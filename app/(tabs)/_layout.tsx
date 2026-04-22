@@ -1,6 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Platform, View, StyleSheet } from 'react-native';
-import { BlurView } from 'expo-blur';
+import { View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { theme } from '@/constants/theme';
@@ -21,12 +20,11 @@ export default function TabsLayout() {
         tabBarShowLabel: false,
         tabBarActiveTintColor: theme.accent,
         tabBarInactiveTintColor: theme.textMuted,
-        tabBarStyle: { position: 'absolute', bottom: 0, left: 0, right: 0, borderTopWidth: 1, borderTopColor: theme.border, backgroundColor: 'transparent', elevation: 0 },
-        tabBarBackground: () => (
-          Platform.OS === 'ios'
-            ? <BlurView tint="dark" intensity={80} style={StyleSheet.absoluteFill} />
-            : <View style={[StyleSheet.absoluteFill, { backgroundColor: theme.panelBg }]} />
-        ),
+        tabBarStyle: {
+          backgroundColor: theme.panelBg,
+          borderTopWidth: 1,
+          borderTopColor: theme.border,
+        },
       }}
       screenListeners={{ tabPress: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light) }}
     >
@@ -46,11 +44,11 @@ export default function TabsLayout() {
         name="admin"
         options={{
           tabBarIcon: ({ color }) => <TabBarIcon name="shield" color={color} />,
-          tabBarItemStyle: isAdmin ? undefined : { display: 'none' },
+          tabBarButton: isAdmin ? undefined : () => <View style={{ width: 0 }} />,
         }}
       />
-      <Tabs.Screen name="chat/[id]" options={{ href: null }} />
-      <Tabs.Screen name="nueva-sala" options={{ href: null }} />
+      <Tabs.Screen name="chat/[id]" options={{ tabBarButton: () => null }} />
+      <Tabs.Screen name="nueva-sala" options={{ tabBarButton: () => null }} />
     </Tabs>
   );
 }

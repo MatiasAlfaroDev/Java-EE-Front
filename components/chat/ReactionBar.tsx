@@ -34,5 +34,5 @@ const s = StyleSheet.create({
   pill:     { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 12, backgroundColor: theme.panelBg, borderWidth: 1, borderColor: theme.border },
   pillMine: { borderColor: theme.accent, backgroundColor: theme.accent + '20' },
   emoji:    { fontSize: 13 },
-  count:    { fontSize: 11, color: theme.textMuted, fontFamily: 'IBMPlexSans-Medium' },
+  count:    { fontSize: 11, color: theme.textMuted, fontFamily: 'IBMPlexSans_500Medium' },
 });

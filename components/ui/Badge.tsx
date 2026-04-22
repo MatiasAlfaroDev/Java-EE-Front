@@ -27,5 +27,5 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 4,
   },
-  text: { color: '#fff', fontSize: 10, fontFamily: 'IBMPlexSans-SemiBold' },
+  text: { color: '#fff', fontSize: 10, fontFamily: 'IBMPlexSans_600SemiBold' },
 });

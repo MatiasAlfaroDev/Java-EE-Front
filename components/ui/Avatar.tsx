@@ -29,7 +29,7 @@ export function Avatar({ initials, size = 40, online, style }: Props) {
 const s = StyleSheet.create({
   wrap:       { position: 'relative' },
   circle:     { alignItems: 'center', justifyContent: 'center' },
-  initials:   { ...typography.bodyBold, color: '#fff', fontFamily: 'IBMPlexSans-SemiBold' },
+  initials:   { ...typography.bodyBold, color: '#fff' },
   dot:        { position: 'absolute', borderWidth: 2, borderColor: theme.bg },
   dotOnline:  { backgroundColor: theme.online },
   dotOffline: { backgroundColor: theme.textMuted },

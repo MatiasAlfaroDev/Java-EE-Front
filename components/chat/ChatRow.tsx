@@ -44,5 +44,5 @@ const s = StyleSheet.create({
   bottom:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   lastMsg:    { ...typography.body, color: theme.textMuted, flex: 1 },
   enCurso:    { backgroundColor: theme.online + '33', paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6 },
-  enCursoTxt: { fontSize: 10, fontFamily: 'IBMPlexSans-SemiBold', color: theme.online },
+  enCursoTxt: { fontSize: 10, fontFamily: 'IBMPlexSans_600SemiBold', color: theme.online },
 });
