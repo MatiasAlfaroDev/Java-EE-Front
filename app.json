@@ -1,0 +1,68 @@
+{
+  "expo": {
+    "name": "ChatEE",
+    "slug": "chatee-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#091525"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.grupo5.chatee"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#091525"
+      },
+      "package": "com.grupo5.chatee"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#3B7DFF",
+          "sounds": []
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "Permite a ChatEE acceder a Face ID para autenticación segura."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permite a ChatEE acceder a tus fotos para enviar imágenes.",
+          "cameraPermission": "Permite a ChatEE usar la cámara para enviar fotos."
+        }
+      ],
+      [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Production"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "scheme": "chatee"
+  }
+}
