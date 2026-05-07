@@ -12,6 +12,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
 import { conectarWebSocket, desconectarWebSocket } from '@/services/websocket.service';
+import { USE_MOCK_API } from '@/constants/dev';
 import { Mensaje, Reaccion } from '@/types/mensaje.types';
 
 SplashScreen.preventAutoHideAsync();
@@ -59,7 +60,7 @@ export default function RootLayout() {
 
   // Conectar/desconectar WebSocket según estado de autenticación
   useEffect(() => {
-    if (!isAutenticado || !accessToken) {
+    if (!isAutenticado || !accessToken || USE_MOCK_API) {
       desconectarWebSocket();
       return;
     }

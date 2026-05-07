@@ -5,15 +5,15 @@ import { Separator } from '@/components/ui/Separator';
 
 interface Props {
   mensajes: Mensaje[];
-  usuarioId: number;
+  usuarioId: string | number;
   onEndReached?: () => void;
   canalId?: string;
 }
 
 const shouldShowDate = (cur: Mensaje, prev?: Mensaje): boolean => {
   if (!prev) return true;
-  const a = new Date(cur.fechaEnviado).toDateString();
-  const b = new Date(prev.fechaEnviado).toDateString();
+  const a = new Date(cur.sent_at).toDateString();
+  const b = new Date(prev.sent_at).toDateString();
   return a !== b;
 };
 
@@ -24,15 +24,15 @@ export function MessageList({ mensajes, usuarioId, onEndReached }: Props) {
       keyExtractor={m => String(m.id)}
       inverted
       renderItem={({ item, index }) => {
-        const prev    = mensajes[index + 1];
-        const esMio   = item.emisor.id === usuarioId;
+        const prev     = mensajes[index + 1];
+        const esMio    = item.sender_id === String(usuarioId);
         const showDate = shouldShowDate(item, prev);
 
         return (
           <View>
             {showDate && (
               <Separator
-                label={new Date(item.fechaEnviado).toLocaleDateString('es-PE', {
+                label={new Date(item.sent_at).toLocaleDateString('es-PE', {
                   weekday: 'long', day: 'numeric', month: 'long',
                 })}
               />
