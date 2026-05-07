@@ -19,14 +19,11 @@ export function ChatRow({ canal, onPress, activo }: Props) {
       <View style={s.body}>
         <View style={s.top}>
           <Text style={s.nombre} numberOfLines={1}>{canal.nombre}</Text>
-          <Text style={s.hora}>{canal.lastMsgTime ? horaCorta(canal.lastMsgTime) : ''}</Text>
+          <Text style={s.hora}>{canal.lastMsg ? horaCorta(new Date().toISOString()) : ''}</Text>
         </View>
         <View style={s.bottom}>
           <Text style={s.lastMsg} numberOfLines={1}>{canal.lastMsg ?? ''}</Text>
-          {canal.is_ephemeral
-            ? <View style={s.enCurso}><Text style={s.enCursoTxt}>En curso</Text></View>
-            : <Badge count={canal.unread} />
-          }
+          <Badge count={canal.unread ?? 0} />
         </View>
       </View>
     </Pressable>
@@ -43,6 +40,4 @@ const s = StyleSheet.create({
   hora:       { ...typography.caption, color: theme.textMuted },
   bottom:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   lastMsg:    { ...typography.body, color: theme.textMuted, flex: 1 },
-  enCurso:    { backgroundColor: theme.online + '33', paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6 },
-  enCursoTxt: { fontSize: 10, fontFamily: 'IBMPlexSans_600SemiBold', color: theme.online },
 });

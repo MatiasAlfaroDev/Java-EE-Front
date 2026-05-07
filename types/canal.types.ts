@@ -1,35 +1,18 @@
 export type TipoChat = 'INDIVIDUAL' | 'GRUPO' | 'PRIVADO';
 export type ChatRol  = 'CREADOR' | 'ADMINISTRADOR' | 'MIEMBRO';
 
+// Refleja lo que devuelve GET /chats (ChatDTO del backend)
 export interface Canal {
-  id: string;
+  id: number;
   nombre: string;
-  tipo: TipoChat;
-  is_ephemeral: boolean;
-  expires_at?: string;
-  fecha_creado: string;
-  lastMsg?: string;
-  lastMsgTime?: string;
-  unread: number;
-  online: boolean;
-  members_count?: number;
-  initials: string;
-}
-
-export interface MiembroCanal {
-  usuario_id: string;
-  canal_id: string;
-  username: string;
-  initials: string;
-  rol: ChatRol;
-  fecha_unido: string;
-  online: boolean;
+  initials: string;   // derivado en cliente
+  lastMsg?: string;   // estado UI local
+  unread?: number;    // estado UI local
+  online?: boolean;   // estado UI local
 }
 
 export interface CrearCanalRequest {
   nombre: string;
-  tipo: TipoChat;
-  is_ephemeral?: boolean;
-  expires_at?: string;
-  miembros?: string[];
+  tipo: TipoChat | string;
+  usuarios?: number[];
 }

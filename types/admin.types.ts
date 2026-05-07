@@ -1,22 +1,22 @@
+// Misma forma que UsuarioDTO del backend
 export interface UsuarioAdmin {
-  id: string;
-  username: string;
+  id: number;
+  nombre: string;
   email: string;
-  rol: 'USER' | 'MANAGER' | 'ADMIN';
-  status: 'ACTIVE' | 'SUSPENDED' | 'OFFLINE' | 'PENDING_MFA';
-  departamento: string;
+  rol: string;
+  estado: 'ONLINE' | 'OFFLINE';
   initials: string;
 }
 
 export interface AuditLog {
-  id: string;
+  id: number;
   usuario: string;
   accion: string;
   entidad: string;
   ip: string;
   old_value?: string;
   new_value?: string;
-  created_at: string;
+  fechaCreacion: string;
 }
 
 export interface ReporteUso {
@@ -24,8 +24,4 @@ export interface ReporteUso {
   mensajes: number;
   usuarios_activos: number;
   canales_activos: number;
-}
-
-export interface CambiarStatusRequest {
-  status: 'ACTIVE' | 'SUSPENDED';
 }

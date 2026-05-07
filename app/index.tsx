@@ -9,25 +9,23 @@ import { theme } from '@/constants/theme';
 const DEV_BYPASS = true;
 
 const MOCK_USUARIO = {
-  id: 'dev-001',
-  username: 'dev.user',
-  email: 'dev@chatee.com',
-  rol: 'ADMIN' as const,
-  status: 'ACTIVE' as const,
-  public_key: '',
+  id:       1,
+  nombre:   'Dev User',
+  email:    'dev@chatee.com',
+  rol:      'ADMIN',
+  estado:   'ONLINE' as const,
   initials: 'DU',
-  created_at: new Date().toISOString(),
 };
 
 export default function Index() {
   const router = useRouter();
-  const { isAutenticado, usuario } = useAuthStore();
+  const { isAutenticado } = useAuthStore();
 
   useEffect(() => {
     if (DEV_BYPASS) {
       useAuthStore.setState({
-        usuario: MOCK_USUARIO,
-        accessToken: 'dev-token',
+        usuario:       MOCK_USUARIO,
+        accessToken:   'dev-token',
         isAutenticado: true,
       });
       router.replace('/(tabs)');
@@ -36,12 +34,10 @@ export default function Index() {
 
     if (!isAutenticado) {
       router.replace('/(auth)/login');
-    } else if (usuario?.status === 'PENDING_MFA') {
-      router.replace('/(auth)/mfa');
     } else {
       router.replace('/(tabs)');
     }
-  }, [isAutenticado, usuario?.status]);
+  }, [isAutenticado]);
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.bg }}>

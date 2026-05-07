@@ -32,7 +32,7 @@ export default function LoginScreen() {
 
   const handleRegister = registerForm.handleSubmit(async data => {
     setLoading(true); setError(null);
-    try { await register({ username: data.username, email: data.email, password: data.password }); }
+    try { await register({ nombre: data.username, email: data.email, password: data.password }); }
     catch (e: unknown) { setError((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Error al registrarse'); }
     finally { setLoading(false); }
   });

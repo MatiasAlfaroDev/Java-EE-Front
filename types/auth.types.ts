@@ -1,18 +1,10 @@
 export interface Usuario {
-  id: string;
-  username: string;
+  id: number;
+  nombre: string;
   email: string;
-  rol: 'USER' | 'MANAGER' | 'ADMIN';
-  status: 'PENDING_MFA' | 'ACTIVE' | 'SUSPENDED' | 'OFFLINE';
-  public_key: string;
-  initials: string;
-  created_at: string;
-}
-
-export interface SesionTokens {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
+  rol: string;
+  estado: 'ONLINE' | 'OFFLINE';
+  initials: string;  // derivado en cliente: nombre.slice(0, 2).toUpperCase()
 }
 
 export interface LoginRequest {
@@ -21,26 +13,13 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-  username: string;
+  nombre: string;
   email: string;
   password: string;
 }
 
+// Respuesta real del backend
 export interface LoginResponse {
-  access_token?: string;
-  refresh_token?: string;
-  expires_in?: number;
-  mfa_required?: boolean;
-  challenge_token?: string;
-}
-
-export interface MfaVerifyRequest {
-  challenge_token: string;
-  code: string;
-}
-
-// Respuesta real del backend actual
-export interface BackendLoginResponse {
   token: string;
   usuario: {
     id: number;

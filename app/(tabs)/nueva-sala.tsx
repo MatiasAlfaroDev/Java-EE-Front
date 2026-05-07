@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { theme } from '@/constants/theme';
@@ -12,31 +12,25 @@ import { Button } from '@/components/ui/Button';
 import { useForm } from 'react-hook-form';
 import { TipoChat } from '@/types/canal.types';
 
-type Tipo = 'INDIVIDUAL' | 'GRUPO' | 'PRIVADO';
+type Tipo = TipoChat;
 
 export default function NuevaSalaScreen() {
-  const { control, handleSubmit, formState: { errors } } = useForm<{ nombre: string }>();
-  const [tipo, setTipo] = useState<Tipo>('GRUPO');
-  const [efimero, setEfimero] = useState(false);
+  const { control, handleSubmit } = useForm<{ nombre: string }>();
+  const [tipo, setTipo]       = useState<Tipo>('GRUPO');
   const [loading, setLoading] = useState(false);
   const setCanales = useChatStore(s => s.setCanales);
 
   const crear = handleSubmit(async data => {
     setLoading(true);
     try {
-      await canalService.crear({ nombre: data.nombre, tipo, is_ephemeral: efimero });
+      await canalService.crear({ nombre: data.nombre, tipo });
       const res = await canalService.listar();
-      const canalesMapeados: Canal[] = res.data.map(c => ({
-        id:           String(c.id),
-        nombre:       c.nombre,
-        tipo:         'GRUPO' as const,
-        is_ephemeral: false,
-        fecha_creado: '',
-        unread:       0,
-        online:       false,
-        initials:     c.nombre.slice(0, 2).toUpperCase(),
+      const mapeados: Canal[] = res.data.map(c => ({
+        id:       c.id,
+        nombre:   c.nombre,
+        initials: c.nombre.slice(0, 2).toUpperCase(),
       }));
-      setCanales(canalesMapeados);
+      setCanales(mapeados);
       router.back();
     } finally {
       setLoading(false);
@@ -72,14 +66,6 @@ export default function NuevaSalaScreen() {
 
         <Input control={control} name="nombre" label="NOMBRE" placeholder="nombre-de-la-sala" autoCapitalize="none" />
 
-        <View style={s.toggleRow}>
-          <View>
-            <Text style={s.toggleTitle}>Sala efímera</Text>
-            <Text style={s.toggleSub}>Se elimina automáticamente al finalizar</Text>
-          </View>
-          <Switch value={efimero} onValueChange={setEfimero} trackColor={{ false: theme.border, true: theme.accent }} thumbColor="#fff" />
-        </View>
-
         <Button label="Crear sala" onPress={crear} loading={loading} style={s.btn} />
       </ScrollView>
     </View>
@@ -97,8 +83,5 @@ const s = StyleSheet.create({
   tipoBtn:       { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 8, borderWidth: 1, borderColor: theme.border, backgroundColor: theme.bg },
   tipoBtnActive: { backgroundColor: theme.accent, borderColor: theme.accent },
   tipoLabel:     { ...typography.bodyMd, color: theme.textMuted },
-  toggleRow:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 4 },
-  toggleTitle:   { ...typography.bodyMd, color: theme.text },
-  toggleSub:     { ...typography.caption, color: theme.textMuted, marginTop: 2 },
   btn:           { marginTop: 8 },
 });

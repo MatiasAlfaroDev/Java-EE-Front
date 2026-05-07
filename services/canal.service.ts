@@ -5,7 +5,6 @@ import { USE_MOCK_API } from '@/constants/dev';
 import { mockCanalService } from './mockApi';
 import { useAuthStore } from '@/store/auth.store';
 
-// Tipo reducido que devuelve el backend
 export interface CanalBackend {
   id:     number;
   nombre: string;

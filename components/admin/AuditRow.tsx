@@ -15,7 +15,7 @@ export function AuditRow({ log }: Props) {
       <View style={s.info}>
         <Text style={s.entidad}>{log.entidad}</Text>
         <Text style={s.meta}>{log.usuario} · {log.ip}</Text>
-        <Text style={s.fecha}>{fechaRelativa(log.created_at)}</Text>
+        <Text style={s.fecha}>{fechaRelativa(log.fechaCreacion)}</Text>
       </View>
     </View>
   );

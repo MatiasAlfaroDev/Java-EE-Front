@@ -15,7 +15,7 @@ import { Mensaje } from '@/types/mensaje.types';
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const canal   = useChatStore(s => s.canales.find(c => c.id === id));
+  const canal   = useChatStore(s => s.canales.find(c => String(c.id) === id));
   const usuario = useAuthStore(s => s.usuario);
 
   const mensajes        = useChatStore(s => s.mensajes[id] ?? []);
@@ -38,8 +38,6 @@ export default function ChatScreen() {
     setCanalActivo(id);
     marcarLeidos(id);
 
-    // Suscribirse al topic del canal para recibir mensajes en tiempo real
-    // El backend publica en /topic/chat.{chatId}
     suscribirCanal(id, (payload) => {
       const data = payload as Record<string, unknown>;
       const mensaje: Mensaje = {
@@ -68,7 +66,6 @@ export default function ChatScreen() {
     if (!texto.trim() || !usuario) return;
     setEnviando(true);
 
-    // Mensaje optimista: aparece de inmediato en la UI mientras se envía
     const optimista: Mensaje = {
       id:              `pending-${Date.now()}`,
       sender_id:       usuario.id,
@@ -88,7 +85,6 @@ export default function ChatScreen() {
       await mensajeService.enviar(id, texto.trim());
     } catch (e) {
       console.error('Error al enviar mensaje:', e);
-      // En producción aquí se marcaría el mensaje como RECHAZADO
     } finally {
       setEnviando(false);
     }
@@ -100,7 +96,7 @@ export default function ChatScreen() {
         <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
           <Feather name="arrow-left" size={22} color={theme.text} />
         </TouchableOpacity>
-        <Avatar initials={canal?.initials ?? '??'} online={canal?.online ?? false} size={32} />
+        <Avatar initials={canal?.initials ?? '??'} online={canal?.online} size={32} />
         <View style={s.headerInfo}>
           <Text style={s.headerNombre}>{canal?.nombre ?? 'Chat'}</Text>
           <Text style={s.headerEstado}>{canal?.online ? 'En línea' : 'Desconectado'}</Text>

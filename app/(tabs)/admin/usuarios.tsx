@@ -23,16 +23,17 @@ export default function UsuariosAdminScreen() {
   useEffect(() => { cargar(); }, [cargar]);
 
   const toggleStatus = (u: UsuarioAdmin) => {
-    const nuevoStatus = u.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
-    const accion = nuevoStatus === 'SUSPENDED' ? 'suspender' : 'activar';
-    Alert.alert(`¿${accion.charAt(0).toUpperCase() + accion.slice(1)} usuario?`, u.username, [
+    const esOnline = u.estado === 'ONLINE';
+    const accion = esOnline ? 'desconectar' : 'reconectar';
+    Alert.alert(`¿${accion.charAt(0).toUpperCase() + accion.slice(1)} usuario?`, u.nombre, [
       { text: 'Cancelar', style: 'cancel' },
       {
         text: accion.charAt(0).toUpperCase() + accion.slice(1),
-        style: nuevoStatus === 'SUSPENDED' ? 'destructive' : 'default',
+        style: esOnline ? 'destructive' : 'default',
         onPress: async () => {
-          await adminService.cambiarStatus(u.id, { status: nuevoStatus });
-          setUsuarios(prev => prev.map(x => x.id === u.id ? { ...x, status: nuevoStatus } : x));
+          setUsuarios(prev => prev.map(x =>
+            x.id === u.id ? { ...x, estado: esOnline ? 'OFFLINE' : 'ONLINE' } : x
+          ));
         },
       },
     ]);
@@ -46,7 +47,7 @@ export default function UsuariosAdminScreen() {
       ) : (
         <FlatList
           data={usuarios}
-          keyExtractor={u => u.id}
+          keyExtractor={u => String(u.id)}
           renderItem={({ item }) => <UserRow usuario={item} onToggleStatus={() => toggleStatus(item)} />}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); cargar(); }} tintColor={theme.accent} />}
           contentContainerStyle={{ paddingBottom: 100 }}

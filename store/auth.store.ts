@@ -1,15 +1,14 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Usuario, SesionTokens } from '@/types/auth.types';
+import { Usuario } from '@/types/auth.types';
 
 interface AuthState {
   usuario:       Usuario | null;
   accessToken:   string | null;
   isAutenticado: boolean;
-  setSession:    (usuario: Usuario, tokens: SesionTokens) => Promise<void>;
+  setSession:    (usuario: Usuario, token: string) => void;
   setUsuario:    (usuario: Usuario) => void;
-  refreshTokens: () => Promise<void>;
   logout:        () => Promise<void>;
 }
 
@@ -20,16 +19,11 @@ export const useAuthStore = create<AuthState>()(
       accessToken:   null,
       isAutenticado: false,
 
-      setSession: async (usuario, tokens) => {
-        set({ usuario, accessToken: tokens.access_token, isAutenticado: true });
+      setSession: (usuario, token) => {
+        set({ usuario, accessToken: token, isAutenticado: true });
       },
 
       setUsuario: (usuario) => set({ usuario }),
-
-      // El backend no tiene refresh token — si el token expira, se cierra sesión
-      refreshTokens: async () => {
-        await get().logout();
-      },
 
       logout: async () => {
         if (get().accessToken) {

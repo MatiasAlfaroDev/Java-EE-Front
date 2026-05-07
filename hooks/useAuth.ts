@@ -20,12 +20,7 @@ export const useAuth = () => {
   const login = async (data: LoginRequest) => {
     const res = await authService.login(data);
     const { token, usuario: u } = res.data;
-    const { setSession } = useAuthStore.getState();
-    await setSession(mapearUsuario(u), {
-      access_token:  token,
-      refresh_token: '',
-      expires_in:    86400,
-    });
+    useAuthStore.getState().setSession(mapearUsuario(u), token);
     router.replace('/(tabs)');
   };
 
@@ -39,10 +34,5 @@ export const useAuth = () => {
     router.replace('/(auth)/login');
   };
 
-  // MFA y SSO no implementados en el backend actual
-  const verificarMfa = async (_challenge_token: string, _code: string) => {
-    throw new Error('MFA no implementado en el backend.');
-  };
-
-  return { usuario, isAutenticado, login, register, verificarMfa, cerrarSesion };
+  return { usuario, isAutenticado, login, register, cerrarSesion };
 };

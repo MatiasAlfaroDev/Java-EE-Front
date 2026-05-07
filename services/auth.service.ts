@@ -20,7 +20,6 @@ export const authService = {
           rol:      'USER',
         }),
 
-  // El interceptor de axios ya adjunta el token del store
   logout: () =>
     USE_MOCK_API
       ? mockAuthService.logout()
