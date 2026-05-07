@@ -34,10 +34,10 @@ export function ChatRow({ canal, onPress, activo }: Props) {
 }
 
 const s = StyleSheet.create({
-  row:        { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, gap: 12 },
+  row:        { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 0, gap: 12 },
   rowActive:  { backgroundColor: theme.activeRow },
   rowPressed: { backgroundColor: theme.activeRow },
-  body:       { flex: 1, gap: 4 },
+  body:       { flex: 1, gap: 4, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.border, paddingBottom: 12 },
   top:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   nombre:     { ...typography.bodyBold, color: theme.text, flex: 1 },
   hora:       { ...typography.caption, color: theme.textMuted },

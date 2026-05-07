@@ -10,7 +10,8 @@ export const api = axios.create({
 
 api.interceptors.request.use(config => {
   const token = useAuthStore.getState().accessToken;
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  // El backend espera el token directamente sin prefijo "Bearer"
+  if (token) config.headers.Authorization = token;
   return config;
 });
 
@@ -21,7 +22,7 @@ api.interceptors.response.use(
       error.config._retry = true;
       await useAuthStore.getState().refreshTokens();
       const newToken = useAuthStore.getState().accessToken;
-      if (newToken) error.config.headers.Authorization = `Bearer ${newToken}`;
+      if (newToken) error.config.headers.Authorization = newToken;
       return api(error.config);
     }
     return Promise.reject(error);

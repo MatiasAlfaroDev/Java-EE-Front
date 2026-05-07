@@ -32,9 +32,8 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
-        const token = get().accessToken;
-        if (token) {
-          try { await import('@/services/auth.service').then(m => m.authService.logout(token)); }
+        if (get().accessToken) {
+          try { await import('@/services/auth.service').then(m => m.authService.logout()); }
           catch { /* ignorar */ }
         }
         set({ usuario: null, accessToken: null, isAutenticado: false });

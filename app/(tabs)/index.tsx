@@ -89,6 +89,12 @@ export default function ChatsScreen() {
 
       {loading ? (
         <ActivityIndicator color={theme.accent} style={{ marginTop: 40 }} />
+      ) : secciones.length === 0 ? (
+        <View style={s.empty}>
+          <Feather name="message-square" size={48} color={theme.textMuted} />
+          <Text style={s.emptyTitle}>Sin conversaciones</Text>
+          <Text style={s.emptySubtitle}>Toca + para iniciar un chat</Text>
+        </View>
       ) : (
         <SectionList
           sections={secciones}
@@ -122,9 +128,12 @@ const s = StyleSheet.create({
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   bellBtn:     { position: 'relative' },
   notifBadge:  { position: 'absolute', top: -4, right: -4 },
-  searchWrap:  { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginBottom: 8, backgroundColor: theme.listBg, borderRadius: 10, paddingHorizontal: 12, height: 40 },
+  searchWrap:  { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginBottom: 8, backgroundColor: theme.listBg, borderRadius: 20, borderWidth: 1, borderColor: theme.border, paddingHorizontal: 12, height: 40 },
   searchIcon:  { marginRight: 8 },
   searchInput: { flex: 1, ...typography.body, color: theme.text },
   sectionHeader: { ...typography.label, color: theme.textMuted, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 6, textTransform: 'uppercase' },
-  fab:         { position: 'absolute', bottom: 90, right: 20, width: 56, height: 56, borderRadius: 28, backgroundColor: theme.accent, alignItems: 'center', justifyContent: 'center', elevation: 4, shadowColor: theme.accent, shadowOpacity: 0.4, shadowRadius: 8 },
+  fab:          { position: 'absolute', bottom: 90, right: 20, width: 56, height: 56, borderRadius: 28, backgroundColor: theme.accent, alignItems: 'center', justifyContent: 'center', elevation: 4, shadowColor: theme.accent, shadowOpacity: 0.4, shadowRadius: 8 },
+  empty:        { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, paddingBottom: 80 },
+  emptyTitle:   { ...typography.title, color: theme.textMuted },
+  emptySubtitle:{ ...typography.body, color: theme.textMuted },
 });
