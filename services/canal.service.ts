@@ -1,29 +1,33 @@
 import { api } from './api';
 import { ENDPOINTS } from '@/constants/endpoints';
-import { Canal, MiembroCanal, CrearCanalRequest } from '@/types/canal.types';
+import { CrearCanalRequest } from '@/types/canal.types';
+
+// Tipo reducido que devuelve el backend
+export interface CanalBackend {
+  id:     number;
+  nombre: string;
+}
 
 export const canalService = {
   listar: () =>
-    api.get<Canal[]>(ENDPOINTS.CANALES),
-
-  obtener: (id: string) =>
-    api.get<Canal>(ENDPOINTS.CANAL(id)),
+    api.get<CanalBackend[]>(ENDPOINTS.CANALES),
 
   crear: (data: CrearCanalRequest) =>
-    api.post<Canal>(ENDPOINTS.CANALES, data),
-
-  actualizar: (id: string, data: Partial<CrearCanalRequest>) =>
-    api.patch<Canal>(ENDPOINTS.CANAL(id), data),
-
-  eliminar: (id: string) =>
-    api.delete(ENDPOINTS.CANAL(id)),
-
-  listarMiembros: (id: string) =>
-    api.get<MiembroCanal[]>(ENDPOINTS.MIEMBROS(id)),
+    api.post<CanalBackend>(ENDPOINTS.CANALES, {
+      nombre:   data.nombre,
+      tipo:     data.tipo,
+      usuarios: (data.miembros ?? []).map(Number),
+    }),
 
   agregarMiembro: (canalId: string, usuarioId: string) =>
-    api.post(ENDPOINTS.MIEMBROS(canalId), { usuario_id: usuarioId }),
+    api.post(ENDPOINTS.AGREGAR_MIEMBRO, {
+      chatId:    Number(canalId),
+      usuarioId: Number(usuarioId),
+    }),
 
   eliminarMiembro: (canalId: string, usuarioId: string) =>
-    api.delete(ENDPOINTS.MIEMBRO(canalId, usuarioId)),
+    api.post(ENDPOINTS.ELIMINAR_MIEMBRO, {
+      chatId:    Number(canalId),
+      usuarioId: Number(usuarioId),
+    }),
 };

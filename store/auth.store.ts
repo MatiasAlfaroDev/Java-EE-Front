@@ -1,51 +1,41 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as SecureStore from 'expo-secure-store';
 import { Usuario, SesionTokens } from '@/types/auth.types';
-import { authService } from '@/services/auth.service';
 
 interface AuthState {
-  usuario: Usuario | null;
-  accessToken: string | null;
+  usuario:       Usuario | null;
+  accessToken:   string | null;
   isAutenticado: boolean;
-  setSession: (usuario: Usuario, tokens: SesionTokens) => Promise<void>;
-  setUsuario: (usuario: Usuario) => void;
+  setSession:    (usuario: Usuario, tokens: SesionTokens) => Promise<void>;
+  setUsuario:    (usuario: Usuario) => void;
   refreshTokens: () => Promise<void>;
-  logout: () => Promise<void>;
+  logout:        () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      usuario: null,
-      accessToken: null,
+      usuario:       null,
+      accessToken:   null,
       isAutenticado: false,
 
       setSession: async (usuario, tokens) => {
-        await SecureStore.setItemAsync('refresh_token', tokens.refresh_token);
         set({ usuario, accessToken: tokens.access_token, isAutenticado: true });
       },
 
       setUsuario: (usuario) => set({ usuario }),
 
+      // El backend no tiene refresh token — si el token expira, se cierra sesión
       refreshTokens: async () => {
-        const rt = await SecureStore.getItemAsync('refresh_token');
-        if (!rt) { await get().logout(); return; }
-        try {
-          const { data } = await authService.refresh(rt);
-          await SecureStore.setItemAsync('refresh_token', data.refresh_token);
-          set({ accessToken: data.access_token });
-        } catch {
-          await get().logout();
-        }
+        await get().logout();
       },
 
       logout: async () => {
-        const rt = await SecureStore.getItemAsync('refresh_token');
-        if (rt) {
-          try { await authService.logout(rt); } catch { /* ignorar */ }
-          await SecureStore.deleteItemAsync('refresh_token');
+        const token = get().accessToken;
+        if (token) {
+          try { await import('@/services/auth.service').then(m => m.authService.logout(token)); }
+          catch { /* ignorar */ }
         }
         set({ usuario: null, accessToken: null, isAutenticado: false });
       },

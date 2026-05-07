@@ -6,6 +6,7 @@ import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { canalService } from '@/services/canal.service';
 import { useChatStore } from '@/store/chat.store';
+import { Canal } from '@/types/canal.types';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useForm } from 'react-hook-form';
@@ -25,7 +26,17 @@ export default function NuevaSalaScreen() {
     try {
       await canalService.crear({ nombre: data.nombre, tipo, is_ephemeral: efimero });
       const res = await canalService.listar();
-      setCanales(res.data);
+      const canalesMapeados: Canal[] = res.data.map(c => ({
+        id:           String(c.id),
+        nombre:       c.nombre,
+        tipo:         'GRUPO' as const,
+        is_ephemeral: false,
+        fecha_creado: '',
+        unread:       0,
+        online:       false,
+        initials:     c.nombre.slice(0, 2).toUpperCase(),
+      }));
+      setCanales(canalesMapeados);
       router.back();
     } finally {
       setLoading(false);

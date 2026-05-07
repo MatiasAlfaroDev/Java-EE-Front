@@ -29,7 +29,17 @@ export default function ChatsScreen() {
   const cargar = useCallback(async () => {
     try {
       const res = await canalService.listar();
-      setCanales(res.data);
+      const canalesMapeados: Canal[] = res.data.map(c => ({
+        id:           String(c.id),
+        nombre:       c.nombre,
+        tipo:         'GRUPO' as const,
+        is_ephemeral: false,
+        fecha_creado: '',
+        unread:       0,
+        online:       false,
+        initials:     c.nombre.slice(0, 2).toUpperCase(),
+      }));
+      setCanales(canalesMapeados);
     } finally {
       setLoading(false); setRefreshing(false);
     }

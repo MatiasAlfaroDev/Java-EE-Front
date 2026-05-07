@@ -2,47 +2,17 @@ export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:
 export const WS_BASE_URL  = process.env.EXPO_PUBLIC_WS_URL  ?? 'http://10.0.2.2:8080';
 
 export const ENDPOINTS = {
-  // Autenticación (público)
-  LOGIN:              '/auth/login',
-  REGISTER:           '/auth/register',
-  MFA_SETUP:          '/auth/mfa/setup',
-  MFA_VERIFY:         '/auth/mfa/verify',
-  REFRESH:            '/auth/refresh',
-  LOGOUT:             '/auth/logout',
-  SSO:                '/auth/sso',
+  // Autenticación
+  LOGIN:              '/usuarios/login',
+  REGISTER:           '/usuarios/registro',
+  LOGOUT:             '/usuarios/logout',
 
   // Canales
-  CANALES:            '/channels',
-  CANAL:              (id: string)               => `/channels/${id}`,
-  MIEMBROS:           (id: string)               => `/channels/${id}/members`,
-  MIEMBRO:            (cid: string, uid: string) => `/channels/${cid}/members/${uid}`,
-  MEETINGS:           '/meetings',
+  CANALES:            '/chats',
+  CANAL:              (id: string) => `/chats/${id}`,
+  AGREGAR_MIEMBRO:    '/chats/agregar-miembro',
+  ELIMINAR_MIEMBRO:   '/chats/eliminar-miembro',
 
   // Mensajes
-  MENSAJES:           (canalId: string)          => `/channels/${canalId}/messages`,
-  MENSAJE:            (id: string)               => `/messages/${id}`,
-  MENSAJE_OFFLINE:    '/messages',
-
-  // Archivos
-  ATTACHMENTS:        '/attachments',
-  ATTACHMENT:         (id: string)               => `/attachments/${id}`,
-  ATTACHMENT_PRV:     (id: string)               => `/attachments/${id}/preview`,
-
-  // Interacciones
-  REACTIONS:          (msgId: string)            => `/messages/${msgId}/reactions`,
-  POLLS:              (canalId: string)          => `/channels/${canalId}/polls`,
-  POLL_VOTE:          (pid: string, oid: string) => `/polls/${pid}/options/${oid}/votes`,
-  POLL_RESULTS:       (pid: string)              => `/polls/${pid}/results`,
-
-  // Notificaciones
-  NOTIFS:             '/notifications',
-  NOTIFS_READ_ALL:    '/notifications/read',
-  NOTIF_READ:         (id: string)               => `/notifications/${id}/read`,
-
-  // Administración
-  ADMIN_USERS:        '/admin/users',
-  ADMIN_USER_STATUS:  (id: string)               => `/admin/users/${id}/status`,
-  ADMIN_AUDIT:        '/admin/audit-logs',
-  ADMIN_AUDIT_EXP:    '/admin/audit-logs/export',
-  ADMIN_REPORTS:      '/admin/reports/usage',
+  MENSAJE_ENVIAR:     '/mensajes/enviar',
 } as const;

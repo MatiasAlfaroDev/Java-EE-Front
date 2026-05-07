@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
@@ -6,54 +6,22 @@ import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { useChatStore } from '@/store/chat.store';
 import { useAuthStore } from '@/store/auth.store';
-import { useChat } from '@/hooks/useChat';
-import { useTyping } from '@/hooks/useTyping';
-import { ws } from '@/services/websocket.service';
 import { mensajeService } from '@/services/mensaje.service';
-import { cryptoService } from '@/services/crypto.service';
 import { MessageList } from '@/components/chat/MessageList';
 import { InputComposer } from '@/components/chat/InputComposer';
-import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { Avatar } from '@/components/ui/Avatar';
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const canal   = useChatStore(s => s.canales.find(c => c.id === id));
-  const typing  = useChatStore(s => s.typing[id] ?? []);
   const usuario = useAuthStore(s => s.usuario);
 
-  const [claveCanal, setClaveCanal] = useState<CryptoKey | undefined>(undefined);
-  const [cursor, setCursor]           = useState<string | null>(null);
-  const [cargandoMas, setCargandoMas] = useState(false);
-
-  useEffect(() => {
-    cryptoService.obtenerClaveCanal(id).then(setClaveCanal);
-  }, [id]);
-
-  const { mensajes, cargarMensajes } = useChat(id, claveCanal);
-  const { onChangeText, detenerTyping } = useTyping(id);
-
-  const cargarMas = async () => {
-    if (!cursor || cargandoMas) return;
-    setCargandoMas(true);
-    const res = await cargarMensajes(cursor);
-    setCursor(res.cursor_next);
-    setCargandoMas(false);
-  };
+  const mensajes = useChatStore(s => s.mensajes[id] ?? []);
 
   const enviar = async (texto: string) => {
-    if (!texto.trim() || !claveCanal) return;
-    detenerTyping();
-    const { content_enc, iv } = await cryptoService.cifrarMensaje(texto, claveCanal);
-    const payload = { channel_id: id, content_enc, iv, parent_id: null };
-
-    if (ws.enviarMensaje(payload) === undefined) {
-      // WS desconectado — enviar por REST
-      await mensajeService.enviarOffline(payload);
-    }
+    if (!texto.trim()) return;
+    await mensajeService.enviar(id, texto);
   };
-
-  const typingOtros = typing.filter(u => u !== usuario?.username);
 
   return (
     <View style={s.root}>
@@ -75,16 +43,14 @@ export default function ChatScreen() {
         <MessageList
           mensajes={mensajes}
           usuarioId={usuario?.id ?? ''}
-          onEndReached={cargarMas}
+          onEndReached={() => {}}
           canalId={id}
         />
-
-        {typingOtros.length > 0 && <TypingIndicator nombres={typingOtros} />}
 
         <InputComposer
           canalId={id}
           onSend={enviar}
-          onChangeText={onChangeText}
+          onChangeText={() => {}}
         />
       </KeyboardAvoidingView>
     </View>

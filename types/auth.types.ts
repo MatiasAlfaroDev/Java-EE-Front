@@ -38,3 +38,15 @@ export interface MfaVerifyRequest {
   challenge_token: string;
   code: string;
 }
+
+// Respuesta real del backend actual
+export interface BackendLoginResponse {
+  token: string;
+  usuario: {
+    id: number;
+    nombre: string;
+    email: string;
+    rol: string;
+    estado: string;
+  };
+}
