@@ -1,25 +1,25 @@
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:8080/api';
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:8080/chat-empresarial/api';
 export const WS_BASE_URL  = process.env.EXPO_PUBLIC_WS_URL  ?? 'http://10.0.2.2:8080';
 
 export const ENDPOINTS = {
   // Autenticación (público)
-  LOGIN:              '/auth/login',
-  REGISTER:           '/auth/register',
-  MFA_SETUP:          '/auth/mfa/setup',
-  MFA_VERIFY:         '/auth/mfa/verify',
-  REFRESH:            '/auth/refresh',
-  LOGOUT:             '/auth/logout',
-  SSO:                '/auth/sso',
+  LOGIN:              '/usuarios/login',
+  REGISTER:           '/usuarios/registro',
+//  MFA_SETUP:          '/auth/mfa/setup',
+ // MFA_VERIFY:         '/auth/mfa/verify',
+ // REFRESH:            '/auth/refresh',
+  LOGOUT:             '/usuarios/logout',
+ // SSO:                '/auth/sso',
 
-  // Canales
-  CANALES:            '/channels',
-  CANAL:              (id: string)               => `/channels/${id}`,
-  MIEMBROS:           (id: string)               => `/channels/${id}/members`,
-  MIEMBRO:            (cid: string, uid: string) => `/channels/${cid}/members/${uid}`,
+  // Chats
+  CANALES:            '/chats',
+  CANAL:              (id: string)               => `/chats/${id}`,
+  MIEMBROS:           (id: string)               => `/chats/${id}/members`,
+  MIEMBRO:            (cid: string, uid: string) => `/chats/${cid}/members/${uid}`,
   MEETINGS:           '/meetings',
 
   // Mensajes
-  MENSAJES:           (canalId: string)          => `/channels/${canalId}/messages`,
+  MENSAJES:           (canalId: string)          => `/chats/${canalId}/messages`,
   MENSAJE:            (id: string)               => `/messages/${id}`,
   MENSAJE_OFFLINE:    '/messages',
 
@@ -30,7 +30,7 @@ export const ENDPOINTS = {
 
   // Interacciones
   REACTIONS:          (msgId: string)            => `/messages/${msgId}/reactions`,
-  POLLS:              (canalId: string)          => `/channels/${canalId}/polls`,
+  POLLS:              (canalId: string)          => `/chats/${canalId}/polls`,
   POLL_VOTE:          (pid: string, oid: string) => `/polls/${pid}/options/${oid}/votes`,
   POLL_RESULTS:       (pid: string)              => `/polls/${pid}/results`,
 

@@ -19,9 +19,10 @@ export function Input<T extends FieldValues>({ control, name, label, ...rest }: 
           <Text style={s.label}>{label}</Text>
           <TextInput
             style={[s.input, error && s.inputError]}
-            onChangeText={onChange}
+            onChangeText={(text) => onChange(text)}
             onBlur={onBlur}
-            value={value ?? ''}
+            value={String(value ?? '')}
+            defaultValue=""
             placeholderTextColor={theme.textMuted}
             {...rest}
           />

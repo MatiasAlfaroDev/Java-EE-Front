@@ -1,11 +1,11 @@
-import { create } from 'zustand';
+/* import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { Usuario, SesionTokens } from '@/types/auth.types';
 import { authService } from '@/services/auth.service';
 
-interface AuthState {
+ interface AuthState {
   usuario: Usuario | null;
   accessToken: string | null;
   isAutenticado: boolean;
@@ -44,7 +44,7 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
         const rt = await SecureStore.getItemAsync('refresh_token');
         if (rt) {
-          try { await authService.logout(rt); } catch { /* ignorar */ }
+          try { await authService.logout(rt); } catch { /* ignorar */ /*}
           await SecureStore.deleteItemAsync('refresh_token');
         }
         set({ usuario: null, accessToken: null, isAutenticado: false });
@@ -54,6 +54,53 @@ export const useAuthStore = create<AuthState>()(
       name: 'chatee-auth',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: state => ({ usuario: state.usuario, isAutenticado: state.isAutenticado }),
+    }
+  )
+); */
+
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Usuario } from '@/types/auth.types';
+
+interface AuthState {
+  usuario: Usuario | null;
+  accessToken: string | null;
+  isAutenticado: boolean;
+
+  setSession: (usuario: Usuario, token: string) => void;
+  setUsuario: (usuario: Usuario) => void;
+  logout: () => void;
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      usuario: null,
+      accessToken: null,
+      isAutenticado: false,
+
+      setSession: (usuario, token) => {
+        set({
+          usuario,
+          accessToken: token,
+          isAutenticado: true,
+        });
+      },
+
+      setUsuario: (usuario) => set({ usuario }),
+
+      logout: () => {
+        set({
+          usuario: null,
+          accessToken: null,
+          isAutenticado: false,
+        });
+      },
+    }),
+    {
+      name: 'chatee-auth',
+      storage: createJSONStorage(() => AsyncStorage),
     }
   )
 );

@@ -8,7 +8,9 @@ export const api = axios.create({
   timeout: 10000,
 });
 
-api.interceptors.request.use(config => {
+console.log("API URL:", API_BASE_URL);
+
+/*api.interceptors.request.use(config => {
   const token = useAuthStore.getState().accessToken;
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
@@ -19,11 +21,18 @@ api.interceptors.response.use(
   async error => {
     if (error.response?.status === 401 && !error.config._retry) {
       error.config._retry = true;
-      await useAuthStore.getState().refreshTokens();
+      //await useAuthStore.getState().refreshTokens();
       const newToken = useAuthStore.getState().accessToken;
       if (newToken) error.config.headers.Authorization = `Bearer ${newToken}`;
       return api(error.config);
     }
+    return Promise.reject(error);
+  }
+);*/
+
+api.interceptors.response.use(
+  res => res,
+  async error => {
     return Promise.reject(error);
   }
 );

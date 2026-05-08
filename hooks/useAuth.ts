@@ -1,4 +1,4 @@
-import * as Notifications from 'expo-notifications';
+/* import * as Notifications from 'expo-notifications';
 import { useAuthStore } from '@/store/auth.store';
 import { authService } from '@/services/auth.service';
 import { notifService } from '@/services/notif.service';
@@ -11,8 +11,8 @@ const registrarPushToken = async () => {
     if (status !== 'granted') return;
     const { data } = await Notifications.getExpoPushTokenAsync();
     await notifService.registrarPushToken(data);
-  } catch { /* push opcional, no bloquear el login */ }
-};
+  } catch { /* push opcional, no bloquear el login */ /*} 
+}; 
 
 const hidratar = async (accessToken: string, refreshToken: string, expiresIn: number) => {
   const { setSession, setUsuario } = useAuthStore.getState();
@@ -61,4 +61,52 @@ export const useAuth = () => {
   };
 
   return { usuario, isAutenticado, login, register, verificarMfa, cerrarSesion };
+};
+*/
+
+import { useAuthStore } from '@/store/auth.store';
+import { authService } from '@/services/auth.service';
+import { LoginRequest, RegisterRequest } from '@/types/auth.types';
+import { router } from 'expo-router';
+
+export const useAuth = () => {
+  const { usuario, isAutenticado, logout } = useAuthStore();
+
+  const login = async (data: LoginRequest) => {
+    const res = await authService.login(data);
+
+    console.log("ANTES IF", res.data);
+
+    if (res.data.accessToken && res.data.usuario) {
+
+      console.log("ENTRO IF");
+
+      useAuthStore.setState({
+        usuario: res.data.usuario,
+        accessToken: res.data.accessToken,
+        isAutenticado: true,
+      });
+
+      console.log("SET STATE OK");
+
+      router.replace('/(tabs)');
+    }
+  };
+
+  const register = async (data: RegisterRequest) => {
+    return await authService.register(data);
+  };
+
+  const cerrarSesion = async () => {
+    logout();
+    router.replace('/(auth)/login');
+  };
+
+  return {
+    usuario,
+    isAutenticado,
+    login,
+    register,
+    cerrarSesion,
+  };
 };

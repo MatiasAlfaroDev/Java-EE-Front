@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
   KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator,
+  TextInput,
 } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,15 +16,19 @@ import { Button } from '@/components/ui/Button';
 type Tab = 'login' | 'register';
 
 export default function LoginScreen() {
+  console.log("RENDER LOGIN");
   const [tab, setTab] = useState<Tab>('login');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { login, register } = useAuth();
+ // const login = async (data: { email: string; password: string; }) => {};
+//  const register = async (p0: { username: string; email: string; password: string; }) => {};
 
   const loginForm = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) });
   const registerForm = useForm<RegisterFormData>({ resolver: zodResolver(registerSchema) });
 
   const handleLogin = loginForm.handleSubmit(async data => {
+    console.log("HANDLE LOGIN");
     setLoading(true); setError(null);
     try { await login(data); }
     catch (e: unknown) { setError((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Error al iniciar sesión'); }
@@ -39,7 +44,7 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView style={s.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <View style={s.glow} />
+      
       <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled">
         <View style={s.card}>
           <Text style={s.logo}>ChatEE</Text>
@@ -67,8 +72,8 @@ export default function LoginScreen() {
             </View>
           ) : (
             <View style={s.form}>
-              <Input control={registerForm.control} name="username" label="USUARIO" placeholder="nombre.apellido" autoCapitalize="none" />
-              <Input control={registerForm.control} name="email" label="EMAIL" placeholder="usuario@empresa.com" keyboardType="email-address" autoCapitalize="none" />
+              <Input control={registerForm.control} name="username" label="USUARIO" placeholder="Nombre de usuario" autoCapitalize="none" />
+              <Input control={registerForm.control} name="email" label="EMAIL" placeholder="usuario@empresa.com" keyboardType="email-address" autoCapitalize="none"  />
               <Input control={registerForm.control} name="password" label="CONTRASEÑA" placeholder="Mín. 8 chars, mayús., número, símbolo" secureTextEntry />
               <Input control={registerForm.control} name="confirmar" label="CONFIRMAR" placeholder="Repetir contraseña" secureTextEntry />
               <Button label="Crear cuenta" onPress={handleRegister} loading={loading} style={s.btnPrimary} />

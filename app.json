@@ -14,7 +14,13 @@
     ],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.grupo5.chatee"
+      "bundleIdentifier": "com.grupo5.chatee",
+
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {
