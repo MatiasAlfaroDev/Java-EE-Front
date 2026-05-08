@@ -1,54 +1,124 @@
 import { useState } from 'react';
-import {
-  View, Text, StyleSheet, TouchableOpacity,
-  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { router } from 'expo-router';
 import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { loginSchema, registerSchema, LoginFormData, RegisterFormData } from '@/utils/validators';
-import { useAuth } from '@/hooks/useAuth';
+import { authService } from '@/services/auth.service';
+import { useAuthStore } from '@/store/auth.store';
+import { Usuario } from '@/types/auth.types';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 
 type Tab = 'login' | 'register';
 
-export default function LoginScreen() {
-  const [tab, setTab] = useState<Tab>('login');
+const mapearUsuario = (u: {
+  id: number; nombre: string; email: string; rol: string; estado?: string;
+}): Usuario => ({
+  id:         String(u.id),
+  username:   u.nombre,
+  email:      u.email,
+  rol:        (u.rol as Usuario['rol']) ?? 'USER',
+  status:     u.estado === 'OFFLINE' ? 'OFFLINE' : 'ACTIVE',
+  public_key: '',
+  initials:   u.nombre.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase(),
+  created_at: new Date().toISOString(),
+});
+
+
+function LoginForm({ onError }: { onError: (msg: string | null) => void }) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { login, register } = useAuth();
-
-  const loginForm = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) });
-  const registerForm = useForm<RegisterFormData>({ resolver: zodResolver(registerSchema) });
-
-  const handleLogin = loginForm.handleSubmit(async data => {
-    setLoading(true); setError(null);
-    try { await login(data); }
-    catch (e: unknown) { setError((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Error al iniciar sesión'); }
-    finally { setLoading(false); }
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' },
   });
 
-  const handleRegister = registerForm.handleSubmit(async data => {
-    setLoading(true); setError(null);
-    try { await register({ nombre: data.username, email: data.email, password: data.password }); }
-    catch (e: unknown) { setError((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Error al registrarse'); }
-    finally { setLoading(false); }
+  const handleSubmit = form.handleSubmit(async (data) => {
+    setLoading(true); onError(null);
+    try {
+      const res = await authService.login(data);
+      const { token, usuario: u } = res.data as {
+        token: string;
+        usuario: { id: number; nombre: string; email: string; rol: string; estado?: string };
+      };
+      useAuthStore.getState().setSession(mapearUsuario(u), token);
+      router.replace('/(tabs)');
+    } catch (e: unknown) {
+      onError(
+        (e as { response?: { data?: { message?: string } } })?.response?.data?.message
+        ?? 'Credenciales incorrectas',
+      );
+    } finally {
+      setLoading(false);
+    }
   });
 
   return (
-    <KeyboardAvoidingView style={s.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <View style={s.glow} />
-      <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled">
+    <View style={s.form}>
+      <Input control={form.control} name="email"    label="EMAIL"      placeholder="usuario@empresa.com" keyboardType="email-address" autoCapitalize="none" />
+      <Input control={form.control} name="password" label="CONTRASEÑA" placeholder="••••••••" secureTextEntry />
+      <Button label="Iniciar sesión"          onPress={handleSubmit} loading={loading} style={s.btnPrimary} />
+      <Button label="Iniciar sesión con SSO"  variant="ghost" onPress={() => {}}       style={s.btnSso} />
+    </View>
+  );
+}
+
+// ── Formulario de registro ───────────────────────────────────────────────────
+
+function RegisterForm({ onSuccess, onError }: { onSuccess: () => void; onError: (msg: string | null) => void }) {
+  const [loading, setLoading] = useState(false);
+  const form = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { username: '', email: '', password: '', confirmar: '' },
+  });
+
+  const handleSubmit = form.handleSubmit(async (data) => {
+    setLoading(true); onError(null);
+    try {
+      await authService.register({ nombre: data.username, email: data.email, password: data.password });
+      form.reset();
+      onSuccess();
+    } catch (e: unknown) {
+      onError(
+        (e as { response?: { data?: { message?: string } } })?.response?.data?.message
+        ?? 'Error al registrarse',
+      );
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  return (
+    <View style={s.form}>
+      <Input control={form.control} name="username" label="USUARIO"    placeholder="nombre.apellido"                    autoCapitalize="none" />
+      <Input control={form.control} name="email"    label="EMAIL"      placeholder="usuario@empresa.com" keyboardType="email-address" autoCapitalize="none" />
+      <Input control={form.control} name="password" label="CONTRASEÑA" placeholder="Mín. 8 chars, mayús., número, símbolo" secureTextEntry />
+      <Input control={form.control} name="confirmar" label="CONFIRMAR" placeholder="Repetir contraseña" secureTextEntry />
+      <Button label="Crear cuenta" onPress={handleSubmit} loading={loading} style={s.btnPrimary} />
+    </View>
+  );
+}
+
+// ── Pantalla principal ───────────────────────────────────────────────────────
+
+export default function LoginScreen() {
+  const [tab, setTab] = useState<Tab>('login');
+  const [error, setError] = useState<string | null>(null);
+
+  const switchTab = (t: Tab) => { setTab(t); setError(null); };
+
+  return (
+    <View style={s.root}>
+      <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="always">
         <View style={s.card}>
           <Text style={s.logo}>ChatEE</Text>
           <Text style={s.subtitle}>Mensajería Empresarial Segura</Text>
 
-          {/* Tabs */}
           <View style={s.tabs}>
             {(['login', 'register'] as Tab[]).map(t => (
-              <TouchableOpacity key={t} style={[s.tabBtn, tab === t && s.tabActive]} onPress={() => { setTab(t); setError(null); }}>
+              <TouchableOpacity key={t} style={[s.tabBtn, tab === t && s.tabActive]} onPress={() => switchTab(t)}>
                 <Text style={[s.tabTxt, tab === t && s.tabTxtActive]}>
                   {t === 'login' ? 'Iniciar sesión' : 'Registrarse'}
                 </Text>
@@ -56,35 +126,22 @@ export default function LoginScreen() {
             ))}
           </View>
 
-          {error && <Text style={s.errorMsg}>{error}</Text>}
+          {!!error && <Text style={s.errorMsg}>{error}</Text>}
 
-          {tab === 'login' ? (
-            <View style={s.form}>
-              <Input control={loginForm.control} name="email" label="EMAIL" placeholder="usuario@empresa.com" keyboardType="email-address" autoCapitalize="none" />
-              <Input control={loginForm.control} name="password" label="CONTRASEÑA" placeholder="••••••••" secureTextEntry />
-              <Button label="Iniciar sesión" onPress={handleLogin} loading={loading} style={s.btnPrimary} />
-              <Button label="Iniciar sesión con SSO" variant="ghost" onPress={() => {}} style={s.btnSso} />
-            </View>
-          ) : (
-            <View style={s.form}>
-              <Input control={registerForm.control} name="username" label="USUARIO" placeholder="nombre.apellido" autoCapitalize="none" />
-              <Input control={registerForm.control} name="email" label="EMAIL" placeholder="usuario@empresa.com" keyboardType="email-address" autoCapitalize="none" />
-              <Input control={registerForm.control} name="password" label="CONTRASEÑA" placeholder="Mín. 8 chars, mayús., número, símbolo" secureTextEntry />
-              <Input control={registerForm.control} name="confirmar" label="CONFIRMAR" placeholder="Repetir contraseña" secureTextEntry />
-              <Button label="Crear cuenta" onPress={handleRegister} loading={loading} style={s.btnPrimary} />
-            </View>
-          )}
+          {tab === 'login'
+            ? <LoginForm    onError={setError} />
+            : <RegisterForm onError={setError} onSuccess={() => switchTab('login')} />
+          }
 
           <Text style={s.footer}>Jakarta EE 10 · WildFly 31 · AES-256-GCM E2E</Text>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const s = StyleSheet.create({
   root:         { flex: 1, backgroundColor: theme.bg },
-  glow:         { position: 'absolute', top: -100, right: -100, width: 300, height: 300, borderRadius: 150, backgroundColor: 'rgba(59,125,255,0.12)' },
   scroll:       { flexGrow: 1, justifyContent: 'center', padding: 24 },
   card:         { backgroundColor: theme.panelBg, borderRadius: 16, padding: 24, borderWidth: 1, borderColor: theme.border, shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 16, elevation: 8 },
   logo:         { ...typography.heading, color: theme.text, textAlign: 'center', marginBottom: 4 },

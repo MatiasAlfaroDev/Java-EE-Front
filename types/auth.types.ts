@@ -1,10 +1,18 @@
 export interface Usuario {
-  id: number;
-  nombre: string;
+  id: string;
+  username: string;
   email: string;
-  rol: string;
-  estado: 'ONLINE' | 'OFFLINE';
-  initials: string;  // derivado en cliente: nombre.slice(0, 2).toUpperCase()
+  rol: 'USER' | 'MANAGER' | 'ADMIN';
+  status: 'PENDING_MFA' | 'ACTIVE' | 'SUSPENDED' | 'OFFLINE';
+  public_key: string;
+  initials: string;
+  created_at: string;
+}
+
+export interface SesionTokens {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
 }
 
 export interface LoginRequest {
@@ -18,14 +26,14 @@ export interface RegisterRequest {
   password: string;
 }
 
-// Respuesta real del backend
-export interface LoginResponse {
+// Respuesta del backend (o mock) al hacer login
+export interface BackendLoginResponse {
   token: string;
   usuario: {
     id: number;
     nombre: string;
     email: string;
     rol: string;
-    estado: string;
+    estado?: string;
   };
 }

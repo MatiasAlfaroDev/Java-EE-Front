@@ -18,12 +18,15 @@ export function Input<T extends FieldValues>({ control, name, label, ...rest }: 
         <View style={s.wrap}>
           <Text style={s.label}>{label}</Text>
           <TextInput
-            style={[s.input, error && s.inputError]}
+            autoComplete="off"
+            autoCorrect={false}
+            importantForAutofill="no"
+            placeholderTextColor={theme.textMuted}
+            {...rest}
+            style={[s.input, error && s.inputError, rest.style]}
             onChangeText={onChange}
             onBlur={onBlur}
             value={value ?? ''}
-            placeholderTextColor={theme.textMuted}
-            {...rest}
           />
           {error && <Text style={s.errorTxt}>{error.message}</Text>}
         </View>
