@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ChatEE",
+    "name": "Terotalk",
     "slug": "chatee-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -39,14 +39,14 @@
       [
         "expo-secure-store",
         {
-          "faceIDPermission": "Permite a ChatEE acceder a Face ID para autenticación segura."
+          "faceIDPermission": "Permite a Terotalk acceder a Face ID para autenticación segura."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Permite a ChatEE acceder a tus fotos para enviar imágenes.",
-          "cameraPermission": "Permite a ChatEE usar la cámara para enviar fotos."
+          "photosPermission": "Permite a Terotalk acceder a tus fotos para enviar imágenes.",
+          "cameraPermission": "Permite a Terotalk usar la cámara para enviar fotos."
         }
       ],
       [

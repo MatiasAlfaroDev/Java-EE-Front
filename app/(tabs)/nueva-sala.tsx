@@ -1,87 +1,107 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList } from 'react-native';
 import { router } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
-import { canalService } from '@/services/canal.service';
 import { useChatStore } from '@/store/chat.store';
-import { Canal } from '@/types/canal.types';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { useForm } from 'react-hook-form';
-import { TipoChat } from '@/types/canal.types';
+import { Avatar } from '@/components/ui/Avatar';
 
-type Tipo = TipoChat;
+export default function NuevoMensajeScreen() {
+  const [query, setQuery] = useState('');
+  const canales = useChatStore(s => s.canales);
 
-export default function NuevaSalaScreen() {
-  const { control, handleSubmit } = useForm<{ nombre: string }>();
-  const [tipo, setTipo]       = useState<Tipo>('GRUPO');
-  const [loading, setLoading] = useState(false);
-  const setCanales = useChatStore(s => s.setCanales);
+  // Contactos: canales individuales ya existentes + todos los canales como fallback
+  const contactos = useMemo(() => {
+    const individuales = canales.filter(c => c.tipo === 'INDIVIDUAL');
+    return (individuales.length > 0 ? individuales : canales).filter(c =>
+      c.nombre.toLowerCase().includes(query.toLowerCase()),
+    );
+  }, [canales, query]);
 
-  const crear = handleSubmit(async data => {
-    setLoading(true);
-    try {
-      await canalService.crear({ nombre: data.nombre, tipo });
-      const res = await canalService.listar();
-      const mapeados: Canal[] = res.data.map(c => ({
-        id:       c.id,
-        nombre:   c.nombre,
-        initials: c.nombre.slice(0, 2).toUpperCase(),
-      }));
-      setCanales(mapeados);
-      router.back();
-    } finally {
-      setLoading(false);
-    }
-  });
-
-  const tipos: { value: Tipo; label: string; icon: React.ComponentProps<typeof Feather>['name'] }[] = [
-    { value: 'INDIVIDUAL', label: 'Directo',  icon: 'user' },
-    { value: 'GRUPO',      label: 'Grupal',   icon: 'users' },
-    { value: 'PRIVADO',    label: 'Privado',  icon: 'lock' },
-  ];
+  const abrirChat = (id: string | number) => {
+    router.push(`/(tabs)/chat/${id}`);
+  };
 
   return (
     <View style={s.root}>
+      {/* Handle */}
       <View style={s.handle} />
+
+      {/* Header */}
       <View style={s.header}>
-        <Text style={s.titulo}>Nueva sala</Text>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Feather name="x" size={22} color={theme.textMuted} />
+        <Text style={s.titulo}>Nuevo mensaje</Text>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={8}>
+          <Ionicons name="close-outline" size={22} color={theme.textMuted} />
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={s.body}>
-        <Text style={s.label}>TIPO</Text>
-        <View style={s.tiposRow}>
-          {tipos.map(t => (
-            <TouchableOpacity key={t.value} style={[s.tipoBtn, tipo === t.value && s.tipoBtnActive]} onPress={() => setTipo(t.value)}>
-              <Feather name={t.icon} size={18} color={tipo === t.value ? '#fff' : theme.textMuted} />
-              <Text style={[s.tipoLabel, tipo === t.value && { color: '#fff' }]}>{t.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+      {/* Buscador */}
+      <View style={s.searchWrap}>
+        <Ionicons name="search-outline" size={15} color={theme.textMuted} style={s.searchIcon} />
+        <TextInput
+          style={s.searchInput}
+          placeholder="Buscar contacto…"
+          placeholderTextColor={theme.textMuted}
+          value={query}
+          onChangeText={setQuery}
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="off"
+        />
+        {query.length > 0 && (
+          <TouchableOpacity onPress={() => setQuery('')}>
+            <Ionicons name="close-circle-outline" size={15} color={theme.textMuted} />
+          </TouchableOpacity>
+        )}
+      </View>
 
-        <Input control={control} name="nombre" label="NOMBRE" placeholder="nombre-de-la-sala" autoCapitalize="none" />
-
-        <Button label="Crear sala" onPress={crear} loading={loading} style={s.btn} />
-      </ScrollView>
+      {/* Lista de contactos */}
+      <FlatList
+        data={contactos}
+        keyExtractor={item => String(item.id)}
+        contentContainerStyle={s.list}
+        ListEmptyComponent={
+          <View style={s.empty}>
+            <Ionicons name="people-outline" size={40} color={theme.textMuted} />
+            <Text style={s.emptyTxt}>No se encontraron contactos</Text>
+          </View>
+        }
+        renderItem={({ item }) => (
+          <TouchableOpacity style={s.row} onPress={() => abrirChat(item.id)} activeOpacity={0.7}>
+            <Avatar initials={item.initials} online={item.online} size={44} />
+            <View style={s.rowInfo}>
+              <Text style={s.rowNombre}>{item.nombre ?? item.initials}</Text>
+              {item.lastMsg ? (
+                <Text style={s.rowUltimo} numberOfLines={1}>{item.lastMsg}</Text>
+              ) : (
+                <Text style={s.rowNuevo}>Iniciar conversación</Text>
+              )}
+            </View>
+            <Ionicons name="chevron-forward-outline" size={18} color={theme.textMuted} />
+          </TouchableOpacity>
+        )}
+        ItemSeparatorComponent={() => <View style={s.separator} />}
+      />
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  root:          { flex: 1, backgroundColor: theme.panelBg, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
-  handle:        { width: 40, height: 4, borderRadius: 2, backgroundColor: theme.border, alignSelf: 'center', marginTop: 10 },
-  header:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: theme.border },
-  titulo:        { ...typography.title, color: theme.text },
-  body:          { padding: 16, gap: 16 },
-  label:         { ...typography.label, color: theme.textMuted, textTransform: 'uppercase' },
-  tiposRow:      { flexDirection: 'row', gap: 10 },
-  tipoBtn:       { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 8, borderWidth: 1, borderColor: theme.border, backgroundColor: theme.bg },
-  tipoBtnActive: { backgroundColor: theme.accent, borderColor: theme.accent },
-  tipoLabel:     { ...typography.bodyMd, color: theme.textMuted },
-  btn:           { marginTop: 8 },
+  root:        { flex: 1, backgroundColor: theme.panelBg, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
+  handle:      { width: 40, height: 4, borderRadius: 2, backgroundColor: theme.border, alignSelf: 'center', marginTop: 10 },
+  header:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: theme.border },
+  titulo:      { ...typography.title, color: theme.text },
+  searchWrap:  { flexDirection: 'row', alignItems: 'center', margin: 12, paddingHorizontal: 12, height: 40, backgroundColor: theme.listBg, borderRadius: 20, borderWidth: 1, borderColor: theme.border, gap: 8 },
+  searchIcon:  {},
+  searchInput: { flex: 1, ...typography.body, color: theme.text },
+  list:        { paddingBottom: 32 },
+  row:         { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, gap: 12 },
+  rowInfo:     { flex: 1 },
+  rowNombre:   { ...typography.bodyBold, color: theme.text },
+  rowUltimo:   { ...typography.caption, color: theme.textMuted, marginTop: 2 },
+  rowNuevo:    { ...typography.caption, color: theme.accent, marginTop: 2 },
+  separator:   { height: 1, backgroundColor: theme.border, marginLeft: 72 },
+  empty:       { alignItems: 'center', paddingTop: 60, gap: 12 },
+  emptyTxt:    { ...typography.body, color: theme.textMuted },
 });

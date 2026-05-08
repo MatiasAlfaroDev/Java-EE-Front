@@ -89,7 +89,20 @@ export const mockCanalService = {
   listar: (userId: number) => {
     const miChats = chats
       .filter(c => c.miembros.includes(userId))
-      .map(c => ({ id: c.id, nombre: c.nombre }));
+      .map(c => {
+        const msgs = getMensajesDeChat(c.id);
+        const ultimo = msgs.length > 0
+          ? msgs.reduce((a, b) => a.sent_at > b.sent_at ? a : b)
+          : null;
+        return {
+          id:          c.id,
+          nombre:      c.nombre,
+          tipo:        c.tipo,
+          lastMsg:     ultimo?.content ?? null,
+          lastMsgTime: ultimo?.sent_at ?? null,
+        };
+      })
+      .sort((a, b) => (b.lastMsgTime ?? '').localeCompare(a.lastMsgTime ?? ''));
     return ok(miChats);
   },
 

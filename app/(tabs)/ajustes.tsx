@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Switch, Alert, TouchableOpacity } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,16 +30,16 @@ export default function AjustesScreen() {
       <Card style={s.card}>
         <Text style={s.seccion}>SEGURIDAD</Text>
         <TouchableOpacity style={s.fila}>
-          <Feather name="shield" size={16} color={theme.textMuted} />
+          <Ionicons name="shield-outline" size={16} color={theme.textMuted} />
           <Text style={s.filaLabel}>Reconfigurar MFA</Text>
-          <Feather name="chevron-right" size={16} color={theme.textMuted} />
+          <Ionicons name="chevron-forward-outline" size={16} color={theme.textMuted} />
         </TouchableOpacity>
       </Card>
 
       <Card style={s.card}>
         <Text style={s.seccion}>NOTIFICACIONES</Text>
         <View style={s.fila}>
-          <Feather name="bell" size={16} color={theme.textMuted} />
+          <Ionicons name="notifications-outline" size={16} color={theme.textMuted} />
           <Text style={s.filaLabel}>Notificaciones push</Text>
           <Switch
             value={pushEnabled}

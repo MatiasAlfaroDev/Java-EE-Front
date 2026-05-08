@@ -34,7 +34,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: 'chatee-auth',
+      name: 'terotalk-auth',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: state => ({ usuario: state.usuario, isAutenticado: state.isAutenticado }),
     }

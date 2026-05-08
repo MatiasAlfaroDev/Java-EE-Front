@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Modal, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { InputComposer } from './InputComposer';
@@ -21,7 +21,7 @@ export function ThreadSheet({ parentId, canalId, usuarioId, onClose, onSend }: P
         <KeyboardAvoidingView style={s.sheet} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={s.header}>
             <Text style={s.titulo}>Hilo de respuestas</Text>
-            <TouchableOpacity onPress={onClose}><Feather name="x" size={20} color={theme.textMuted} /></TouchableOpacity>
+            <TouchableOpacity onPress={onClose}><Ionicons name="close-outline" size={20} color={theme.textMuted} /></TouchableOpacity>
           </View>
           <Text style={s.empty}>Hilos no disponibles aún.</Text>
           <InputComposer canalId={canalId} onSend={t => onSend(t, parentId)} />

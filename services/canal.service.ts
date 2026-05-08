@@ -6,8 +6,11 @@ import { mockCanalService } from './mockApi';
 import { useAuthStore } from '@/store/auth.store';
 
 export interface CanalBackend {
-  id:     number;
-  nombre: string;
+  id:          number;
+  nombre:      string;
+  tipo?:       'INDIVIDUAL' | 'GRUPO' | 'PRIVADO';
+  lastMsg?:    string | null;
+  lastMsgTime?: string | null;
 }
 
 export const canalService = {

@@ -1,96 +1,162 @@
 import { Tabs } from 'expo-router';
-import { View, StyleSheet, Platform } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@/constants/theme';
 import { useAuthStore } from '@/store/auth.store';
+import { Avatar } from '@/components/ui/Avatar';
 
-function TabBarIcon({
-  name,
-  color,
-  focused,
-}: {
-  name: React.ComponentProps<typeof Feather>['name'];
-  color: string;
-  focused: boolean;
+type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
+
+const TAB_CONFIG: Record<string, { icon: IoniconName; label: string }> = {
+  'nueva-sala': { icon: 'create-outline',     label: 'Mensaje'  },
+  'index':      { icon: 'chatbubbles-outline', label: 'Chats'   },
+  'perfil':     { icon: 'person-outline',      label: 'Perfil'  },
+  'admin':      { icon: 'shield-outline',      label: 'Admin'   },
+};
+
+const HIDDEN_ROUTES = new Set(['chat/[id]']);
+
+function FloatingTabBar({ state, navigation }: {
+  state: { routes: { key: string; name: string }[]; index: number };
+  descriptors: Record<string, unknown>;
+  navigation: { emit: (e: object) => { defaultPrevented: boolean }; navigate: (name: string) => void };
 }) {
+  const usuario   = useAuthStore(s => s.usuario);
+  const isAdmin   = usuario?.rol === 'ADMIN';
+  const insets    = useSafeAreaInsets();
+
+  // Ocultar tab bar completamente dentro de un chat
+  if (state.routes[state.index].name === 'chat/[id]') return null;
+
+  const visibleRoutes = state.routes.filter(route => {
+    if (HIDDEN_ROUTES.has(route.name)) return false;
+    if (route.name === 'admin' && !isAdmin) return false;
+    return true;
+  });
+
   return (
-    <View style={s.iconWrap}>
-      <Feather name={name} size={24} color={color} />
-      {focused && <View style={s.activeDot} />}
+    <View style={[s.wrapper, { paddingBottom: insets.bottom + 6 }]} pointerEvents="box-none">
+      {/* capa de blur — liquid glass */}
+      <BlurView intensity={55} tint="dark" style={StyleSheet.absoluteFill} />
+
+      {/* capa de color semi-transparente encima del blur */}
+      <View style={[StyleSheet.absoluteFill, s.glassOverlay]} />
+
+      {/* borde superior sutil */}
+      <View style={s.topBorder} />
+
+      {/* tabs */}
+      <View style={s.row}>
+        {visibleRoutes.map((route) => {
+          const focused = state.routes[state.index].name === route.name;
+          const config  = TAB_CONFIG[route.name];
+          if (!config) return null;
+
+          const color = focused ? theme.accent : theme.textMuted;
+
+          const onPress = () => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
+            if (!focused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
+
+          return (
+            <Pressable key={route.key} style={s.tabBtn} onPress={onPress}>
+              {route.name === 'perfil' ? (
+                <View style={[s.avatarWrap, focused && s.avatarWrapFocused]}>
+                  <Avatar
+                    initials={usuario?.initials ?? '??'}
+                    online={usuario?.status === 'ACTIVE'}
+                    size={26}
+                  />
+                </View>
+              ) : (
+                <Ionicons name={config.icon} size={24} color={color} />
+              )}
+              {focused && <View style={s.activeDot} />}
+              <Text style={[s.label, { color }]}>{config.label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }
 
 export default function TabsLayout() {
-  const usuario = useAuthStore(s => s.usuario);
-  const isAdmin = usuario?.rol === 'ADMIN';
-
   return (
     <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarShowLabel: true,
-        tabBarActiveTintColor: theme.accent,
-        tabBarInactiveTintColor: theme.textMuted,
-        tabBarLabelStyle: {
-          fontSize: 10,
-          fontFamily: 'IBMPlexSans_500Medium',
-          marginTop: 2,
-        },
-        tabBarStyle: {
-          backgroundColor: 'rgba(13,28,48,0.97)',
-          borderTopWidth: 1,
-          borderTopColor: theme.border,
-          height: 62,
-          paddingBottom: Platform.OS === 'ios' ? 12 : 8,
-          paddingTop: 6,
-        },
-      }}
-      screenListeners={{ tabPress: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light) }}
+      tabBar={(props) => <FloatingTabBar {...(props as Parameters<typeof FloatingTabBar>[0])} />}
+      screenOptions={{ headerShown: false }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          tabBarLabel: 'Chats',
-          tabBarIcon: ({ color, focused }) => <TabBarIcon name="message-square" color={color} focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="perfil"
-        options={{
-          tabBarLabel: 'Perfil',
-          tabBarIcon: ({ color, focused }) => <TabBarIcon name="user" color={color} focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="ajustes"
-        options={{
-          tabBarLabel: 'Ajustes',
-          tabBarIcon: ({ color, focused }) => <TabBarIcon name="settings" color={color} focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="admin"
-        options={{
-          tabBarLabel: 'Admin',
-          tabBarIcon: ({ color, focused }) => <TabBarIcon name="shield" color={color} focused={focused} />,
-          tabBarButton: isAdmin ? undefined : () => <View style={{ width: 0 }} />,
-        }}
-      />
-      <Tabs.Screen name="chat/[id]" options={{ tabBarButton: () => null }} />
-      <Tabs.Screen name="nueva-sala" options={{ tabBarButton: () => null }} />
+      <Tabs.Screen name="nueva-sala" />
+      <Tabs.Screen name="ajustes"   />
+      <Tabs.Screen name="index"     />
+      <Tabs.Screen name="perfil"    />
+      <Tabs.Screen name="admin"     />
+      <Tabs.Screen name="chat/[id]" />
     </Tabs>
   );
 }
 
 const s = StyleSheet.create({
-  iconWrap: { alignItems: 'center' },
+  wrapper: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    overflow: 'hidden',         // contiene el BlurView
+  },
+
+  glassOverlay: {
+    backgroundColor: 'rgba(9,21,37,1)',
+  },
+
+  topBorder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(255,255,255,0.10)',
+  },
+
+  row: {
+    flexDirection: 'row',
+    height: 58,
+    paddingTop: 6,
+  },
+
+  tabBtn: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+    paddingVertical: 8,
+  },
+
   activeDot: {
-    marginTop: 3,
     width: 4,
     height: 4,
     borderRadius: 2,
     backgroundColor: theme.accent,
+  },
+
+  avatarWrap:        { borderRadius: 15, borderWidth: 2, borderColor: 'transparent' },
+  avatarWrapFocused: { borderColor: theme.accent },
+
+  label: {
+    fontSize: 10,
+    fontFamily: 'IBMPlexSans_500Medium',
+    textAlign: 'center',
   },
 });

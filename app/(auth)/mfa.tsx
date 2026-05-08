@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { useAuth } from '@/hooks/useAuth';
@@ -50,7 +50,7 @@ export default function MfaScreen() {
   return (
     <View style={s.root}>
       <View style={s.iconWrap}>
-        <Feather name="key" size={28} color={theme.accent} />
+        <Ionicons name="key-outline" size={28} color={theme.accent} />
       </View>
       <Text style={s.titulo}>Verificación en dos pasos</Text>
       <Text style={s.subtitulo}>Ingresá el código de 6 dígitos de tu autenticador</Text>

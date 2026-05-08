@@ -4,7 +4,7 @@ import {
   TouchableOpacity, RefreshControl, ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { useChatStore } from '@/store/chat.store';
@@ -25,9 +25,12 @@ export default function ChatsScreen() {
     try {
       const res = await canalService.listar();
       const mapeados: Canal[] = res.data.map(c => ({
-        id:       c.id,
-        nombre:   c.nombre,
-        initials: c.nombre.slice(0, 2).toUpperCase(),
+        id:          c.id,
+        nombre:      c.nombre,
+        tipo:        c.tipo,
+        initials:    c.nombre.slice(0, 2).toUpperCase(),
+        lastMsg:     c.lastMsg     ?? undefined,
+        lastMsgTime: c.lastMsgTime ?? undefined,
       }));
       setCanales(mapeados);
     } finally {
@@ -49,7 +52,7 @@ export default function ChatsScreen() {
     <View style={s.root}>
       {/* Header */}
       <View style={s.header}>
-        <Text style={s.empresa}>ChatEE</Text>
+        <Text style={s.empresa}>Terotalk</Text>
         <TouchableOpacity onPress={() => router.push('/(tabs)/perfil')}>
           <Avatar initials={usuario?.initials ?? '??'} online={usuario?.status === 'ACTIVE'} size={34} />
         </TouchableOpacity>
@@ -57,7 +60,7 @@ export default function ChatsScreen() {
 
       {/* Buscador */}
       <View style={s.searchWrap}>
-        <Feather name="search" size={16} color={theme.textMuted} style={s.searchIcon} />
+        <Ionicons name="search-outline" size={16} color={theme.textMuted} style={s.searchIcon} />
         <TextInput
           style={s.searchInput}
           placeholder="Buscar conversaciones…"
@@ -71,7 +74,7 @@ export default function ChatsScreen() {
         <ActivityIndicator color={theme.accent} style={{ marginTop: 40 }} />
       ) : secciones.length === 0 ? (
         <View style={s.empty}>
-          <Feather name="message-square" size={48} color={theme.textMuted} />
+          <Ionicons name="chatbubble-outline" size={48} color={theme.textMuted} />
           <Text style={s.emptyTitle}>Sin conversaciones</Text>
           <Text style={s.emptySubtitle}>Toca + para iniciar un chat</Text>
         </View>
@@ -93,7 +96,7 @@ export default function ChatsScreen() {
 
       {/* FAB */}
       <TouchableOpacity style={s.fab} onPress={() => router.push('/(tabs)/nueva-sala')}>
-        <Feather name="plus" size={26} color="#fff" />
+        <Ionicons name="add-outline" size={26} color="#fff" />
       </TouchableOpacity>
     </View>
   );
@@ -107,7 +110,7 @@ const s = StyleSheet.create({
   searchIcon:    { marginRight: 8 },
   searchInput:   { flex: 1, ...typography.body, color: theme.text },
   sectionHeader: { ...typography.label, color: theme.textMuted, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 6, textTransform: 'uppercase' },
-  fab:           { position: 'absolute', bottom: 90, right: 20, width: 56, height: 56, borderRadius: 28, backgroundColor: theme.accent, alignItems: 'center', justifyContent: 'center', elevation: 4, shadowColor: theme.accent, shadowOpacity: 0.4, shadowRadius: 8 },
+  fab:           { position: 'absolute', bottom: 110, right: 32, width: 46, height: 46, borderRadius: 28, backgroundColor: theme.accent, alignItems: 'center', justifyContent: 'center', elevation: 4, shadowColor: theme.accent, shadowOpacity: 0.4, shadowRadius: 8 },
   empty:         { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, paddingBottom: 80 },
   emptyTitle:    { ...typography.title, color: theme.textMuted },
   emptySubtitle: { ...typography.body, color: theme.textMuted },

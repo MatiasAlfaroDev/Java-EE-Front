@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { useNotifStore } from '@/store/notif.store';
@@ -41,7 +41,7 @@ export function NotifSheet({ visible, onClose }: Props) {
               <Text style={s.leerTodas}>Leer todas</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={onClose} style={{ marginLeft: 8 }}>
-              <Feather name="x" size={20} color={theme.textMuted} />
+              <Ionicons name="close-outline" size={20} color={theme.textMuted} />
             </TouchableOpacity>
           </View>
 

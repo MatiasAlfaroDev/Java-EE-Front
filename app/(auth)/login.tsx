@@ -27,7 +27,6 @@ const mapearUsuario = (u: {
   created_at: new Date().toISOString(),
 });
 
-
 function LoginForm({ onError }: { onError: (msg: string | null) => void }) {
   const [loading, setLoading] = useState(false);
   const form = useForm<LoginFormData>({
@@ -113,7 +112,7 @@ export default function LoginScreen() {
     <View style={s.root}>
       <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="always">
         <View style={s.card}>
-          <Text style={s.logo}>ChatEE</Text>
+          <Text style={s.logo}>Terotalk</Text>
           <Text style={s.subtitle}>Mensajería Empresarial Segura</Text>
 
           <View style={s.tabs}>

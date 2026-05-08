@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { Mensaje } from '@/types/mensaje.types';
@@ -14,9 +14,9 @@ interface Props {
 
 export function MessageBubble({ mensaje, esMio, onLongPress }: Props) {
   const estadoIcon = () => {
-    if (mensaje.estado === 'PENDIENTE') return <Feather name="clock"        size={12} color={theme.textMuted} />;
-    if (mensaje.estado === 'RECHAZADO') return <Feather name="alert-circle" size={12} color={theme.error} />;
-    return <Feather name="check" size={12} color={theme.accent} />;
+    if (mensaje.estado === 'PENDIENTE') return <Ionicons name="time-outline"         size={12} color={theme.textMuted} />;
+    if (mensaje.estado === 'RECHAZADO') return <Ionicons name="alert-circle-outline" size={12} color={theme.error} />;
+    return <Ionicons name="checkmark-done-outline" size={12} color={theme.accent} />;
   };
 
   return (

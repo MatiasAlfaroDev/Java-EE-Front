@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { View, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { EmojiPicker } from './EmojiPicker';
@@ -14,6 +15,7 @@ interface Props {
 export function InputComposer({ canalId, onSend, onChangeText }: Props) {
   const [texto, setTexto] = useState('');
   const [emojiVisible, setEmojiVisible] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const handleChange = (t: string) => { setTexto(t); onChangeText?.(t); };
 
@@ -26,33 +28,49 @@ export function InputComposer({ canalId, onSend, onChangeText }: Props) {
   const tieneTexto = texto.trim().length > 0;
 
   return (
-    <View style={s.root}>
-      <View style={s.composer}>
-        <TouchableOpacity style={s.actionBtn}><Feather name="paperclip" size={20} color={theme.textMuted} /></TouchableOpacity>
-        <TouchableOpacity style={s.actionBtn}><Feather name="image" size={20} color={theme.textMuted} /></TouchableOpacity>
-        <TouchableOpacity style={s.actionBtn} onPress={() => setEmojiVisible(true)}>
-          <Feather name="smile" size={20} color={theme.textMuted} />
+    <View style={[s.root, { paddingBottom: insets.bottom + 10 }]}>
+      <View style={s.row}>
+
+        {/* + abre adjuntos, polls, etc. */}
+        <TouchableOpacity style={s.sideBtn} onPress={() => setEmojiVisible(true)}>
+          <Ionicons name="add-circle-outline" size={30} color={theme.textMuted} />
         </TouchableOpacity>
-        <TouchableOpacity style={s.actionBtn}><Feather name="bar-chart-2" size={20} color={theme.textMuted} /></TouchableOpacity>
 
-        <TextInput
-          style={s.input}
-          placeholder="Escribe un mensaje… (E2E cifrado)"
-          placeholderTextColor={theme.textMuted}
-          value={texto}
-          onChangeText={handleChange}
-          multiline
-          maxLength={4000}
-        />
+        {/* Campo de texto — mismo estilo que el buscador del tab Chats */}
+        <View style={s.inputPill}>
+          <TextInput
+            style={s.input}
+            placeholder="Mensaje"
+            placeholderTextColor={theme.textMuted}
+            value={texto}
+            onChangeText={handleChange}
+            multiline
+            maxLength={4000}
+            autoComplete="off"
+            autoCorrect={false}
+          />
+        </View>
 
+        {/* Cámara (se oculta cuando hay texto) */}
+        {!tieneTexto && (
+          <TouchableOpacity style={s.sideBtn}>
+            <Ionicons name="camera-outline" size={28} color={theme.textMuted} />
+          </TouchableOpacity>
+        )}
+
+        {/* Enviar */}
         <TouchableOpacity
-          style={[s.sendBtn, tieneTexto ? s.sendBtnActive : s.sendBtnInactive]}
+          style={[s.sendBtn, tieneTexto ? s.sendActive : s.sendInactive]}
           onPress={handleSend}
         >
-          <Feather name="send" size={18} color={tieneTexto ? '#fff' : theme.textMuted} />
+          <Ionicons
+            name="paper-plane-outline"
+            size={18}
+            color={tieneTexto ? '#fff' : theme.textMuted}
+          />
         </TouchableOpacity>
       </View>
-      <Text style={s.e2eLabel}>🔒 Cifrado de extremo a extremo · AES-256-GCM</Text>
+
       <EmojiPicker
         visible={emojiVisible}
         onSelect={e => setTexto(t => t + e)}
@@ -63,12 +81,53 @@ export function InputComposer({ canalId, onSend, onChangeText }: Props) {
 }
 
 const s = StyleSheet.create({
-  root:           { backgroundColor: theme.panelBg, borderTopWidth: 1, borderTopColor: theme.border },
-  composer:       { flexDirection: 'row', alignItems: 'flex-end', padding: 8, gap: 6 },
-  actionBtn:      { padding: 6 },
-  input:          { flex: 1, ...typography.body, color: theme.text, maxHeight: 120, paddingVertical: 8 },
-  sendBtn:        { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  sendBtnActive:  { backgroundColor: theme.accent },
-  sendBtnInactive:{ backgroundColor: theme.accent + '4D' },
-  e2eLabel:       { ...typography.caption, color: theme.textMuted, textAlign: 'center', paddingBottom: 8 },
+  root: {
+    backgroundColor: theme.panelBg,
+    borderTopWidth: 1,
+    borderTopColor: theme.border,
+    paddingHorizontal: 10,
+    paddingTop: 10,
+  },
+
+  row: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+
+  sideBtn: {
+    paddingBottom: 6,
+    paddingHorizontal: 2,
+  },
+
+  /* Mismo estilo que el buscador del tab Chats */
+  inputPill: {
+    flex: 1,
+    backgroundColor: theme.listBg,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: theme.border,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    maxHeight: 130,
+    justifyContent: 'center',
+  },
+
+  input: {
+    ...typography.body,
+    color: theme.text,
+    paddingVertical: 0,
+    maxHeight: 110,
+  },
+
+  sendBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 2,
+  },
+  sendActive:   { backgroundColor: theme.accent },
+  sendInactive: { backgroundColor: theme.accent + '4D' },
 });

@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { UsuarioAdmin } from '@/types/admin.types';
@@ -33,8 +33,8 @@ export function UserRow({ usuario, onToggleStatus }: Props) {
         </View>
       </View>
       <TouchableOpacity style={s.actionBtn} onPress={onToggleStatus}>
-        <Feather
-          name={usuario.estado === 'ONLINE' ? 'user-x' : 'user-check'}
+        <Ionicons
+          name={usuario.estado === 'ONLINE' ? 'person-remove-outline' : 'person-add-outline'}
           size={18}
           color={usuario.estado === 'ONLINE' ? theme.error : theme.online}
         />

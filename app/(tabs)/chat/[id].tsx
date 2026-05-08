@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, BackHandler } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { useChatStore } from '@/store/chat.store';
@@ -25,6 +25,15 @@ export default function ChatScreen() {
 
   const [enviando, setEnviando] = useState(false);
   const setMensajes = useChatStore(s => s.setMensajes);
+
+  // Back de Android siempre va a Chats
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      router.replace('/(tabs)');
+      return true;
+    });
+    return () => sub.remove();
+  }, []);
 
   // Cargar historial de mensajes al abrir el canal (mock devuelve datos; real no tiene GET)
   useEffect(() => {
@@ -93,17 +102,17 @@ export default function ChatScreen() {
   return (
     <View style={s.root}>
       <View style={s.header}>
-        <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
-          <Feather name="arrow-left" size={22} color={theme.text} />
+        <TouchableOpacity onPress={() => router.replace('/(tabs)')} style={s.backBtn}>
+          <Ionicons name="arrow-back-outline" size={22} color={theme.text} />
         </TouchableOpacity>
         <Avatar initials={canal?.initials ?? '??'} online={canal?.online} size={32} />
         <View style={s.headerInfo}>
           <Text style={s.headerNombre}>{canal?.nombre ?? 'Chat'}</Text>
           <Text style={s.headerEstado}>{canal?.online ? 'En línea' : 'Desconectado'}</Text>
         </View>
-        <TouchableOpacity style={s.headerIcon}><Feather name="phone" size={20} color={theme.textMuted} /></TouchableOpacity>
-        <TouchableOpacity style={s.headerIcon}><Feather name="video" size={20} color={theme.textMuted} /></TouchableOpacity>
-        <TouchableOpacity style={s.headerIcon}><Feather name="more-vertical" size={20} color={theme.textMuted} /></TouchableOpacity>
+        <TouchableOpacity style={s.headerIcon}><Ionicons name="call-outline"             size={20} color={theme.textMuted} /></TouchableOpacity>
+        <TouchableOpacity style={s.headerIcon}><Ionicons name="videocam-outline"         size={20} color={theme.textMuted} /></TouchableOpacity>
+        <TouchableOpacity style={s.headerIcon}><Ionicons name="ellipsis-vertical-outline" size={20} color={theme.textMuted} /></TouchableOpacity>
       </View>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>

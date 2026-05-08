@@ -5,10 +5,12 @@ export type ChatRol  = 'CREADOR' | 'ADMINISTRADOR' | 'MIEMBRO';
 export interface Canal {
   id: number;
   nombre: string;
-  initials: string;   // derivado en cliente
-  lastMsg?: string;   // estado UI local
-  unread?: number;    // estado UI local
-  online?: boolean;   // estado UI local
+  initials: string;
+  lastMsg?: string;
+  lastMsgTime?: string;   // ISO string del último mensaje
+  unread?: number;
+  online?: boolean;
+  tipo?: 'INDIVIDUAL' | 'GRUPO' | 'PRIVADO';
 }
 
 export interface CrearCanalRequest {

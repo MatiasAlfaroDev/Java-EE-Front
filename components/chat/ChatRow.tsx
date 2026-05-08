@@ -19,10 +19,10 @@ export function ChatRow({ canal, onPress, activo }: Props) {
       <View style={s.body}>
         <View style={s.top}>
           <Text style={s.nombre} numberOfLines={1}>{canal.nombre}</Text>
-          <Text style={s.hora}>{canal.lastMsg ? horaCorta(new Date().toISOString()) : ''}</Text>
+          <Text style={s.hora}>{canal.lastMsgTime ? horaCorta(canal.lastMsgTime) : ''}</Text>
         </View>
         <View style={s.bottom}>
-          <Text style={s.lastMsg} numberOfLines={1}>{canal.lastMsg ?? ''}</Text>
+          <Text style={s.lastMsg} numberOfLines={2}>{canal.lastMsg ?? ''}</Text>
           <Badge count={canal.unread ?? 0} />
         </View>
       </View>
@@ -31,7 +31,7 @@ export function ChatRow({ canal, onPress, activo }: Props) {
 }
 
 const s = StyleSheet.create({
-  row:        { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 0, gap: 12 },
+  row:        { flexDirection: 'row', alignItems: 'flex-start', paddingHorizontal: 16, paddingTop: 14, paddingBottom: 0, gap: 12 },
   rowActive:  { backgroundColor: theme.activeRow },
   rowPressed: { backgroundColor: theme.activeRow },
   body:       { flex: 1, gap: 4, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.border, paddingBottom: 12 },

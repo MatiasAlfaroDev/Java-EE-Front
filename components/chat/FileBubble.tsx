@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { ArchivoAdjunto } from '@/types/mensaje.types';
@@ -16,10 +16,10 @@ const formatBytes = (b: number): string => {
   return `${(b / 1048576).toFixed(1)} MB`;
 };
 
-const SCAN_ICON: Record<string, React.ComponentProps<typeof Feather>['name']> = {
-  CLEAN:    'check-circle',
-  INFECTED: 'alert-triangle',
-  PENDING:  'loader',
+const SCAN_ICON: Record<string, React.ComponentProps<typeof Ionicons>['name']> = {
+  CLEAN:    'checkmark-circle-outline',
+  INFECTED: 'warning-outline',
+  PENDING:  'reload-outline',
 };
 const SCAN_COLOR: Record<string, string> = {
   CLEAN:    theme.online,
@@ -35,13 +35,13 @@ export function FileBubble({ archivo, esMio, onPress }: Props) {
       activeOpacity={0.8}
     >
       <View style={s.iconWrap}>
-        <Feather name="file" size={24} color={theme.accent} />
+        <Ionicons name="document-outline" size={24} color={theme.accent} />
       </View>
       <View style={s.info}>
         <Text style={s.nombre} numberOfLines={1}>{archivo.file_name}</Text>
         <Text style={s.meta}>{formatBytes(archivo.size_bytes)}</Text>
       </View>
-      <Feather
+      <Ionicons
         name={SCAN_ICON[archivo.scan_result]}
         size={16}
         color={SCAN_COLOR[archivo.scan_result]}

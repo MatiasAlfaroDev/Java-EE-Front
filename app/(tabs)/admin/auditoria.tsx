@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl, Alert } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { adminService } from '@/services/admin.service';
@@ -53,7 +53,7 @@ export default function AuditoriaScreen() {
       <View style={s.headerRow}>
         <Text style={s.titulo}>Auditoría</Text>
         <TouchableOpacity style={s.exportBtn} onPress={exportar}>
-          <Feather name="download" size={16} color={theme.accent} />
+          <Ionicons name="download-outline" size={16} color={theme.accent} />
           <Text style={s.exportTxt}>Exportar CSV</Text>
         </TouchableOpacity>
       </View>
