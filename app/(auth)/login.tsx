@@ -76,7 +76,8 @@ function RegisterForm({ onSuccess, onError }: { onSuccess: () => void; onError: 
   const handleSubmit = form.handleSubmit(async (data) => {
     setLoading(true); onError(null);
     try {
-      await authService.register({ nombre: data.username, email: data.email, password: data.password });
+      await authService.register({nombre: data.username, email: data.email, password: data.password,
+  rol: 'USER',});
       form.reset();
       onSuccess();
     } catch (e: unknown) {

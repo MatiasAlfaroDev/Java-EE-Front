@@ -12,12 +12,12 @@ export const authService = {
 
   register: (data: RegisterRequest) =>
     USE_MOCK_API
-      ? mockAuthService.register(data.username, data.email, data.password)
+      ? mockAuthService.register(data.nombre, data.email, data.password)
       : api.post(ENDPOINTS.REGISTER, {
-          nombre:   data.username,
-          email:    data.email,
+          nombre: data.nombre,
+          email: data.email,
           password: data.password,
-          rol:      'USER',
+          rol: data.rol,
         }),
 
   logout: () =>

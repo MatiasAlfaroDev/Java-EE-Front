@@ -24,6 +24,7 @@ export interface RegisterRequest {
   nombre: string;
   email: string;
   password: string;
+  rol: string;
 }
 
 // Respuesta del backend (o mock) al hacer login
