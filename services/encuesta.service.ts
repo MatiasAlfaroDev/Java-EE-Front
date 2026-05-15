@@ -10,8 +10,8 @@ interface CrearEncuestaRequest {
 }
 
 export const encuestaService = {
-  crear: (canalId: string, data: CrearEncuestaRequest) =>
-    api.post<Encuesta>(ENDPOINTS.POLLS(canalId), data),
+  crear: (chatId: string, data: CrearEncuestaRequest) =>
+    api.post<Encuesta>(ENDPOINTS.POLLS(chatId), data),
 
   votar: (pollId: string, opcionId: string) =>
     api.post(ENDPOINTS.POLL_VOTE(pollId, opcionId)),

@@ -9,38 +9,38 @@ import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { useChatStore } from '@/store/chat.store';
 import { useAuthStore } from '@/store/auth.store';
-import { canalService } from '@/services/canal.service';
-import { Canal } from '@/types/canal.types';
+import { chatService } from '@/services/chat.service';
+import { Chat } from '@/types/chat.types';
 import { ChatRow } from '@/components/chat/ChatRow';
 import { Avatar } from '@/components/ui/Avatar';
 
 export default function ChatsScreen() {
   const usuario  = useAuthStore(s => s.usuario);
-  const { canales, setCanales } = useChatStore();
+  const { chats, setchats } = useChatStore();
   const [query, setQuery]          = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading]       = useState(true);
 
   const cargar = useCallback(async () => {
     try {
-      const res = await canalService.listar();
-      const mapeados: Canal[] = res.data.map(c => ({
-        id:          c.id,
+      const res = await chatService.listar();
+      const mapeados: Chat[] = res.data.map(c => ({
+        id:          String(c.id),
         nombre:      c.nombre,
         tipo:        c.tipo,
         initials:    c.nombre.slice(0, 2).toUpperCase(),
         lastMsg:     c.lastMsg     ?? undefined,
         lastMsgTime: c.lastMsgTime ?? undefined,
       }));
-      setCanales(mapeados);
+      setchats(mapeados);
     } finally {
       setLoading(false); setRefreshing(false);
     }
-  }, [setCanales]);
+  }, [setchats]);
 
   useEffect(() => { cargar(); }, [cargar]);
 
-  const filtrados = canales.filter(c =>
+  const filtrados = chats.filter(c =>
     c.nombre.toLowerCase().includes(query.toLowerCase())
   );
 
@@ -83,7 +83,7 @@ export default function ChatsScreen() {
           sections={secciones}
           keyExtractor={item => String(item.id)}
           renderItem={({ item }) => (
-            <ChatRow canal={item} onPress={() => router.push(`/(tabs)/chat/${item.id}`)} />
+            <ChatRow chat={item} onPress={() => router.push(`/(tabs)/chat/${item.id}`)} />
           )}
           renderSectionHeader={({ section }) => (
             <Text style={s.sectionHeader}>{section.title}</Text>

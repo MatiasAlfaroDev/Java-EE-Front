@@ -23,5 +23,6 @@ export interface ReporteUso {
   fecha: string;
   mensajes: number;
   usuarios_activos: number;
-  canales_activos: number;
+  chats_activos: number;
 }
+  

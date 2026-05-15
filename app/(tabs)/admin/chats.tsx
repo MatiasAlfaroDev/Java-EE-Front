@@ -2,20 +2,31 @@ import { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
-import { canalService } from '@/services/canal.service';
-import { Canal } from '@/types/canal.types';
+import { chatService } from '@/services/chat.service';
+import { Chat } from '@/types/chat.types';
 import { Avatar } from '@/components/ui/Avatar';
 import { Tag } from '@/components/ui/Tag';
 
-export default function CanalesAdminScreen() {
-  const [canales, setCanales] = useState<Canal[]>([]);
+export default function chatesAdminScreen() {
+  const [chates, setchates] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const cargar = useCallback(async () => {
     try {
-      const res = await canalService.listar();
-      setCanales(res.data);
+      const res = await chatService.listar();
+      const mapeados: Chat[] = res.data.map(c => ({
+      id: String(c.id),
+      nombre: c.nombre,
+      tipo: c.tipo,
+      initials: c.nombre.slice(0, 2).toUpperCase(),
+      lastMsg: c.lastMsg ?? undefined,
+      lastMsgTime: c.lastMsgTime ?? undefined,
+      miembros: c.miembros ?? 0,
+}));
+  
+
+setchates(mapeados);
     } finally {
       setLoading(false); setRefreshing(false);
     }
@@ -23,14 +34,14 @@ export default function CanalesAdminScreen() {
 
   useEffect(() => { cargar(); }, [cargar]);
 
-  const eliminar = (canal: Canal) => {
-    Alert.alert('Eliminar canal', `¿Eliminar "${canal.nombre}"? Esta acción es irreversible.`, [
+  const eliminar = (chat: Chat) => {
+    Alert.alert('Eliminar chat', `¿Eliminar "${chat.nombre}"? Esta acción es irreversible.`, [
       { text: 'Cancelar', style: 'cancel' },
       {
         text: 'Eliminar', style: 'destructive',
         onPress: async () => {
-          await canalService.eliminar(canal.id);
-          setCanales(prev => prev.filter(c => c.id !== canal.id));
+          await chatService.eliminar(chat.id);
+          setchates(prev => prev.filter(c => c.id !== chat.id));
         },
       },
     ]);
@@ -44,21 +55,20 @@ export default function CanalesAdminScreen() {
 
   return (
     <View style={s.root}>
-      <Text style={s.titulo}>Gestión de canales</Text>
+      <Text style={s.titulo}>Gestión de chates</Text>
       {loading ? (
         <ActivityIndicator color={theme.accent} style={{ marginTop: 40 }} />
       ) : (
         <FlatList
-          data={canales}
+          data={chates}
           keyExtractor={c => c.id}
           renderItem={({ item }) => (
             <View style={s.row}>
               <Avatar initials={item.initials} size={40} />
               <View style={s.info}>
                 <Text style={s.nombre}>{item.nombre}</Text>
-                <Text style={s.meta}>{item.members_count ?? 0} miembros</Text>
+                <Text style={s.meta}>{item.miembros ?? 0} miembros</Text>
               </View>
-              <Tag label={item.tipo} color={TIPO_COLOR[item.tipo]} />
             </View>
           )}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); cargar(); }} tintColor={theme.accent} />}

@@ -7,7 +7,7 @@ interface Props {
   mensajes: Mensaje[];
   usuarioId: string | number;
   onEndReached?: () => void;
-  canalId?: string;
+  chatId?: string;
 }
 
 const shouldShowDate = (cur: Mensaje, prev?: Mensaje): boolean => {

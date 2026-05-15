@@ -71,7 +71,7 @@ export default function AuditoriaScreen() {
       ) : (
         <FlatList
           data={logs}
-          keyExtractor={l => l.id}
+          keyExtractor={l => String(l.id)}
           renderItem={({ item }) => <AuditRow log={item} />}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); cargar(); }} tintColor={theme.accent} />}
           contentContainerStyle={{ paddingBottom: 100 }}

@@ -83,9 +83,9 @@ export const mockAuthService = {
   logout: () => ok('Logout exitoso'),
 };
 
-// ─── Canales ─────────────────────────────────────────────────────────────────
+// ─── chates ─────────────────────────────────────────────────────────────────
 
-export const mockCanalService = {
+export const mockchatService = {
   listar: (userId: number) => {
     const miChats = chats
       .filter(c => c.miembros.includes(userId))
@@ -100,11 +100,20 @@ export const mockCanalService = {
           tipo:        c.tipo,
           lastMsg:     ultimo?.content ?? null,
           lastMsgTime: ultimo?.sent_at ?? null,
+          miembros:     c.miembros.length,
         };
       })
       .sort((a, b) => (b.lastMsgTime ?? '').localeCompare(a.lastMsgTime ?? ''));
     return ok(miChats);
   },
+
+  eliminar: async (chatId: number) => {
+  chats.filter(c => c.id !== chatId);
+
+  return {
+    data: true,
+  };
+},
 
   crear: (nombre: string, tipo: ChatMockDB['tipo'], miembrosIds: number[]) => {
     const nuevo: ChatMockDB = {

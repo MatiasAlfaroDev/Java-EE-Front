@@ -1,64 +1,181 @@
 import { create } from 'zustand';
-import { Canal } from '@/types/canal.types';
+import { Chat } from '@/types/chat.types';
 import { Mensaje } from '@/types/mensaje.types';
 
 interface TypingState {
-  [canalId: string]: string[];
+  [chatId: string]: string[];
+}
+
+interface EditarMensajePayload {
+  id: string;
+  channel_id: string;
+  content: string;
+  edited_at: string;
 }
 
 interface ChatState {
-  canales:      Canal[];
-  mensajes:     Record<string, Mensaje[]>;
-  typing:       TypingState;
-  canalActivo:  string | null;
+  chats: Chat[];
+  mensajes: Record<string, Mensaje[]>;
+  typing: TypingState;
+  chatActivo: string | null;
 
-  setCanales:     (canales: Canal[]) => void;
-  setCanalActivo: (id: string | null) => void;
-  setMensajes:    (canalId: string, mensajes: Mensaje[]) => void;
+  setchats: (chats : Chat[]) => void;
+  setchatActivo: (id: string | null) => void;
+
+  setMensajes: (chatId: string, mensajes: Mensaje[]) => void;
+
+  editarMensaje: (payload: EditarMensajePayload) => void;
+
   agregarMensaje: (mensaje: Mensaje) => void;
-  setTyping:      (canalId: string, username: string, activo: boolean) => void;
-  marcarLeidos:   (canalId: string) => void;
+
+  setTyping: (
+    chatId: string,
+    username: string,
+    activo: boolean
+  ) => void;
+
+  marcarLeidos: (chatId: string) => void;
+
+  marcarEliminado: (
+    mensajeId: string,
+    deletedAt: string
+  ) => void;
+
+  actualizarReacciones: (
+    mensajeId: string,
+    reacciones: Mensaje['reacciones']
+  ) => void;
 }
 
 export const useChatStore = create<ChatState>()((set) => ({
-  canales:     [],
-  mensajes:    {},
-  typing:      {},
-  canalActivo: null,
+  chats: [],
+  mensajes: {},
+  typing: {},
+  chatActivo: null,
 
-  setCanales: (canales) => set({ canales }),
+  setchats: (chats) => set({ chats }),
 
-  setCanalActivo: (id) => set({ canalActivo: id }),
+  setchatActivo: (id) => set({ chatActivo: id }),
 
-  setMensajes: (canalId, mensajes) =>
-    set(s => ({ mensajes: { ...s.mensajes, [canalId]: mensajes } })),
+  setMensajes: (chatId, mensajes) => set((s) => ({ mensajes: { ...s.mensajes, [chatId]: mensajes } })),
 
   agregarMensaje: (mensaje) => {
-    const key = String(mensaje.chatId);
-    set(s => ({
+    const chatId = String(mensaje.chatId);
+
+    set((s) => ({
       mensajes: {
         ...s.mensajes,
-        [key]: [mensaje, ...(s.mensajes[key] ?? [])],
+        [chatId]: [
+          mensaje,
+          ...(s.mensajes[chatId] ?? []),
+        ],
       },
-      canales: s.canales.map(c =>
-        c.id === mensaje.chatId
-          ? { ...c, lastMsg: mensaje.contenido }
+
+      chats: s.chats.map((c) =>
+        String(c.id) === chatId
+          ? {
+              ...c,
+              lastMsg: mensaje.content,
+            }
           : c
       ),
     }));
   },
 
-  setTyping: (canalId, username, activo) =>
-    set(s => {
-      const actuales  = s.typing[canalId] ?? [];
-      const siguientes = activo
-        ? actuales.includes(username) ? actuales : [...actuales, username]
-        : actuales.filter(u => u !== username);
-      return { typing: { ...s.typing, [canalId]: siguientes } };
+  editarMensaje: ({
+    id,
+    channel_id,
+    content,
+    edited_at,
+  }) =>
+    set((s) => ({
+      mensajes: {
+        ...s.mensajes,
+
+        [channel_id]: (s.mensajes[channel_id] ?? []).map((m) =>
+          String(m.id) === id
+            ? {
+                ...m,
+                content,
+                edited_at,
+              }
+            : m
+        ),
+      },
+    })),
+
+  marcarEliminado: (mensajeId, deletedAt) =>
+    set((s) => {
+      const nuevosMensajes = Object.fromEntries(
+        Object.entries(s.mensajes).map(([chatId, mensajes]) => [
+          chatId,
+
+          mensajes.map((m) =>
+            String(m.id) === mensajeId
+              ? {
+                  ...m,
+                  deleted_at: deletedAt,
+                  eliminado: true,
+                }
+              : m
+          ),
+        ])
+      );
+
+      return {
+        mensajes: nuevosMensajes,
+      };
     }),
 
-  marcarLeidos: (canalId) =>
-    set(s => ({
-      canales: s.canales.map(c => c.id === Number(canalId) ? { ...c, unread: 0 } : c),
+  actualizarReacciones: (mensajeId, reacciones) =>
+    set((s) => {
+      const nuevosMensajes = Object.fromEntries(
+        Object.entries(s.mensajes).map(([chatId, mensajes]) => [
+          chatId,
+
+          mensajes.map((m) =>
+            String(m.id) === mensajeId
+              ? {
+                  ...m,
+                  reacciones,
+                }
+              : m
+          ),
+        ])
+      );
+
+      return {
+        mensajes: nuevosMensajes,
+      };
+    }),
+
+  setTyping: (chatId, username, activo) =>
+    set((s) => {
+      const actuales = s.typing[chatId] ?? [];
+
+      const siguientes = activo
+        ? actuales.includes(username)
+          ? actuales
+          : [...actuales, username]
+        : actuales.filter((u) => u !== username);
+
+      return {
+        typing: {
+          ...s.typing,
+          [chatId]: siguientes,
+        },
+      };
+    }),
+
+  marcarLeidos: (chatId) =>
+    set((s) => ({
+      chats: s.chats.map((c) =>
+        String(c.id) === chatId
+          ? {
+              ...c,
+              unread: 0,
+            }
+          : c
+      ),
     })),
 }));

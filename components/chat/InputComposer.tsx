@@ -7,12 +7,12 @@ import { typography } from '@/constants/typography';
 import { EmojiPicker } from './EmojiPicker';
 
 interface Props {
-  canalId: string;
+  chatId: string;
   onSend: (texto: string) => void;
   onChangeText?: (text: string) => void;
 }
 
-export function InputComposer({ canalId, onSend, onChangeText }: Props) {
+export function InputComposer({ chatId, onSend, onChangeText }: Props) {
   const [texto, setTexto] = useState('');
   const [emojiVisible, setEmojiVisible] = useState(false);
   const insets = useSafeAreaInsets();

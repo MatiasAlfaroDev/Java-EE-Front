@@ -1,29 +1,29 @@
 import { Pressable, View, Text, StyleSheet } from 'react-native';
 import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
-import { Canal } from '@/types/canal.types';
+import { Chat } from '@/types/chat.types';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { horaCorta } from '@/utils/fecha';
 
 interface Props {
-  canal: Canal;
+  chat: Chat;
   onPress: () => void;
   activo?: boolean;
 }
 
-export function ChatRow({ canal, onPress, activo }: Props) {
+export function ChatRow({ chat, onPress, activo }: Props) {
   return (
     <Pressable style={({ pressed }) => [s.row, activo && s.rowActive, pressed && s.rowPressed]} onPress={onPress}>
-      <Avatar initials={canal.initials} online={canal.online} size={44} />
+      <Avatar initials={chat.initials} online={chat.online} size={44} />
       <View style={s.body}>
         <View style={s.top}>
-          <Text style={s.nombre} numberOfLines={1}>{canal.nombre}</Text>
-          <Text style={s.hora}>{canal.lastMsgTime ? horaCorta(canal.lastMsgTime) : ''}</Text>
+          <Text style={s.nombre} numberOfLines={1}>{chat.nombre}</Text>
+          <Text style={s.hora}>{chat.lastMsgTime ? horaCorta(chat.lastMsgTime) : ''}</Text>
         </View>
         <View style={s.bottom}>
-          <Text style={s.lastMsg} numberOfLines={2}>{canal.lastMsg ?? ''}</Text>
-          <Badge count={canal.unread ?? 0} />
+          <Text style={s.lastMsg} numberOfLines={2}>{chat.lastMsg ?? ''}</Text>
+          <Badge count={chat.unread ?? 0} />
         </View>
       </View>
     </Pressable>

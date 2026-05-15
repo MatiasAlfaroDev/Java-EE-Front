@@ -17,8 +17,8 @@ const mockToMensaje = (m: MensajeMock): Mensaje => ({
   sender_id:       m.sender_id,
   sender_username: m.sender_username,
   sender_initials: m.sender_initials,
-  channel_id:      m.channel_id,
-  content_enc:     m.content_enc,
+  chatId:      m.channel_id,
+  contenido:     m.content_enc,
   iv:              m.iv,
   content:         m.content,
   sent_at:         m.sent_at,
@@ -27,7 +27,7 @@ const mockToMensaje = (m: MensajeMock): Mensaje => ({
 });
 
 export const mensajeService = {
-  // listar solo existe en el mock — el backend real no tiene GET de mensajes por canal
+  // listar solo existe en el mock — el backend real no tiene GET de mensajes por chat
   listar: async (chatId: string): Promise<Mensaje[]> => {
     if (!USE_MOCK_API) return [];
     const res = await mockMensajeService.listar(Number(chatId));

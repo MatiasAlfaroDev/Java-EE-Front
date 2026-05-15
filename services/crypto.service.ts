@@ -3,7 +3,7 @@ import * as Crypto from 'expo-crypto';
 const ALGORITHM = 'AES-GCM';
 const KEY_LENGTH = 256;
 
-const clavesPorCanal = new Map<string, CryptoKey>();
+const clavesPorchat = new Map<string, CryptoKey>();
 
 const base64ToBytes = (b64: string): Uint8Array<ArrayBuffer> => {
   const bin = atob(b64);
@@ -69,20 +69,20 @@ export const cryptoService = {
     return new TextDecoder().decode(descifrado);
   },
 
-  // Gestión de claves por canal (en memoria — en producción se intercambiarían via public_key RSA)
-  obtenerClaveCanal: async (canalId: string): Promise<CryptoKey> => {
-    if (clavesPorCanal.has(canalId)) return clavesPorCanal.get(canalId)!;
+  // Gestión de claves por chat (en memoria — en producción se intercambiarían via public_key RSA)
+  obtenerClavechat: async (chatId: string): Promise<CryptoKey> => {
+    if (clavesPorchat.has(chatId)) return clavesPorchat.get(chatId)!;
     const clave = await crypto.subtle.generateKey(
       { name: ALGORITHM, length: KEY_LENGTH },
       true,
       ['encrypt', 'decrypt']
     );
-    clavesPorCanal.set(canalId, clave);
+    clavesPorchat.set(chatId, clave);
     return clave;
   },
 
-  guardarClaveCanal: (canalId: string, clave: CryptoKey) => {
-    clavesPorCanal.set(canalId, clave);
+  guardarClavechat: (chatId: string, clave: CryptoKey) => {
+    clavesPorchat.set(chatId, clave);
   },
 
   randomUUID: (): string => Crypto.randomUUID(),

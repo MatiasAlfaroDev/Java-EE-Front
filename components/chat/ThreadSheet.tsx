@@ -6,13 +6,13 @@ import { InputComposer } from './InputComposer';
 
 interface Props {
   parentId: number | null;
-  canalId: string;
+  chatId: string;
   usuarioId: number;
   onClose: () => void;
   onSend: (texto: string, parentId: number) => void;
 }
 
-export function ThreadSheet({ parentId, canalId, usuarioId, onClose, onSend }: Props) {
+export function ThreadSheet({ parentId, chatId, usuarioId, onClose, onSend }: Props) {
   if (!parentId) return null;
 
   return (
@@ -24,7 +24,7 @@ export function ThreadSheet({ parentId, canalId, usuarioId, onClose, onSend }: P
             <TouchableOpacity onPress={onClose}><Ionicons name="close-outline" size={20} color={theme.textMuted} /></TouchableOpacity>
           </View>
           <Text style={s.empty}>Hilos no disponibles aún.</Text>
-          <InputComposer canalId={canalId} onSend={t => onSend(t, parentId)} />
+          <InputComposer chatId={chatId} onSend={t => onSend(t, parentId)} />
         </KeyboardAvoidingView>
       </View>
     </Modal>

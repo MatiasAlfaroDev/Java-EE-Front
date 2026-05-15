@@ -9,15 +9,15 @@ import { Avatar } from '@/components/ui/Avatar';
 
 export default function NuevoMensajeScreen() {
   const [query, setQuery] = useState('');
-  const canales = useChatStore(s => s.canales);
+  const chats = useChatStore(s => s.chats);
 
-  // Contactos: canales individuales ya existentes + todos los canales como fallback
+  // Contactos: chates individuales ya existentes + todos los chates como fallback
   const contactos = useMemo(() => {
-    const individuales = canales.filter(c => c.tipo === 'INDIVIDUAL');
-    return (individuales.length > 0 ? individuales : canales).filter(c =>
+    const individuales = chats.filter(c => c.tipo === 'INDIVIDUAL');
+    return (individuales.length > 0 ? individuales : chats).filter(c =>
       c.nombre.toLowerCase().includes(query.toLowerCase()),
     );
-  }, [canales, query]);
+  }, [chats, query]);
 
   const abrirChat = (id: string | number) => {
     router.push(`/(tabs)/chat/${id}`);

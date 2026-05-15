@@ -7,7 +7,7 @@ export interface Notificacion {
   cuerpo: string;
   leida: boolean;
   created_at: string;
-  canal_id?: string;
+  chat_id?: string;
   mensaje_id?: string;
 }
 

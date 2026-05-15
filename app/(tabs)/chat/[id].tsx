@@ -7,7 +7,7 @@ import { typography } from '@/constants/typography';
 import { useChatStore } from '@/store/chat.store';
 import { useAuthStore } from '@/store/auth.store';
 import { mensajeService } from '@/services/mensaje.service';
-import { suscribirCanal, desuscribirCanal } from '@/services/websocket.service';
+import { suscribirchat, desuscribirchat } from '@/services/websocket.service';
 import { MessageList } from '@/components/chat/MessageList';
 import { InputComposer } from '@/components/chat/InputComposer';
 import { Avatar } from '@/components/ui/Avatar';
@@ -15,12 +15,12 @@ import { Mensaje } from '@/types/mensaje.types';
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const canal   = useChatStore(s => s.canales.find(c => String(c.id) === id));
+  const chat   = useChatStore(s => s.chats.find(c => String(c.id) === id));
   const usuario = useAuthStore(s => s.usuario);
 
   const mensajes        = useChatStore(s => s.mensajes[id] ?? []);
   const agregarMensaje  = useChatStore(s => s.agregarMensaje);
-  const setCanalActivo  = useChatStore(s => s.setCanalActivo);
+  const setchatActivo  = useChatStore(s => s.setchatActivo);
   const marcarLeidos    = useChatStore(s => s.marcarLeidos);
 
   const [enviando, setEnviando] = useState(false);
@@ -35,27 +35,27 @@ export default function ChatScreen() {
     return () => sub.remove();
   }, []);
 
-  // Cargar historial de mensajes al abrir el canal (mock devuelve datos; real no tiene GET)
+  // Cargar historial de mensajes al abrir el chat (mock devuelve datos; real no tiene GET)
   useEffect(() => {
     mensajeService.listar(id).then(lista => {
       if (lista.length > 0) setMensajes(id, lista);
     }).catch(() => {/* sin historial disponible */});
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Registrar canal activo y suscribirse al topic WebSocket
+  // Registrar chat activo y suscribirse al topic WebSocket
   useEffect(() => {
-    setCanalActivo(id);
+    setchatActivo(id);
     marcarLeidos(id);
 
-    suscribirCanal(id, (payload) => {
+    suscribirchat(id, (payload) => {
       const data = payload as Record<string, unknown>;
       const mensaje: Mensaje = {
         id:              String(data.id ?? `ws-${Date.now()}`),
         sender_id:       String(data.remitenteId   ?? data.sender_id       ?? ''),
         sender_username: String(data.remitente     ?? data.sender_username ?? ''),
         sender_initials: String(data.remitente     ?? '').slice(0, 2).toUpperCase(),
-        channel_id:      id,
-        content_enc:     '',
+        chatId:      id,
+        contenido:     '',
         iv:              '',
         content:         String(data.contenido     ?? data.content         ?? ''),
         sent_at:         String(data.timestamp     ?? data.sent_at         ?? new Date().toISOString()),
@@ -66,8 +66,8 @@ export default function ChatScreen() {
     });
 
     return () => {
-      desuscribirCanal(id);
-      setCanalActivo(null);
+      desuscribirchat(id);
+      setchatActivo(null);
     };
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -80,8 +80,8 @@ export default function ChatScreen() {
       sender_id:       usuario.id,
       sender_username: usuario.username,
       sender_initials: usuario.initials,
-      channel_id:      id,
-      content_enc:     '',
+      chatId:      id,
+      contenido:     '',
       iv:              '',
       content:         texto.trim(),
       sent_at:         new Date().toISOString(),
@@ -105,10 +105,10 @@ export default function ChatScreen() {
         <TouchableOpacity onPress={() => router.replace('/(tabs)')} style={s.backBtn}>
           <Ionicons name="arrow-back-outline" size={22} color={theme.text} />
         </TouchableOpacity>
-        <Avatar initials={canal?.initials ?? '??'} online={canal?.online} size={32} />
+        <Avatar initials={chat?.initials ?? '??'} online={chat?.online} size={32} />
         <View style={s.headerInfo}>
-          <Text style={s.headerNombre}>{canal?.nombre ?? 'Chat'}</Text>
-          <Text style={s.headerEstado}>{canal?.online ? 'En línea' : 'Desconectado'}</Text>
+          <Text style={s.headerNombre}>{chat?.nombre ?? 'Chat'}</Text>
+          <Text style={s.headerEstado}>{chat?.online ? 'En línea' : 'Desconectado'}</Text>
         </View>
         <TouchableOpacity style={s.headerIcon}><Ionicons name="call-outline"             size={20} color={theme.textMuted} /></TouchableOpacity>
         <TouchableOpacity style={s.headerIcon}><Ionicons name="videocam-outline"         size={20} color={theme.textMuted} /></TouchableOpacity>
@@ -120,11 +120,11 @@ export default function ChatScreen() {
           mensajes={mensajes}
           usuarioId={usuario?.id ?? ''}
           onEndReached={() => {}}
-          canalId={id}
+          chatId={id}
         />
 
         <InputComposer
-          canalId={id}
+          chatId={id}
           onSend={enviar}
           onChangeText={() => {}}
         />

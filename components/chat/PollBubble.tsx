@@ -8,10 +8,10 @@ import { fechaRelativa } from '@/utils/fecha';
 
 interface Props {
   encuesta: Encuesta;
-  canalId: string;
+  chatId: string;
 }
 
-export function PollBubble({ encuesta: inicial, canalId }: Props) {
+export function PollBubble({ encuesta: inicial, chatId }: Props) {
   const [enc, setEnc] = useState(inicial);
 
   const votar = async (opcionId: string) => {

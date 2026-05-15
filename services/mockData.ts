@@ -43,7 +43,7 @@ export const mockUsuarios: UsuarioMock[] = [
 // ─── Chats ───────────────────────────────────────────────────────────────────
 
 export const mockChatsDB: ChatMockDB[] = [
-  { id: 1, nombre: 'Canal General',     tipo: 'GRUPO',      miembros: [1, 2, 3, 4] },
+  { id: 1, nombre: 'chat General',     tipo: 'GRUPO',      miembros: [1, 2, 3, 4] },
   { id: 2, nombre: 'Marketing',         tipo: 'GRUPO',      miembros: [1, 2]       },
   { id: 3, nombre: 'María García',      tipo: 'INDIVIDUAL', miembros: [1, 2]       },
   { id: 4, nombre: 'Dev Team',          tipo: 'GRUPO',      miembros: [1, 3, 4]    },
@@ -83,7 +83,7 @@ const msg = (
   threads_count:   0,
 });
 
-// Canal General (id=1) — 10 mensajes variados de los últimos 2 días
+// chat General (id=1) — 10 mensajes variados de los últimos 2 días
 export const mockMensajesDB: Record<number, MensajeMock[]> = {
   1: [
     msg('m1-1',  1, 'Demo Admin',   1, 'Buen día equipo! Recuerden que hoy a las 3pm tenemos la reunión de sprint review.', 36 * hora + 20 * min),

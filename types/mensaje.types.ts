@@ -35,9 +35,9 @@ export interface Mensaje {
   sender_id: string;
   sender_username: string;
   sender_initials: string;
-  channel_id: string;
+  chatId: string;
   parent_id?: string;
-  content_enc: string;
+  contenido: string;
   iv: string;
   content?: string;
   sent_at: string;

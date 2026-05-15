@@ -29,7 +29,7 @@ export default function AdminIndexScreen() {
             {[
               { label: 'Mensajes hoy', valor: ultimo?.mensajes ?? 0, icon: 'message-square' },
               { label: 'Usuarios activos', valor: ultimo?.usuarios_activos ?? 0, icon: 'users' },
-              { label: 'Canales activos', valor: ultimo?.canales_activos ?? 0, icon: 'hash' },
+              { label: 'chats activos', valor: ultimo?.chats_activos ?? 0, icon: 'hash' },
             ].map(m => (
               <Card key={m.label} style={s.metricaCard}>
                 <Text style={s.metricaValor}>{m.valor}</Text>

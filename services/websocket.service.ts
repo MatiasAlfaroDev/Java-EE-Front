@@ -5,7 +5,7 @@ import { WS_BASE_URL } from '@/constants/endpoints';
 let stompClient: Client | null = null;
 let globalHandler: ((tipo: string, payload: unknown) => void) | null = null;
 
-// Suscripciones activas por canalId
+// Suscripciones activas por chatId
 const suscripciones: Record<string, StompSubscription> = {};
 
 export const conectarWebSocket = (
@@ -40,7 +40,7 @@ export const conectarWebSocket = (
 };
 
 export const desconectarWebSocket = () => {
-  // Cancelar todas las suscripciones de canal antes de desconectar
+  // Cancelar todas las suscripciones de chat antes de desconectar
   Object.values(suscripciones).forEach(sub => {
     try { sub.unsubscribe(); } catch { /* ignorar */ }
   });
@@ -52,11 +52,11 @@ export const desconectarWebSocket = () => {
 };
 
 /**
- * Suscribirse al topic de un canal específico.
+ * Suscribirse al topic de un chat específico.
  * El backend Jakarta EE publica en /topic/chat.{chatId}
  * El callback recibe el objeto de mensaje parseado.
  */
-export const suscribirCanal = (
+export const suscribirchat = (
   chatId: string,
   onMensaje: (payload: unknown) => void
 ): void => {
@@ -71,9 +71,9 @@ export const suscribirCanal = (
 };
 
 /**
- * Desuscribirse del topic de un canal específico.
+ * Desuscribirse del topic de un chat específico.
  */
-export const desuscribirCanal = (chatId: string): void => {
+export const desuscribirchat = (chatId: string): void => {
   if (suscripciones[chatId]) {
     try { suscripciones[chatId].unsubscribe(); } catch { /* ignorar */ }
     delete suscripciones[chatId];
