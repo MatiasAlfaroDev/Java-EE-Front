@@ -10,6 +10,12 @@ export const ENDPOINTS = {
   LOGIN:              '/usuarios/login',
   REGISTER:           '/usuarios/registro',
   LOGOUT:             '/usuarios/logout',
+  USUARIOS:            '/usuarios/listar',
+
+  // Notificaciones
+  NOTIFS:             '/notificaciones',
+  NOTIF_READ:         (id: string) => `/notificaciones/${id}/leer`,
+  NOTIFS_READ_ALL:    '/notificaciones/leer-todas',
 
   // Chats
   CHATS:            '/chats',

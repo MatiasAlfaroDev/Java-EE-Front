@@ -5,6 +5,7 @@ import { typography } from '@/constants/typography';
 import { adminService } from '@/services/admin.service';
 import { UsuarioAdmin } from '@/types/admin.types';
 import { UserRow } from '@/components/admin/UserRow';
+import { usuarioService } from '@/services/usuario.service'; 
 
 export default function UsuariosAdminScreen() {
   const [usuarios, setUsuarios] = useState<UsuarioAdmin[]>([]);
@@ -13,7 +14,7 @@ export default function UsuariosAdminScreen() {
 
   const cargar = useCallback(async () => {
     try {
-      const res = await adminService.listarUsuarios();
+      const res = await usuarioService.listar();
       setUsuarios(res.data);
     } finally {
       setLoading(false); setRefreshing(false);
