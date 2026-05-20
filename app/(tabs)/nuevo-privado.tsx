@@ -13,6 +13,8 @@ import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { usuarioService } from '@/services/usuario.service';
 import { Avatar } from '@/components/ui/Avatar';
+import { useAuthStore } from '@/store/auth.store';
+import { chatService } from '@/services/chat.service';
 
 interface Usuario {
   id: number;
@@ -25,6 +27,8 @@ export default function NuevoMensajeScreen() {
   const [query, setQuery] = useState('');
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
+  const usuarioLogueado = useAuthStore(s => s.usuario);
+  
 
   // 🔥 TRAER USUARIOS DEL BACKEND
   useEffect(() => {
@@ -49,29 +53,69 @@ export default function NuevoMensajeScreen() {
   }, []);
 
   const contactos = useMemo(() => {
-    return usuarios.filter(u =>
+  return usuarios.filter(
+    u =>
+      u.id !== Number(usuarioLogueado?.id) &&
       u.nombre.toLowerCase().includes(query.toLowerCase()),
-    );
-  }, [usuarios, query]);
+  );
+}, [usuarios, query, usuarioLogueado]);
 
-  const abrirChat = (id: number) => {
-    router.push(`/(tabs)/chat/${id}`);
-  };
+ const abrirChat = async (usuario: Usuario) => {
+  try {
+    if (!usuarioLogueado) return;
 
+    const res = await chatService.crear({
+      nombre: usuario.nombre,
+      tipo: 'PRIVADO',
+      miembros: [
+        Number(usuarioLogueado.id),
+        usuario.id,
+      ],
+    });
+
+    const chatCreado = res.data as {
+      id: number;
+      nombre: string;
+    };
+
+    const chatId = chatCreado.id;
+
+    router.push({
+      pathname: '/(tabs)/chat/[id]',
+      params: {
+        id: String(chatId),
+        nombre: usuario.nombre,
+        email: usuario.email,
+      },
+    });
+  } catch (e) {
+    console.log('error creando chat:', e);
+  }
+};
   return (
     <View style={s.root}>
       <View style={s.handle} />
 
       <View style={s.header}>
         <Text style={s.titulo}>Nuevo mensaje</Text>
+
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="close-outline" size={22} color={theme.textMuted} />
+          <Ionicons
+            name="close-outline"
+            size={22}
+            color={theme.textMuted}
+          />
         </TouchableOpacity>
       </View>
 
       {/* SEARCH */}
       <View style={s.searchWrap}>
-        <Ionicons name="search-outline" size={15} color={theme.textMuted} />
+        <Ionicons
+          name="search-outline"
+          size={15}
+          color={theme.textMuted}
+        />
+
         <TextInput
           style={s.searchInput}
           placeholder="Buscar contacto…"
@@ -94,13 +138,16 @@ export default function NuevoMensajeScreen() {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={s.row}
-            onPress={() => abrirChat(item.id)}
+            onPress={() => abrirChat(item)}
           >
             <Avatar initials={item.initials} size={44} />
 
             <View style={s.rowInfo}>
               <Text style={s.rowNombre}>{item.nombre}</Text>
-              <Text style={s.rowNuevo}>Iniciar conversación</Text>
+
+              <Text style={s.rowNuevo}>
+                {item.email}
+              </Text>
             </View>
           </TouchableOpacity>
         )}
@@ -114,6 +161,7 @@ const s = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.bg,
   },
+
   handle: {
     height: 4,
     width: 40,
@@ -122,6 +170,7 @@ const s = StyleSheet.create({
     alignSelf: 'center',
     marginTop: 8,
   },
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -131,10 +180,12 @@ const s = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: theme.border,
   },
+
   titulo: {
     ...typography.heading,
     color: theme.text,
   },
+
   searchWrap: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -145,6 +196,7 @@ const s = StyleSheet.create({
     borderBottomColor: theme.border,
     gap: 8,
   },
+
   searchInput: {
     flex: 1,
     backgroundColor: theme.inputBg,
@@ -156,16 +208,19 @@ const s = StyleSheet.create({
     borderColor: theme.border,
     ...typography.body,
   },
+
   empty: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 40,
   },
+
   emptyTxt: {
     ...typography.body,
     color: theme.textMuted,
   },
+
   row: {
     flexDirection: 'row',
     paddingHorizontal: 16,
@@ -175,13 +230,16 @@ const s = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
+
   rowInfo: {
     flex: 1,
   },
+
   rowNombre: {
     ...typography.bodyBold,
     color: theme.text,
   },
+
   rowNuevo: {
     ...typography.caption,
     color: theme.textMuted,

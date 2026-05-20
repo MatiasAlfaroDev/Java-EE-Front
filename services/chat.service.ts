@@ -39,7 +39,7 @@ export const chatService = {
     return api.post<chatBackend>(ENDPOINTS.CHATS, {
       nombre:   data.nombre,
       tipo:     data.tipo,
-      miembros: (data.miembros ?? []).map(Number),
+      usuarios: (data.miembros ?? []).map(Number),
     });
   },
 

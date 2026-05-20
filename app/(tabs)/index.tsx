@@ -95,7 +95,7 @@ export default function ChatsScreen() {
       )}
 
       {/* FAB */}
-      <TouchableOpacity style={s.fab} onPress={() => router.push('/(tabs)/nueva-sala')}>
+      <TouchableOpacity style={s.fab} onPress={() => router.push('/(tabs)/nuevo-chat')}>
         <Ionicons name="add-outline" size={26} color="#fff" />
       </TouchableOpacity>
     </View>
