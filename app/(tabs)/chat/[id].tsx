@@ -51,6 +51,8 @@ export default function ChatScreen() {
 
   const agregarMensaje = useChatStore(s => s.agregarMensaje);
 
+  const actualizarEstadoMensaje = useChatStore(s => s.actualizarEstadoMensaje);
+
   const setchatActivo = useChatStore(s => s.setchatActivo);
 
   const marcarLeidos = useChatStore(s => s.marcarLeidos);
@@ -175,13 +177,28 @@ export default function ChatScreen() {
 
       try {
         await mensajeService.enviar(id, texto.trim());
+
+        actualizarEstadoMensaje(
+          id,
+          optimista.id,
+          'ENVIADO'
+        );
+
       } catch (e) {
+
+        actualizarEstadoMensaje(
+          id,
+          optimista.id,
+          'RECHAZADO'
+        );
+
         console.error('Error al enviar mensaje:', e);
+
       } finally {
         setEnviando(false);
       }
     },
-    [id, usuario, agregarMensaje],
+    [id, usuario, agregarMensaje, actualizarEstadoMensaje],
   );
 
   return (

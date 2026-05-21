@@ -36,7 +36,7 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'terotalk-auth',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: state => ({ usuario: state.usuario, isAutenticado: state.isAutenticado }),
+      partialize: state => ({ usuario: state.usuario, accessToken: state.accessToken, isAutenticado: state.isAutenticado }),
     }
   )
 );

@@ -44,6 +44,14 @@ export const mensajeService = {
         usuario?.username ?? 'Usuario'
       );
     }
+
+    console.log('ENVIAR PAYLOAD', {
+      chatId,
+      chatIdConvertido: Number(chatId),
+      contenido,
+      tipo,
+    });
+
     return api.post(ENDPOINTS.MENSAJE_ENVIAR, {
       chatId:    Number(chatId),
       contenido,

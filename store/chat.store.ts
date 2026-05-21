@@ -28,6 +28,12 @@ interface ChatState {
 
   agregarMensaje: (mensaje: Mensaje) => void;
 
+  actualizarEstadoMensaje: (
+    chatId: string,
+    mensajeId: string,
+    estado: 'PENDIENTE' | 'ENVIADO' | 'RECHAZADO'
+  ) => void;
+
   setTyping: (
     chatId: string,
     username: string,
@@ -81,6 +87,26 @@ export const useChatStore = create<ChatState>()((set) => ({
       ),
     }));
   },
+
+    actualizarEstadoMensaje: (
+    chatId,
+    mensajeId,
+    estado
+  ) =>
+    set((s) => ({
+      mensajes: {
+        ...s.mensajes,
+
+        [chatId]: (s.mensajes[chatId] ?? []).map((m) =>
+          String(m.id) === mensajeId
+            ? {
+                ...m,
+                estado,
+              }
+            : m
+        ),
+      },
+    })),
 
   editarMensaje: ({
     id,

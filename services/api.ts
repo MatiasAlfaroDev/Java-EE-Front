@@ -1,4 +1,4 @@
-import axios from 'axios';
+/*import axios from 'axios';
 import { API_BASE_URL } from '@/constants/endpoints';
 import { useAuthStore } from '@/store/auth.store';
 
@@ -25,6 +25,33 @@ api.interceptors.response.use(
       if (newToken) error.config.headers.Authorization = newToken;
       return api(error.config);
     }
+    return Promise.reject(error);
+  }
+); */
+
+import axios from 'axios';
+import { API_BASE_URL } from '@/constants/endpoints';
+import { useAuthStore } from '@/store/auth.store';
+
+export const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: { 'Content-Type': 'application/json' },
+  timeout: 10000,
+});
+
+api.interceptors.request.use(config => {
+  const token = useAuthStore.getState().accessToken;
+
+  console.log('TOKEN:', token);
+
+  if (token) config.headers.Authorization = token;
+
+  return config;
+});
+
+api.interceptors.response.use(
+  res => res,
+  async error => {
     return Promise.reject(error);
   }
 );
