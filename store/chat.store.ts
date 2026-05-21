@@ -77,14 +77,27 @@ export const useChatStore = create<ChatState>()((set) => ({
         ],
       },
 
-      chats: s.chats.map((c) =>
-        String(c.id) === chatId
-          ? {
-              ...c,
-              lastMsg: mensaje.content,
-            }
-          : c
-      ),
+      chats: s.chats.map((c) => {
+
+        if (String(c.id) !== chatId) {
+          return c;
+        }
+
+        const esChatActivo =
+          s.chatActivo === chatId;
+
+        return {
+          ...c,
+
+          lastMsg: mensaje.content,
+
+          lastMsgTime: mensaje.sent_at,
+
+          unread: esChatActivo
+            ? 0
+            : (c.unread ?? 0) + 1,
+        };
+      }),
     }));
   },
 

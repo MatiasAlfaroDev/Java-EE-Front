@@ -11,8 +11,8 @@ import { IBMPlexMono_400Regular } from '@expo-google-fonts/ibm-plex-mono';
 import * as SplashScreen from 'expo-splash-screen';
 import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
-import { conectarWebSocket, desconectarWebSocket } from '@/services/websocket.service';
-import { USE_MOCK_API } from '@/constants/dev';
+/*import { conectarWebSocket, desconectarWebSocket } from '@/services/websocket.service';
+import { USE_MOCK_API } from '@/constants/dev'; */
 import { Mensaje, Reaccion } from '@/types/mensaje.types';
 
 SplashScreen.preventAutoHideAsync();
@@ -59,7 +59,7 @@ export default function RootLayout() {
   }, [fontsLoaded]);
 
   // Conectar/desconectar WebSocket según estado de autenticación
-  useEffect(() => {
+ /* useEffect(() => {
     if (!isAutenticado || !accessToken || USE_MOCK_API) {
       desconectarWebSocket();
       return;
@@ -103,7 +103,7 @@ export default function RootLayout() {
           break;
       }
     });
-  }, [isAutenticado, accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isAutenticado, accessToken]); */ // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!fontsLoaded) return null;
 

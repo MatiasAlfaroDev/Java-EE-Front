@@ -19,10 +19,6 @@ import { useChatStore } from '@/store/chat.store';
 import { useAuthStore } from '@/store/auth.store';
 
 import { mensajeService } from '@/services/mensaje.service';
-import {
-  suscribirchat,
-  desuscribirchat,
-} from '@/services/websocket.service';
 
 import { MessageList } from '@/components/chat/MessageList';
 import { InputComposer } from '@/components/chat/InputComposer';
@@ -80,7 +76,13 @@ export default function ChatScreen() {
       .listar(id)
       .then(lista => {
         if (lista.length > 0) {
-          setMensajes(id, lista);
+
+          const actuales =
+            useChatStore.getState().mensajes[id] ?? [];
+
+          if (actuales.length === 0) {
+            setMensajes(id, lista);
+          }
         }
       })
       .catch(() => {});
@@ -88,58 +90,15 @@ export default function ChatScreen() {
 
   // WEBSOCKET
   useEffect(() => {
+
     setchatActivo(id);
 
     marcarLeidos(id);
 
-    suscribirchat(id, payload => {
-      const data = payload as Record<string, unknown>;
-
-      const mensaje: Mensaje = {
-        id: String(data.id ?? `ws-${Date.now()}`),
-
-        sender_id: String(
-          data.remitenteId ?? data.sender_id ?? '',
-        ),
-
-        sender_username: String(
-          data.remitente ?? data.sender_username ?? '',
-        ),
-
-        sender_initials: String(
-          data.remitente ?? '',
-        )
-          .slice(0, 2)
-          .toUpperCase(),
-
-        chatId: id,
-
-        contenido: '',
-
-        iv: '',
-
-        content: String(
-          data.contenido ?? data.content ?? '',
-        ),
-
-        sent_at: String(
-          data.timestamp ??
-            data.sent_at ??
-            new Date().toISOString(),
-        ),
-
-        estado: 'ENVIADO',
-
-        reacciones: [],
-      };
-
-      agregarMensaje(mensaje);
-    });
-
     return () => {
-      desuscribirchat(id);
       setchatActivo(null);
     };
+
   }, [id]);
 
   // ENVIAR MENSAJE

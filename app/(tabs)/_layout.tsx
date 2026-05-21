@@ -7,6 +7,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@/constants/theme';
 import { useAuthStore } from '@/store/auth.store';
 import { Avatar } from '@/components/ui/Avatar';
+import { useEffect } from 'react';
+import { conectarWebSocket, desconectarWebSocket } from '@/services/websocket.service';
+import { useChatStore } from '@/store/chat.store';
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -93,6 +96,60 @@ function FloatingTabBar({ state, navigation }: {
 }
 
 export default function TabsLayout() {
+
+  const agregarMensaje =
+    useChatStore(s => s.agregarMensaje);
+
+  const usuario =
+    useAuthStore(s => s.usuario);
+
+  useEffect(() => {
+
+    if (!usuario) return;
+
+    conectarWebSocket((data: any) => {
+
+      // ignorar mensajes propios
+      if (
+        String(data.remitenteId) ===
+        String(usuario.id)
+      ) {
+        return;
+      }
+
+      agregarMensaje({
+        id: String(data.id),
+
+        chatId: String(data.chatId),
+
+        sender_id: String(data.remitenteId),
+
+        sender_username: data.remitente,
+
+        sender_initials:
+          data.remitente?.slice(0, 2)?.toUpperCase(),
+
+        content: data.contenido,
+
+        contenido: data.contenido,
+
+        iv: '',
+
+        sent_at: new Date().toISOString(),
+
+        estado: 'ENVIADO',
+
+        reacciones: [],
+      });
+
+    });
+
+    return () => {
+      desconectarWebSocket();
+    };
+
+  }, [usuario?.id]);
+
   return (
     <Tabs
       tabBar={(props) => <FloatingTabBar {...(props as Parameters<typeof FloatingTabBar>[0])} />}

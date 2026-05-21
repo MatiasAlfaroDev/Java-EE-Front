@@ -42,7 +42,13 @@ export const api = axios.create({
 api.interceptors.request.use(config => {
   const token = useAuthStore.getState().accessToken;
 
-  console.log('TOKEN:', token);
+  console.log(
+    'REQUEST:',
+    config.method,
+    config.url,
+    'TOKEN:',
+    token
+  );
 
   if (token) config.headers.Authorization = token;
 
@@ -52,6 +58,14 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   res => res,
   async error => {
+
+    console.log(
+      'ERROR REQUEST:',
+      error.config?.url,
+      'STATUS:',
+      error.response?.status
+    );
+
     return Promise.reject(error);
   }
 );

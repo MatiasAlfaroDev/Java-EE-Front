@@ -1,4 +1,4 @@
-import { Client, StompSubscription } from '@stomp/stompjs';
+/* import { Client, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { WS_BASE_URL } from '@/constants/endpoints';
 
@@ -42,8 +42,8 @@ export const conectarWebSocket = (
 export const desconectarWebSocket = () => {
   // Cancelar todas las suscripciones de chat antes de desconectar
   Object.values(suscripciones).forEach(sub => {
-    try { sub.unsubscribe(); } catch { /* ignorar */ }
-  });
+    try { sub.unsubscribe(); } catch { /* ignorar */ /*}
+  }); 
   Object.keys(suscripciones).forEach(k => delete suscripciones[k]);
 
   stompClient?.deactivate();
@@ -56,7 +56,7 @@ export const desconectarWebSocket = () => {
  * El backend Jakarta EE publica en /topic/chat.{chatId}
  * El callback recibe el objeto de mensaje parseado.
  */
-export const suscribirchat = (
+/*export const suscribirchat = (
   chatId: string,
   onMensaje: (payload: unknown) => void
 ): void => {
@@ -73,9 +73,9 @@ export const suscribirchat = (
 /**
  * Desuscribirse del topic de un chat específico.
  */
-export const desuscribirchat = (chatId: string): void => {
+/*export const desuscribirchat = (chatId: string): void => {
   if (suscripciones[chatId]) {
-    try { suscripciones[chatId].unsubscribe(); } catch { /* ignorar */ }
+    try { suscripciones[chatId].unsubscribe(); } catch { /* ignorar */ /*}
     delete suscripciones[chatId];
   }
 };
@@ -85,4 +85,52 @@ export const ws = {
   confirmarRecibo: (p: object) => stompClient?.publish({ destination: '/app/chat.ack',     body: JSON.stringify(p) }),
   confirmarLeido:  (p: object) => stompClient?.publish({ destination: '/app/chat.read',    body: JSON.stringify(p) }),
   typing:          (p: object) => stompClient?.publish({ destination: '/app/chat.typing',  body: JSON.stringify(p) }),
+}; */
+
+import { WS_BASE_URL } from '@/constants/endpoints';
+
+let socket: WebSocket | null = null;
+
+export const conectarWebSocket = (
+  onMensaje: (data: unknown) => void
+) => {
+
+  if (socket) return;
+
+  socket = new WebSocket(
+    `${WS_BASE_URL.replace('http', 'ws')}/chat-empresarial/ws/chat`
+  );
+
+  socket.onopen = () => {
+    console.log('WS conectado');
+  };
+
+  socket.onmessage = event => {
+
+    const data = JSON.parse(event.data);
+
+    onMensaje(data);
+  };
+
+  socket.onclose = () => {
+
+    console.log('WS cerrado');
+
+    socket = null;
+
+    setTimeout(() => {
+      conectarWebSocket(onMensaje);
+    }, 3000);
+  };
+
+  socket.onerror = () => {
+    console.log('WS error');
+  };
+};
+
+export const desconectarWebSocket = () => {
+
+  socket?.close();
+
+  socket = null;
 };
