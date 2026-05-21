@@ -98,7 +98,7 @@ export const conectarWebSocket = (
   if (socket) return;
 
   socket = new WebSocket(
-    `${WS_BASE_URL.replace('http', 'ws')}/chat-empresarial/ws/chat`
+     `${WS_BASE_URL.replace('http://', 'ws://')}/ws/chat`
   );
 
   socket.onopen = () => {
