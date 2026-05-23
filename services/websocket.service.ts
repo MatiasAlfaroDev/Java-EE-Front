@@ -95,10 +95,18 @@ export const conectarWebSocket = (
   onMensaje: (data: unknown) => void
 ) => {
 
-  if (socket) return;
+  if (
+    socket &&
+    (
+      socket.readyState === WebSocket.OPEN ||
+      socket.readyState === WebSocket.CONNECTING
+    )
+  ) {
+    return;
+  }
 
   socket = new WebSocket(
-     `${WS_BASE_URL.replace('http://', 'ws://')}/ws/chat`
+     `${WS_BASE_URL.replace('http', 'ws')}/chat-empresarial/ws/chat`
   );
 
   socket.onopen = () => {
@@ -114,17 +122,24 @@ export const conectarWebSocket = (
 
   socket.onclose = () => {
 
-    console.log('WS cerrado');
+  console.log('WS cerrado');
 
-    socket = null;
+  socket = null;
+
+  if (!socket) {
 
     setTimeout(() => {
       conectarWebSocket(onMensaje);
     }, 3000);
-  };
 
-  socket.onerror = () => {
-    console.log('WS error');
+  }
+};
+
+socket.onerror = () => {
+
+  console.log('WS error');
+
+  socket?.close();
   };
 };
 

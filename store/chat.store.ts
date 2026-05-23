@@ -66,39 +66,74 @@ export const useChatStore = create<ChatState>()((set) => ({
   setMensajes: (chatId, mensajes) => set((s) => ({ mensajes: { ...s.mensajes, [chatId]: mensajes } })),
 
   agregarMensaje: (mensaje) => {
+
     const chatId = String(mensaje.chatId);
 
-    set((s) => ({
-      mensajes: {
-        ...s.mensajes,
-        [chatId]: [
-          mensaje,
-          ...(s.mensajes[chatId] ?? []),
-        ],
-      },
+    set((s) => {
 
-      chats: s.chats.map((c) => {
+      const yaExiste = (
+        s.mensajes[chatId] ?? []
+      ).some(
+        m => String(m.id) === String(mensaje.id)
+      );
 
-        if (String(c.id) !== chatId) {
-          return c;
-        }
+      if (yaExiste) {
+        return s;
+      }
 
-        const esChatActivo =
-          s.chatActivo === chatId;
+      const existeChat = s.chats.some(
+        c => String(c.id) === chatId
+      );
 
-        return {
-          ...c,
+      const chatsActualizados = existeChat
 
-          lastMsg: mensaje.content,
+        ? s.chats.map((c) =>
+            String(c.id) === chatId
+              ? {
+                  ...c,
+                  lastMsg: mensaje.content,
+                }
+              : c
+          )
 
-          lastMsgTime: mensaje.sent_at,
+        : [
+            {
+              id: chatId,
 
-          unread: esChatActivo
-            ? 0
-            : (c.unread ?? 0) + 1,
-        };
-      }),
-    }));
+              nombre:
+                mensaje.sender_username,
+
+              initials:
+                mensaje.sender_initials,
+
+              lastMsg:
+                mensaje.content,
+
+              lastMsgTime:
+                mensaje.sent_at,
+
+              unread: 1,
+
+              tipo: 'INDIVIDUAL',
+            } as Chat,
+
+            ...s.chats,
+          ];
+
+      return {
+
+        mensajes: {
+          ...s.mensajes,
+
+          [chatId]: [
+            mensaje,
+            ...(s.mensajes[chatId] ?? []),
+          ],
+        },
+
+        chats: chatsActualizados,
+      };
+    });
   },
 
     actualizarEstadoMensaje: (

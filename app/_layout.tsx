@@ -11,8 +11,8 @@ import { IBMPlexMono_400Regular } from '@expo-google-fonts/ibm-plex-mono';
 import * as SplashScreen from 'expo-splash-screen';
 import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
-/*import { conectarWebSocket, desconectarWebSocket } from '@/services/websocket.service';
-import { USE_MOCK_API } from '@/constants/dev'; */
+import { conectarWebSocket, desconectarWebSocket } from '@/services/websocket.service';
+import { USE_MOCK_API } from '@/constants/dev'; 
 import { Mensaje, Reaccion } from '@/types/mensaje.types';
 
 SplashScreen.preventAutoHideAsync();
@@ -59,51 +59,31 @@ export default function RootLayout() {
   }, [fontsLoaded]);
 
   // Conectar/desconectar WebSocket según estado de autenticación
- /* useEffect(() => {
+  useEffect(() => {
+
     if (!isAutenticado || !accessToken || USE_MOCK_API) {
+
       desconectarWebSocket();
+
       return;
     }
 
-    conectarWebSocket(accessToken, (tipo, payload) => {
-      const data = (payload ?? {}) as Record<string, unknown>;
-      switch (tipo) {
-        case 'MESSAGE_NEW':
-          agregarMensaje(mapearMensajeWS(data));
-          break;
-        case 'MESSAGE_EDITED':
-          editarMensaje({
-            id:         String(data.id           ?? ''),
-            channel_id: String(data.chatId       ?? data.channel_id ?? ''),
-            content:    String(data.contenido    ?? data.content    ?? ''),
-            edited_at:  String(data.editado_at   ?? data.edited_at  ?? new Date().toISOString()),
-          });
-          break;
-        case 'MESSAGE_DELETED':
-          marcarEliminado(
-            String(data.id ?? ''),
-            String(data.deleted_at ?? new Date().toISOString())
-          );
-          break;
-        case 'REACTION_UPDATED':
-          actualizarReacciones(
-            String(data.id ?? ''),
-            (data.reacciones as Reaccion[]) ?? []
-          );
-          break;
-        case 'TYPING':
-          if (data.chatId && data.remitente) {
-            setTyping(String(data.chatId), String(data.remitente), Boolean(data.activo));
-          }
-          break;
-        case 'WS_AUTH_ERROR':
-          useAuthStore.getState().logout();
-          break;
-        default:
-          break;
-      }
+    conectarWebSocket((payload) => {
+
+      const data =
+        (payload ?? {}) as Record<string, unknown>;
+
+      agregarMensaje(
+        mapearMensajeWS(data)
+      );
+
     });
-  }, [isAutenticado, accessToken]); */ // eslint-disable-line react-hooks/exhaustive-deps
+
+    return () => {
+      desconectarWebSocket();
+    };
+
+  }, [isAutenticado, accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!fontsLoaded) return null;
 

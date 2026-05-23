@@ -104,60 +104,32 @@ export default function ChatScreen() {
   // ENVIAR MENSAJE
   const enviar = useCallback(
     async (texto: string) => {
+
       if (!texto.trim() || !usuario) return;
 
       setEnviando(true);
 
-      const optimista: Mensaje = {
-        id: `pending-${Date.now()}`,
-
-        sender_id: usuario.id,
-
-        sender_username: usuario.username,
-
-        sender_initials: usuario.initials,
-
-        chatId: id,
-
-        contenido: '',
-
-        iv: '',
-
-        content: texto.trim(),
-
-        sent_at: new Date().toISOString(),
-
-        estado: 'PENDIENTE',
-
-        reacciones: [],
-      };
-
-      agregarMensaje(optimista);
-
       try {
-        await mensajeService.enviar(id, texto.trim());
 
-        actualizarEstadoMensaje(
+        await mensajeService.enviar(
           id,
-          optimista.id,
-          'ENVIADO'
+          texto.trim()
         );
 
       } catch (e) {
 
-        actualizarEstadoMensaje(
-          id,
-          optimista.id,
-          'RECHAZADO'
+        console.error(
+          'Error al enviar mensaje:',
+          e
         );
 
-        console.error('Error al enviar mensaje:', e);
-
       } finally {
+
         setEnviando(false);
       }
+
     },
-    [id, usuario, agregarMensaje, actualizarEstadoMensaje],
+    [id, usuario],
   );
 
   return (
