@@ -64,23 +64,28 @@ export const useChatStore = create<ChatState>()((set) => ({
   setchatActivo: (id) => set({ chatActivo: id }),
 
   setMensajes: (chatId, mensajes) =>
-  set((s) => {
-    const ordenados = [...mensajes].sort(
-      (a, b) =>
-        new Date(a.sent_at).getTime() -
-        new Date(b.sent_at).getTime()
-    );
+    set((s) => {
+      const ordenados = [...mensajes]
+        .filter((m) => m?.contenido?.trim().length > 0) // 🔴 evita mensajes vacíos
+        .sort(
+          (a, b) =>
+            new Date(a.sent_at).getTime() -
+            new Date(b.sent_at).getTime()
+        );
 
-    return {
-      mensajes: {
-        ...s.mensajes,
-        [chatId]: ordenados,
-      },
-    };
-  }),
+      return {
+        mensajes: {
+          ...s.mensajes,
+          [chatId]: ordenados,
+        },
+      };
+    }),
 
   agregarMensaje: (mensaje) => {
   const chatId = String(mensaje.chatId);
+  if (!mensaje?.contenido || !mensaje.contenido.trim()) {
+    return;
+  }
 
   set((s) => {
     const mensajesChat = s.mensajes[chatId] ?? [];
