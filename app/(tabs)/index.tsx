@@ -14,6 +14,8 @@ import { Chat } from '@/types/chat.types';
 import { ChatRow } from '@/components/chat/ChatRow';
 import { Avatar } from '@/components/ui/Avatar';
 
+
+
 export default function ChatsScreen() {
   const usuario  = useAuthStore(s => s.usuario);
   const { chats, setchats } = useChatStore();

@@ -20,7 +20,6 @@ const mockToMensaje = (m: MensajeMock): Mensaje => ({
   chatId:      m.channel_id,
   contenido:     m.content_enc,
   iv:              m.iv,
-  content:         m.content,
   sent_at:         m.sent_at,
   estado:          m.estado,
   reacciones:      [],
@@ -29,9 +28,21 @@ const mockToMensaje = (m: MensajeMock): Mensaje => ({
 export const mensajeService = {
   // listar solo existe en el mock — el backend real no tiene GET de mensajes por chat
   listar: async (chatId: string): Promise<Mensaje[]> => {
-    if (!USE_MOCK_API) return [];
-    const res = await mockMensajeService.listar(Number(chatId));
-    return (res.data as MensajeMock[]).map(mockToMensaje);
+    if (USE_MOCK_API) {
+      const res =
+        await mockMensajeService.listar(
+          Number(chatId)
+        );
+      return (res.data as MensajeMock[])
+        .map(mockToMensaje);
+    }
+
+    const response = await api.get(
+      ENDPOINTS.MENSAJES_CHAT(chatId)
+    );
+
+    return response.data;
+
   },
 
   enviar: (chatId: string, contenido: string, tipo: EnviarMensajeBackend['tipo'] = 'TEXTO') => {

@@ -7,7 +7,7 @@ import { theme } from '@/constants/theme';
 
 // DEV_BYPASS: true = saltar login y usar usuario mock
 // Cambiar a false cuando el backend esté disponible
-const DEV_BYPASS = true;
+const DEV_BYPASS = false;
 
 const MOCK_USUARIO: Usuario = {
   id:         '1',

@@ -39,7 +39,6 @@ export interface Mensaje {
   parent_id?: string;
   contenido: string;
   iv: string;
-  content?: string;
   sent_at: string;
   delivered_at?: string;
   read_at?: string;

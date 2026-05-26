@@ -129,8 +129,6 @@ export default function TabsLayout() {
         sender_initials:
           data.remitente?.slice(0, 2)?.toUpperCase(),
 
-        content: data.contenido,
-
         contenido: data.contenido,
 
         iv: '',

@@ -22,10 +22,10 @@ export function MessageList({ mensajes, usuarioId, onEndReached }: Props) {
     <FlatList
       data={mensajes}
       keyExtractor={m => String(m.id)}
-      inverted
+      //inverted
       renderItem={({ item, index }) => {
         const prev     = mensajes[index + 1];
-        const esMio    = item.sender_id === String(usuarioId);
+        const esMio    = String(item.sender_id) === String(usuarioId);
         const showDate = shouldShowDate(item, prev);
 
         return (

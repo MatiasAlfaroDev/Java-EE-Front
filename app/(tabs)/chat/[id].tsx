@@ -25,6 +25,7 @@ import { InputComposer } from '@/components/chat/InputComposer';
 import { Avatar } from '@/components/ui/Avatar';
 
 import { Mensaje } from '@/types/mensaje.types';
+import NetInfo from '@react-native-community/netinfo';
 
 export default function ChatScreen() {
   const {
@@ -75,17 +76,24 @@ export default function ChatScreen() {
     mensajeService
       .listar(id)
       .then(lista => {
-        if (lista.length > 0) {
+        console.log(
+          'MENSAJES BACK:',
+          JSON.stringify(lista, null, 2)
+        );
+        
+        const actuales =
+          useChatStore.getState().mensajes[id] ?? [];
 
-          const actuales =
-            useChatStore.getState().mensajes[id] ?? [];
+        setMensajes(id, lista);
 
-          if (actuales.length === 0) {
-            setMensajes(id, lista);
-          }
-        }
       })
-      .catch(() => {});
+      .catch(e => {
+        console.log(
+          'ERROR:',
+          e?.response?.data || e
+        );
+      });
+
   }, [id]);
 
   // WEBSOCKET
@@ -101,36 +109,110 @@ export default function ChatScreen() {
 
   }, [id]);
 
+  useEffect(() => {
+
+    const unsubscribe =
+      NetInfo.addEventListener(
+        async state => {
+
+          if (state.isConnected) {
+
+            const mensajes =
+              useChatStore
+                .getState()
+                .mensajes;
+
+            for (const chatId in mensajes) {
+
+              for (const mensaje of mensajes[chatId]) {
+
+                if (
+                  mensaje.estado === 'RECHAZADO'
+                ) {
+
+                  try {
+
+                    await mensajeService.enviar(
+                      chatId,
+                      mensaje.contenido
+                    );
+
+                    actualizarEstadoMensaje(
+                      chatId,
+                      mensaje.id,
+                      'ENVIADO'
+                    );
+
+                    const chatActivo = useChatStore.getState().chatActivo;
+
+                  if (chatActivo === chatId) {
+                    const lista = await mensajeService.listar(chatId);
+                    useChatStore.getState().setMensajes(chatId, lista);
+                  }
+
+                  } catch (e) {
+
+                    console.log(
+                      'Sigue sin conexión'
+                    );
+
+                  }
+
+                }
+
+              }
+
+            }
+
+          }
+
+        }
+      );
+
+    return unsubscribe;
+
+  }, []);
+
   // ENVIAR MENSAJE
-  const enviar = useCallback(
-    async (texto: string) => {
+const enviar = useCallback(
+  
+  async (texto: string) => {
+    if (!texto.trim() || !usuario) return;
+  console.log("ENVIAR CALL:", JSON.stringify(texto));
+    setEnviando(true);
 
-      if (!texto.trim() || !usuario) return;
+    const tempId = `pending-${Date.now()}`;
 
-      setEnviando(true);
+    const optimista: Mensaje = {
+      id: tempId,
+      chatId: id,
+      sender_id: usuario.id,
+      sender_username: usuario.username,
+      sender_initials: usuario.initials,
+      contenido: texto.trim(),
+      sent_at: new Date().toISOString(),
+      estado: 'PENDIENTE',
+      iv: ' ',
+      reacciones: [],
+    };
 
-      try {
+    agregarMensaje(optimista);
 
-        await mensajeService.enviar(
-          id,
-          texto.trim()
-        );
+    try {
+      await mensajeService.enviar(id, texto.trim());
 
-      } catch (e) {
+      actualizarEstadoMensaje(id, tempId, 'ENVIADO');
 
-        console.error(
-          'Error al enviar mensaje:',
-          e
-        );
+    } catch (e) {
+      actualizarEstadoMensaje(id, tempId, 'RECHAZADO');
 
-      } finally {
-
-        setEnviando(false);
-      }
-
-    },
-    [id, usuario],
-  );
+      console.error('Error al enviar mensaje:', e);
+    } finally {
+      setEnviando(false);
+    }
+  },
+  [id, usuario, agregarMensaje, actualizarEstadoMensaje],
+);
 
   return (
     <View style={s.root}>

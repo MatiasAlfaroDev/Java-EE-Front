@@ -9,7 +9,7 @@ interface TypingState {
 interface EditarMensajePayload {
   id: string;
   channel_id: string;
-  content: string;
+  contenido: string;
   edited_at: string;
 }
 
@@ -63,78 +63,82 @@ export const useChatStore = create<ChatState>()((set) => ({
 
   setchatActivo: (id) => set({ chatActivo: id }),
 
-  setMensajes: (chatId, mensajes) => set((s) => ({ mensajes: { ...s.mensajes, [chatId]: mensajes } })),
+  setMensajes: (chatId, mensajes) =>
+  set((s) => {
+    const ordenados = [...mensajes].sort(
+      (a, b) =>
+        new Date(a.sent_at).getTime() -
+        new Date(b.sent_at).getTime()
+    );
+
+    return {
+      mensajes: {
+        ...s.mensajes,
+        [chatId]: ordenados,
+      },
+    };
+  }),
 
   agregarMensaje: (mensaje) => {
+  const chatId = String(mensaje.chatId);
 
-    const chatId = String(mensaje.chatId);
+  set((s) => {
+    const mensajesChat = s.mensajes[chatId] ?? [];
 
-    set((s) => {
+    // 🔥 DEDUPE REAL (ID + fallback por contenido/tiempo)
+    const yaExiste = mensajesChat.some((m) => {
+      if (String(m.id) === String(mensaje.id)) return true;
 
-      const yaExiste = (
-        s.mensajes[chatId] ?? []
-      ).some(
-        m => String(m.id) === String(mensaje.id)
+      return (
+        m.contenido === mensaje.contenido &&
+        m.sender_id === mensaje.sender_id &&
+        Math.abs(
+          new Date(m.sent_at).getTime() -
+          new Date(mensaje.sent_at).getTime()
+        ) < 1500
       );
-
-      if (yaExiste) {
-        return s;
-      }
-
-      const existeChat = s.chats.some(
-        c => String(c.id) === chatId
-      );
-
-      const chatsActualizados = existeChat
-
-        ? s.chats.map((c) =>
-            String(c.id) === chatId
-              ? {
-                  ...c,
-                  lastMsg: mensaje.content,
-                }
-              : c
-          )
-
-        : [
-            {
-              id: chatId,
-
-              nombre:
-                mensaje.sender_username,
-
-              initials:
-                mensaje.sender_initials,
-
-              lastMsg:
-                mensaje.content,
-
-              lastMsgTime:
-                mensaje.sent_at,
-
-              unread: 1,
-
-              tipo: 'INDIVIDUAL',
-            } as Chat,
-
-            ...s.chats,
-          ];
-
-      return {
-
-        mensajes: {
-          ...s.mensajes,
-
-          [chatId]: [
-            mensaje,
-            ...(s.mensajes[chatId] ?? []),
-          ],
-        },
-
-        chats: chatsActualizados,
-      };
     });
-  },
+
+    if (yaExiste) {
+      return s;
+    }
+
+    const existeChat = s.chats.some(
+      (c) => String(c.id) === chatId
+    );
+
+    const chatsActualizados = existeChat
+      ? s.chats.map((c) =>
+          String(c.id) === chatId
+            ? {
+                ...c,
+                lastMsg: mensaje.contenido,
+                lastMsgTime: mensaje.sent_at,
+              }
+            : c
+        )
+      : [
+          {
+            id: chatId,
+            nombre: mensaje.sender_username,
+            initials: mensaje.sender_initials,
+            lastMsg: mensaje.contenido,
+            lastMsgTime: mensaje.sent_at,
+            unread: 1,
+            tipo: 'INDIVIDUAL',
+          } as Chat,
+          ...s.chats,
+        ];
+
+    return {
+      mensajes: {
+        ...s.mensajes,
+        [chatId]: [...mensajesChat, mensaje],
+      },
+      chats: chatsActualizados,
+    };
+  });
+},
 
     actualizarEstadoMensaje: (
     chatId,
@@ -159,7 +163,7 @@ export const useChatStore = create<ChatState>()((set) => ({
   editarMensaje: ({
     id,
     channel_id,
-    content,
+    contenido,
     edited_at,
   }) =>
     set((s) => ({
@@ -170,7 +174,7 @@ export const useChatStore = create<ChatState>()((set) => ({
           String(m.id) === id
             ? {
                 ...m,
-                content,
+                contenido: contenido,
                 edited_at,
               }
             : m

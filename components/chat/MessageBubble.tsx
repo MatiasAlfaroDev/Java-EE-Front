@@ -32,7 +32,7 @@ export function MessageBubble({ mensaje, esMio, onLongPress }: Props) {
         >
           {mensaje.deleted_at
             ? <Text style={[s.content, s.deletedTxt]}>Mensaje eliminado</Text>
-            : <Text style={s.content}>{mensaje.content ?? ''}</Text>
+            : <Text style={s.content}>{mensaje.contenido ?? mensaje.contenido ?? ''}</Text>
           }
           <View style={s.meta}>
             {mensaje.edited_at && <Text style={s.editadoTxt}>editado</Text>}
