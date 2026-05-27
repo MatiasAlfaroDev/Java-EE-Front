@@ -91,8 +91,11 @@ import { WS_BASE_URL } from '@/constants/endpoints';
 
 let socket: WebSocket | null = null;
 
+let heartbeat: ReturnType<typeof setInterval> | null = null;
+
 export const conectarWebSocket = (
-  onMensaje: (data: unknown) => void
+  onMensaje: (data: unknown) => void,
+  onReconnect?: () => void
 ) => {
 
   if (
@@ -106,44 +109,63 @@ export const conectarWebSocket = (
   }
 
   socket = new WebSocket(
-     `${WS_BASE_URL.replace('http', 'ws')}/chat-empresarial/ws/chat`
+    `${WS_BASE_URL.replace('http', 'ws')}/chat-empresarial/ws/chat`
   );
 
   socket.onopen = () => {
+
     console.log('WS conectado');
+    onReconnect?.();
+
+    if (heartbeat) {
+      clearInterval(heartbeat);
+    }
+
+    heartbeat = setInterval(() => {
+
+      if (socket?.readyState === WebSocket.OPEN) {
+
+        socket.send('ping');
+      }
+
+    }, 30000);
   };
 
-  socket.onmessage = event => {
+  socket.onmessage = (event) => {
 
     const data = JSON.parse(event.data);
 
     onMensaje(data);
   };
 
+  socket.onerror = (e) => {
+
+    console.log('WS error', e);
+  };
+
   socket.onclose = () => {
 
-  console.log('WS cerrado');
+    console.log('WS cerrado');
 
-  socket = null;
+    if (heartbeat) {
+      clearInterval(heartbeat);
+      heartbeat = null;
+    }
 
-  if (!socket) {
+    socket = null;
 
     setTimeout(() => {
       conectarWebSocket(onMensaje);
     }, 3000);
-
-  }
-};
-
-socket.onerror = () => {
-
-  console.log('WS error');
-
-  socket?.close();
   };
 };
 
 export const desconectarWebSocket = () => {
+
+  if (heartbeat) {
+    clearInterval(heartbeat);
+    heartbeat = null;
+  }
 
   socket?.close();
 

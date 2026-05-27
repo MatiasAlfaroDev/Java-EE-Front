@@ -18,6 +18,9 @@ interface ChatState {
   mensajes: Record<string, Mensaje[]>;
   typing: TypingState;
   chatActivo: string | null;
+  wsReconectado: number;
+  
+  notificarReconnect: () => void;
 
   setchats: (chats : Chat[]) => void;
   setchatActivo: (id: string | null) => void;
@@ -58,6 +61,10 @@ export const useChatStore = create<ChatState>()((set) => ({
   mensajes: {},
   typing: {},
   chatActivo: null,
+  wsReconectado: 0,
+
+  notificarReconnect: () =>
+    set((s) => ({ wsReconectado: s.wsReconectado + 1 })),
 
   setchats: (chats) => set({ chats }),
 
