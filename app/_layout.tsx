@@ -28,9 +28,8 @@ function mapearMensajeWS(data: Record<string, unknown>): Mensaje {
     sender_username: String(data.remitente      ?? data.sender_username ?? ''),
     sender_initials: String(data.remitente      ?? '').slice(0, 2).toUpperCase(),
     chatId:      String(data.chatId         ?? data.channel_id      ?? ''),
-    contenido:     '',
+    contenido:         String(data.contenido      ?? data.content         ?? ''),
     iv:              '',
-    content:         String(data.contenido      ?? data.content         ?? ''),
     sent_at:         String(data.timestamp      ?? data.sent_at         ?? new Date().toISOString()),
     estado:          'ENVIADO',
     reacciones:      [],
@@ -68,16 +67,25 @@ export default function RootLayout() {
       return;
     }
 
-    conectarWebSocket((payload) => {
+    conectarWebSocket(
 
-      const data =
-        (payload ?? {}) as Record<string, unknown>;
+      (payload) => {
 
-      agregarMensaje(
-        mapearMensajeWS(data)
-      );
+        const data =
+          (payload ?? {}) as Record<string, unknown>;
 
-    });
+        agregarMensaje(
+          mapearMensajeWS(data)
+        );
+      },
+
+      () => {
+
+        console.log('WS reconectado');
+
+      }
+
+    );
 
     return () => {
       desconectarWebSocket();

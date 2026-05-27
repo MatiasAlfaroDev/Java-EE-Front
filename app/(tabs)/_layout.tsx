@@ -14,7 +14,7 @@ import { useChatStore } from '@/store/chat.store';
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
 const TAB_CONFIG: Record<string, { icon: IoniconName; label: string }> = {
-  'nueva-sala': { icon: 'create-outline',     label: 'Mensaje'  },
+  'nuevo-chat': { icon: 'create-outline',     label: 'Mensaje'  },
   'index':      { icon: 'chatbubbles-outline', label: 'Chats'   },
   'perfil':     { icon: 'person-outline',      label: 'Perfil'  },
   'admin':      { icon: 'shield-outline',      label: 'Admin'   },
@@ -110,12 +110,12 @@ export default function TabsLayout() {
     conectarWebSocket((data: any) => {
 
       // ignorar mensajes propios
-      if (
+    /*  if (
         String(data.remitenteId) ===
         String(usuario.id)
-      ) {
+      )*/ { 
         return;
-      }
+      } 
 
       agregarMensaje({
         id: String(data.id),
@@ -153,7 +153,7 @@ export default function TabsLayout() {
       tabBar={(props) => <FloatingTabBar {...(props as Parameters<typeof FloatingTabBar>[0])} />}
       screenOptions={{ headerShown: false }}
     >
-      <Tabs.Screen name="nueva-sala" />
+      <Tabs.Screen name="nuevo-chat" />
       <Tabs.Screen name="ajustes"   />
       <Tabs.Screen name="index"     />
       <Tabs.Screen name="perfil"    />
