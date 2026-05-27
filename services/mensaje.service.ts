@@ -69,4 +69,12 @@ export const mensajeService = {
       tipo,
     });
   },
+
+  marcarComoLeido: async (chatId: string) => {
+
+    return api.post(
+      `/mensajes/${chatId}/leer`
+    );
+
+  },
 };
