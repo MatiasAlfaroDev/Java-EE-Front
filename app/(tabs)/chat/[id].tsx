@@ -26,6 +26,7 @@ import { Avatar } from '@/components/ui/Avatar';
 
 import { Mensaje } from '@/types/mensaje.types';
 import NetInfo from '@react-native-community/netinfo';
+import { chatService } from '@/services/chat.service';
 
 export default function ChatScreen() {
   const {

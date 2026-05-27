@@ -14,6 +14,8 @@ import { useChatStore } from '@/store/chat.store';
 import { conectarWebSocket, desconectarWebSocket } from '@/services/websocket.service';
 import { USE_MOCK_API } from '@/constants/dev'; 
 import { Mensaje, Reaccion } from '@/types/mensaje.types';
+import { mensajeService } from '@/services/mensaje.service';
+import { chatService } from '@/services/chat.service';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -69,7 +71,7 @@ export default function RootLayout() {
 
     conectarWebSocket(
 
-      (payload) => {
+       (payload) => {
 
         const data =
           (payload ?? {}) as Record<string, unknown>;
@@ -77,6 +79,22 @@ export default function RootLayout() {
         agregarMensaje(
           mapearMensajeWS(data)
         );
+
+        const chatActivo =
+          useChatStore
+            .getState()
+            .chatActivo;
+
+        if (
+          chatActivo ===
+          String(data.chatId)
+        ) {
+
+          mensajeService
+            .marcarComoLeido(
+              String(data.chatId)
+            );
+        } 
       },
 
       () => {
