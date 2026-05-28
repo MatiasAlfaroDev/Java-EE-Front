@@ -102,6 +102,8 @@ export default function ChatScreen() {
 
     setchatActivo(id);
 
+    mensajeService.marcarComoLeido(id);
+
     marcarLeidos(id);
 
     return () => {
