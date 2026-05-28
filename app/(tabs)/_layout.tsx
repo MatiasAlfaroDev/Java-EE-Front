@@ -107,15 +107,19 @@ export default function TabsLayout() {
 
     if (!usuario) return;
 
-    conectarWebSocket((data: any) => {
+    conectarWebSocket(
+      
+      useAuthStore.getState().accessToken!,
+      
+      (data: any) => {
 
       // ignorar mensajes propios
     /*  if (
         String(data.remitenteId) ===
         String(usuario.id)
-      )*/ { 
+      ) { 
         return;
-      } 
+      } */
 
       agregarMensaje({
         id: String(data.id),
