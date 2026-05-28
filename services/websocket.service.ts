@@ -93,11 +93,15 @@ let socket: WebSocket | null = null;
 
 let heartbeat: ReturnType<typeof setInterval> | null = null;
 
+let cierreManual = false;
+
 export const conectarWebSocket = (
+  token: string,
   onMensaje: (data: unknown) => void,
   onReconnect?: () => void
 ) => {
 
+  // evitar múltiples conexiones
   if (
     socket &&
     (
@@ -108,27 +112,33 @@ export const conectarWebSocket = (
     return;
   }
 
+  cierreManual = false;
+
   socket = new WebSocket(
-    `${WS_BASE_URL.replace('http', 'ws')}/chat-empresarial/ws/chat`
+    `${WS_BASE_URL.replace('http', 'ws')}/chat-empresarial/ws/chat?token=${token}`
   );
 
   socket.onopen = () => {
 
     console.log('WS conectado');
+
     onReconnect?.();
 
     if (heartbeat) {
-      clearInterval(heartbeat);
-    }
+    clearInterval(heartbeat);
+  }
 
     heartbeat = setInterval(() => {
 
-      if (socket?.readyState === WebSocket.OPEN) {
+      if (
+        socket?.readyState === WebSocket.OPEN
+      ) {
 
         socket.send('ping');
       }
 
     }, 30000);
+    
   };
 
   socket.onmessage = (event) => {
@@ -143,27 +153,36 @@ export const conectarWebSocket = (
     console.log('WS error', e);
   };
 
-  socket.onclose = () => {
+ socket.onclose = () => {
 
     console.log('WS cerrado');
 
-    if (heartbeat) {
-      clearInterval(heartbeat);
-      heartbeat = null;
-    }
-
     socket = null;
 
-    setTimeout(() => {
-      conectarWebSocket(onMensaje);
-    }, 3000);
-  };
-};
+    // reconectar SOLO si no fue cierre manual
+    if (!cierreManual) {
+
+      setTimeout(() => {
+
+        conectarWebSocket(
+          token,
+          onMensaje,
+          onReconnect
+        );
+
+      }, 3000);
+    }
+  }; 
+}; 
 
 export const desconectarWebSocket = () => {
 
+  cierreManual = true;
+
   if (heartbeat) {
+
     clearInterval(heartbeat);
+
     heartbeat = null;
   }
 
