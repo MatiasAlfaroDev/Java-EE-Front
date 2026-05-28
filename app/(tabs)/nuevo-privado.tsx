@@ -15,6 +15,7 @@ import { usuarioService } from '@/services/usuario.service';
 import { Avatar } from '@/components/ui/Avatar';
 import { useAuthStore } from '@/store/auth.store';
 import { chatService } from '@/services/chat.service';
+import { useChatStore } from '@/store/chat.store';
 
 interface Usuario {
   id: number;
@@ -66,7 +67,9 @@ export default function NuevoMensajeScreen() {
   );
 }, [usuarios, query, usuarioLogueado]);
 
- const abrirChat = async (usuario: Usuario) => {
+const { setchats } = useChatStore();
+
+const abrirChat = async (usuario: Usuario) => {
   try {
     if (!usuarioLogueado) return;
 
@@ -81,19 +84,32 @@ export default function NuevoMensajeScreen() {
 
     const chatCreado = res.data as {
       id: number;
-      nombre: string;
     };
 
-    const chatId = chatCreado.id;
+    // RECARGAR CHATS DESDE BACK
+    const chatsRes = await chatService.listar();
+
+    const chatsMapeados = chatsRes.data.map((c: any) => ({
+      id: String(c.id),
+      nombre: c.nombre,
+      tipo: c.tipo,
+      initials: c.nombre.slice(0, 2).toUpperCase(),
+      lastMsg: c.lastMsg ?? undefined,
+      lastMsgTime: c.lastMsgTime ?? undefined,
+      unread: c.unread ?? 0,
+    }));
+
+    setchats(chatsMapeados);
 
     router.push({
       pathname: '/(tabs)/chat/[id]',
       params: {
-        id: String(chatId),
+        id: String(chatCreado.id),
         nombre: usuario.nombre,
         email: usuario.email,
       },
     });
+
   } catch (e) {
     console.log('error creando chat:', e);
   }

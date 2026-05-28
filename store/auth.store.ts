@@ -7,36 +7,64 @@ interface AuthState {
   usuario:       Usuario | null;
   accessToken:   string | null;
   isAutenticado: boolean;
-  setSession:    (usuario: Usuario, token: string) => void;
-  setUsuario:    (usuario: Usuario) => void;
-  logout:        () => Promise<void>;
+
+  setSession: (usuario: Usuario, token: string) => void;
+  setUsuario: (usuario: Usuario) => void;
+
+  logout: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      usuario:       null,
-      accessToken:   null,
+      usuario: null,
+      accessToken: null,
       isAutenticado: false,
 
+      // 🔐 login completo
       setSession: (usuario, token) => {
-        set({ usuario, accessToken: token, isAutenticado: true });
+        set({
+          usuario,
+          accessToken: token,
+          isAutenticado: true,
+        });
       },
 
+      // 👤 update parcial de usuario
       setUsuario: (usuario) => set({ usuario }),
 
+      // 🚪 logout limpio
       logout: async () => {
-        if (get().accessToken) {
-          try { await import('@/services/auth.service').then(m => m.authService.logout()); }
-          catch { /* ignorar */ }
+        const token = get().accessToken;
+
+        // opcional: avisar backend
+        if (token) {
+          try {
+            const { authService } = await import('@/services/auth.service');
+            await authService.logout();
+          } catch (e) {
+            // ignoramos errores de red
+          }
         }
-        set({ usuario: null, accessToken: null, isAutenticado: false });
+
+        // 🔥 limpiar SOLO auth
+        set({
+          usuario: null,
+          accessToken: null,
+          isAutenticado: false,
+        });
       },
     }),
     {
       name: 'terotalk-auth',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: state => ({ usuario: state.usuario, accessToken: state.accessToken, isAutenticado: state.isAutenticado }),
+
+      // ⚠️ importante: solo auth, no chats
+      partialize: (state) => ({
+        usuario: state.usuario,
+        accessToken: state.accessToken,
+        isAutenticado: state.isAutenticado,
+      }),
     }
   )
 );
