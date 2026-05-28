@@ -71,6 +71,7 @@ export default function RootLayout() {
 
     conectarWebSocket(
 
+      accessToken,
        (payload) => {
 
         const data =
@@ -105,9 +106,9 @@ export default function RootLayout() {
 
     );
 
-    return () => {
+   /* return () => {
       desconectarWebSocket();
-    };
+    }; */
 
   }, [isAutenticado, accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
