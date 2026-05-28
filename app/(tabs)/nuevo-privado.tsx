@@ -51,11 +51,11 @@ export default function NuevoMensajeScreen() {
 
     cargar(); // primera carga
 
-   /* const interval = setInterval(() => {
+    const interval = setInterval(() => {
       cargar(); // se actualiza cada X tiempo
     }, 3000); // 3 segundos
 
-    return () => clearInterval(interval); */
+    return () => clearInterval(interval); 
   }, []);
 
   const contactos = useMemo(() => {

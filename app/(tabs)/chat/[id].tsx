@@ -184,7 +184,7 @@ const enviar = useCallback(
   console.log("ENVIAR CALL:", JSON.stringify(texto));
     setEnviando(true);
 
-  /*  const tempId = `pending-${Date.now()}`;
+    const tempId = `pending-${Date.now()}`;
 
     const optimista: Mensaje = {
       id: tempId,
@@ -199,15 +199,15 @@ const enviar = useCallback(
       reacciones: [],
     };
 
-    agregarMensaje(optimista); */
+    agregarMensaje(optimista); 
 
     try {
       await mensajeService.enviar(id, texto.trim());
 
-    //  actualizarEstadoMensaje(id, tempId, 'ENVIADO');
+      actualizarEstadoMensaje(id, tempId, 'ENVIADO');
 
     } catch (e) {
-     // actualizarEstadoMensaje(id, tempId, 'RECHAZADO'); 
+      actualizarEstadoMensaje(id, tempId, 'RECHAZADO'); 
 
       console.error('Error al enviar mensaje:', e);
     } finally {
