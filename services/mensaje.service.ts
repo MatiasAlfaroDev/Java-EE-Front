@@ -70,11 +70,11 @@ export const mensajeService = {
     });
   },
 
-  marcarComoLeido: async (chatId: string) => {
+  marcarEntregado: (mensajeId: number) => {
+    return api.post(ENDPOINTS.MENSAJE_ENTREGADO(mensajeId));
+  },
 
-    return api.post(
-      `/mensajes/${chatId}/leer`
-    );
-
+  marcarLeido: (chatId: number) => {
+    return api.post(ENDPOINTS.MENSAJE_LEIDO(chatId));
   },
 };

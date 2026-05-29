@@ -49,4 +49,6 @@ export interface Mensaje {
   threads_count?: number;
   archivo?: ArchivoAdjunto;
   encuesta?: Encuesta;
+  entregado?: boolean; 
+  leido?: boolean;     
 }

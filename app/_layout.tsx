@@ -70,33 +70,20 @@ export default function RootLayout() {
     }
 
     conectarWebSocket(
+  accessToken,
+  (payload) => {
+    const data = (payload ?? {}) as Record<string, unknown>;
 
-      accessToken,
-       (payload) => {
+    const mensaje = mapearMensajeWS(data);
+    agregarMensaje(mensaje);
 
-        const data =
-          (payload ?? {}) as Record<string, unknown>;
+    const userId = useAuthStore.getState().usuario?.id;
 
-        agregarMensaje(
-          mapearMensajeWS(data)
-        );
-
-        const chatActivo =
-          useChatStore
-            .getState()
-            .chatActivo;
-
-        if (
-          chatActivo ===
-          String(data.chatId)
-        ) {
-
-          mensajeService
-            .marcarComoLeido(
-              String(data.chatId)
-            );
-        } 
-      },
+    // SOLO mensajes de otros
+    if (String(data.remitenteId) !== String(userId) && data.id) {
+      mensajeService.marcarEntregado(Number(data.id));
+    }
+  },
 
       () => {
 

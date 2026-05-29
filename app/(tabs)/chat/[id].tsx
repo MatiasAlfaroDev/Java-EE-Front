@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -98,19 +98,36 @@ export default function ChatScreen() {
   }, [id]);
 
   // WEBSOCKET
-  useEffect(() => {
+  const yaMarcoLeidoRef = useRef(false);
 
-    setchatActivo(id);
+useEffect(() => {
+    if (!id || !usuario || !mensajes.length) return;
 
-    mensajeService.marcarComoLeido(id);
+    const hayMensajesDeOtros = mensajes.some(
+      m => m.sender_id !== usuario.id
+    );
 
-    marcarLeidos(id);
+    if (!hayMensajesDeOtros) return;
 
-    return () => {
-      setchatActivo(null);
+    if (yaMarcoLeidoRef.current) return;
+
+    yaMarcoLeidoRef.current = true;
+
+    const marcar = async () => {
+      try {
+        await mensajeService.marcarLeido(Number(id));
+
+        // 🔥 refrescar mensajes para actualizar tick
+        const lista = await mensajeService.listar(id);
+        useChatStore.getState().setMensajes(id, lista);
+
+      } catch (e) {
+        console.log('error marcando leido', e);
+      }
     };
 
-  }, [id]);
+    marcar();
+  }, [id, mensajes]);
 
   useEffect(() => {
 

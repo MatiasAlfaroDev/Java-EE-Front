@@ -5,6 +5,8 @@ import { typography } from '@/constants/typography';
 import { Mensaje } from '@/types/mensaje.types';
 import { Avatar } from '@/components/ui/Avatar';
 import { horaCorta } from '@/utils/fecha';
+import { useEffect, useState } from 'react';
+import { mensajeService } from '@/services/mensaje.service';
 
 interface Props {
   mensaje: Mensaje;
@@ -14,11 +16,17 @@ interface Props {
 
 export function MessageBubble({ mensaje, esMio, onLongPress }: Props) {
   const estadoIcon = () => {
-    if (mensaje.estado === 'PENDIENTE') return <Ionicons name="time-outline"         size={12} color={theme.textMuted} />;
-    if (mensaje.estado === 'RECHAZADO') return <Ionicons name="alert-circle-outline" size={12} color={theme.error} />;
-    return <Ionicons name="checkmark-done-outline" size={12} color={theme.accent} />;
-  };
+  if (mensaje.estado === 'PENDIENTE') return <Ionicons name="time-outline"         size={12} color={theme.textMuted} />;
+  if (mensaje.estado === 'RECHAZADO') return <Ionicons name="alert-circle-outline" size={12} color={theme.error} />;
+  if (!esMio) return null;
+  if (!mensaje.entregado) return <Ionicons name="checkmark" size={12} color={theme.textMuted} />;
+  if (!mensaje.leido) return <Ionicons name="checkmark-done-outline" size={12} color={theme.textMuted} />;
+  return <Ionicons name="checkmark-done" size={12} color={theme.accent} />;
+};
+  
+  
 
+  
   return (
     <View style={[s.wrap, esMio ? s.wrapMio : s.wrapOtro]}>
       {!esMio && <Avatar initials={mensaje.sender_initials} size={28} style={s.avatar} />}
