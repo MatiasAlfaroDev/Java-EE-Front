@@ -15,12 +15,21 @@ interface Props {
 }
 
 export function MessageBubble({ mensaje, esMio, onLongPress }: Props) {
-  const estadoIcon = () => {
-  if (mensaje.estado === 'PENDIENTE') return <Ionicons name="time-outline"         size={12} color={theme.textMuted} />;
-  if (mensaje.estado === 'RECHAZADO') return <Ionicons name="alert-circle-outline" size={12} color={theme.error} />;
+ const estadoIcon = () => {
   if (!esMio) return null;
-  if (!mensaje.entregado) return <Ionicons name="checkmark" size={12} color={theme.textMuted} />;
-  if (!mensaje.leido) return <Ionicons name="checkmark-done-outline" size={12} color={theme.textMuted} />;
+
+  if (mensaje.estado === 'PENDIENTE')
+    return <Ionicons name="time-outline" size={12} color={theme.textMuted} />;
+
+  if (mensaje.estado === 'RECHAZADO')
+    return <Ionicons name="alert-circle-outline" size={12} color={theme.error} />;
+
+  if (!mensaje.entregado)
+    return <Ionicons name="checkmark" size={12} color={theme.textMuted} />;
+
+  if (!mensaje.leido)
+    return <Ionicons name="checkmark-done-outline" size={12} color={theme.textMuted} />;
+
   return <Ionicons name="checkmark-done" size={12} color={theme.accent} />;
 };
   
