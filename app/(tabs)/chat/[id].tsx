@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -53,8 +54,6 @@ export default function ChatScreen() {
 
   const setchatActivo = useChatStore(s => s.setchatActivo);
 
-  const marcarLeidos = useChatStore(s => s.marcarLeidos);
-
   const setMensajes = useChatStore(s => s.setMensajes);
 
   const [enviando, setEnviando] = useState(false);
@@ -73,61 +72,42 @@ export default function ChatScreen() {
   }, []);
 
   // CARGAR MENSAJES
-  useEffect(() => {
-    mensajeService
-      .listar(id)
-      .then(lista => {
-        console.log(
-          'MENSAJES BACK:',
-          JSON.stringify(lista, null, 2)
-        );
-        
-        const actuales =
-          useChatStore.getState().mensajes[id] ?? [];
+  useFocusEffect(
+    useCallback(() => {
+      const cargar = async () => {
+        try {
+          const lista = await mensajeService.listar(id);
 
-        setMensajes(id, lista);
+          console.log(
+            'MENSAJES BACK:',
+            JSON.stringify(lista, null, 2)
+          );
 
-      })
-      .catch(e => {
-        console.log(
-          'ERROR:',
-          e?.response?.data || e
-        );
-      });
+          setMensajes(id, lista);
+        } catch (e) {
+          console.log(e);
+        }
+      };
 
-  }, [id]);
+      cargar();
+    }, [id])
+  );
 
   // WEBSOCKET
-  const yaMarcoLeidoRef = useRef(false);
 
 useEffect(() => {
-    if (!id || !usuario || !mensajes.length) return;
+  if (!id || !usuario) return;
 
-    const hayMensajesDeOtros = mensajes.some(
-      m => m.sender_id !== usuario.id
-    );
+  const marcar = async () => {
+    try {
+      await mensajeService.marcarLeido(Number(id));
+    } catch (e) {
+      console.log('error marcando leido', e);
+    }
+  };
 
-    if (!hayMensajesDeOtros) return;
-
-    if (yaMarcoLeidoRef.current) return;
-
-    yaMarcoLeidoRef.current = true;
-
-    const marcar = async () => {
-      try {
-        await mensajeService.marcarLeido(Number(id));
-
-        // 🔥 refrescar mensajes para actualizar tick
-        const lista = await mensajeService.listar(id);
-        useChatStore.getState().setMensajes(id, lista);
-
-      } catch (e) {
-        console.log('error marcando leido', e);
-      }
-    };
-
-    marcar();
-  }, [id, mensajes]);
+  marcar();
+}, [id]);
 
   useEffect(() => {
 

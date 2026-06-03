@@ -54,6 +54,10 @@ export default function RootLayout() {
   const marcarEliminado     = useChatStore(s => s.marcarEliminado);
   const actualizarReacciones = useChatStore(s => s.actualizarReacciones);
   const setTyping           = useChatStore(s => s.setTyping);
+  const marcarMensajeEntregado =
+    useChatStore(s => s.marcarMensajeEntregado);
+  const marcarMensajeLeido =
+    useChatStore(s => s.marcarMensajeLeido);
 
   useEffect(() => {
     if (fontsLoaded) SplashScreen.hideAsync();
@@ -70,9 +74,21 @@ export default function RootLayout() {
     }
 
     conectarWebSocket(
-  accessToken,
-  (payload) => {
+    accessToken,
+    (payload) => {
     const data = (payload ?? {}) as Record<string, unknown>;
+
+    if (data.type === 'message_delivered') {
+      console.log('WS DELIVERED', data);
+      marcarMensajeEntregado(String(data.messageId));
+      return;
+    }
+
+    if (data.type === 'message_read') {
+      console.log('WS DELIVERED', data);
+      marcarMensajeLeido(String(data.messageId));
+      return;
+    }
 
     const mensaje = mapearMensajeWS(data);
     agregarMensaje(mensaje);

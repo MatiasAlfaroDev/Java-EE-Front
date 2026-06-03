@@ -54,6 +54,10 @@ interface ChatState {
     mensajeId: string,
     reacciones: Mensaje['reacciones']
   ) => void;
+
+  marcarMensajeEntregado: (mensajeId: string) => void;
+
+  marcarMensajeLeido: (mensajeId: string) => void;
 }
 
 export const useChatStore = create<ChatState>()((set) => ({
@@ -268,4 +272,47 @@ export const useChatStore = create<ChatState>()((set) => ({
           : c
       ),
     })),
+
+    marcarMensajeEntregado: (mensajeId) =>
+    set((s) => {
+      const nuevosMensajes = Object.fromEntries(
+        Object.entries(s.mensajes).map(([chatId, mensajes]) => [
+          chatId,
+          mensajes.map((m) =>
+            String(m.id) === mensajeId
+              ? {
+                  ...m,
+                  entregado: true,
+                }
+              : m
+          ),
+        ])
+      );
+
+      return {
+        mensajes: nuevosMensajes,
+      };
+    }),
+
+  marcarMensajeLeido: (mensajeId) =>
+  set((s) => {
+    const nuevosMensajes = Object.fromEntries(
+      Object.entries(s.mensajes).map(([chatId, mensajes]) => [
+        chatId,
+        mensajes.map((m) =>
+          String(m.id) === mensajeId
+            ? {
+                ...m,
+                leido: true,
+                entregado: true,
+              }
+            : m
+        ),
+      ])
+    );
+
+    return {
+      mensajes: nuevosMensajes,
+    };
+  }),
 }));
