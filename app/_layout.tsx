@@ -90,6 +90,15 @@ export default function RootLayout() {
       return;
     }
 
+    if (data.type === 'message_edited') {
+      editarMensaje({
+        id: String(data.messageId),
+        contenido: String(data.contenido),
+        editado: true,
+      });
+      return;
+    }
+
     const mensaje = mapearMensajeWS(data);
     agregarMensaje(mensaje);
 

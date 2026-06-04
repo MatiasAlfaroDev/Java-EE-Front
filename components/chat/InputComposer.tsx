@@ -1,26 +1,40 @@
-import { useState } from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, TextInput, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { EmojiPicker } from './EmojiPicker';
+import { Mensaje } from '@/types/mensaje.types';
 
 interface Props {
   chatId: string;
   onSend: (texto: string) => void;
   onChangeText?: (text: string) => void;
+  editingMessage?: Mensaje | null;  
+  onCancelEdit?: () => void; 
 }
 
-export function InputComposer({ chatId, onSend, onChangeText }: Props) {
+export function InputComposer({ chatId, onSend, onChangeText, editingMessage, onCancelEdit, }: Props) {
   const [texto, setTexto] = useState('');
   const [emojiVisible, setEmojiVisible] = useState(false);
   const insets = useSafeAreaInsets();
-
+  useEffect(() => {
+    if (editingMessage) {
+      setTexto(editingMessage.contenido);
+    }
+  }, [editingMessage]);
   const handleChange = (t: string) => { setTexto(t); onChangeText?.(t); };
 
   const handleSend = () => {
     if (!texto.trim()) return;
+
+    if (editingMessage) {
+      onSend(texto.trim()); // acá será EDIT en el screen
+      setTexto('');
+      return;
+    }
+
     onSend(texto.trim());
     setTexto('');
   };
@@ -29,6 +43,17 @@ export function InputComposer({ chatId, onSend, onChangeText }: Props) {
 
   return (
     <View style={[s.root, { paddingBottom: insets.bottom + 10 }]}>
+      {editingMessage && (
+        <View style={s.editBar}>
+          <Text style={s.editText}>
+            Editando mensaje
+          </Text>
+
+          <TouchableOpacity onPress={onCancelEdit}>
+            <Text style={s.cancelText}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       <View style={s.row}>
 
         {/* + abre adjuntos, polls, etc. */}
@@ -130,4 +155,21 @@ const s = StyleSheet.create({
   },
   sendActive:   { backgroundColor: theme.accent },
   sendInactive: { backgroundColor: theme.accent + '4D' },
+
+  editBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingBottom: 6,
+    paddingHorizontal: 6,
+  },
+
+  editText: {
+    color: theme.textMuted,
+    fontSize: 12,
+  },
+
+  cancelText: {
+    color: theme.accent,
+    fontSize: 12,
+  },
 });

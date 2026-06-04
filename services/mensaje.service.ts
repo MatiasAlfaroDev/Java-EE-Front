@@ -77,4 +77,10 @@ export const mensajeService = {
   marcarLeido: (chatId: number) => {
     return api.post(ENDPOINTS.MENSAJE_LEIDO(chatId));
   },
+
+  editar: (mensajeId: string, nuevoContenido: string) => {
+    return api.put(ENDPOINTS.MENSAJE_EDITAR(mensajeId), {
+      contenido: nuevoContenido,
+    });
+  }
 };

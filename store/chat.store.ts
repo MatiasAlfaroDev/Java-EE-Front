@@ -8,9 +8,8 @@ interface TypingState {
 
 interface EditarMensajePayload {
   id: string;
-  channel_id: string;
   contenido: string;
-  edited_at: string;
+  editado: boolean;
 }
 
 interface ChatState {
@@ -27,7 +26,7 @@ interface ChatState {
 
   setMensajes: (chatId: string, mensajes: Mensaje[]) => void;
 
-  editarMensaje: (payload: EditarMensajePayload) => void;
+  editarMensaje: (data: EditarMensajePayload) => void;
 
   agregarMensaje: (mensaje: Mensaje) => void;
 
@@ -176,27 +175,23 @@ export const useChatStore = create<ChatState>()((set) => ({
       },
     })),
 
-  editarMensaje: ({
-    id,
-    channel_id,
-    contenido,
-    edited_at,
-  }) =>
-    set((s) => ({
-      mensajes: {
-        ...s.mensajes,
+  editarMensaje: (data) =>
+    set((s) => {
+      const nuevosMensajes = Object.fromEntries(
+        Object.entries(s.mensajes).map(([chatId, mensajes]) => [
+          chatId,
+          mensajes.map((m) =>
+            String(m.id) === data.id
+              ? { ...m, contenido: data.contenido, editado: true }
+              : m
+          ),
+        ])
+      );
 
-        [channel_id]: (s.mensajes[channel_id] ?? []).map((m) =>
-          String(m.id) === id
-            ? {
-                ...m,
-                contenido: contenido,
-                edited_at,
-              }
-            : m
-        ),
-      },
-    })),
+      return {
+        mensajes: nuevosMensajes,
+      };
+    }),
 
   marcarEliminado: (mensajeId, deletedAt) =>
     set((s) => {

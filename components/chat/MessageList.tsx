@@ -8,6 +8,7 @@ interface Props {
   usuarioId: string | number;
   onEndReached?: () => void;
   chatId?: string;
+  onLongPressMessage?: (mensaje: Mensaje) => void;
 }
 
 const shouldShowDate = (cur: Mensaje, prev?: Mensaje): boolean => {
@@ -17,7 +18,7 @@ const shouldShowDate = (cur: Mensaje, prev?: Mensaje): boolean => {
   return a !== b;
 };
 
-export function MessageList({ mensajes, usuarioId, onEndReached }: Props) {
+export function MessageList({ mensajes, usuarioId, onEndReached, onLongPressMessage }: Props) {
   return (
     <FlatList
       data={mensajes}
@@ -37,7 +38,7 @@ export function MessageList({ mensajes, usuarioId, onEndReached }: Props) {
                 })}
               />
             )}
-            <MessageBubble mensaje={item} esMio={esMio} />
+            <MessageBubble mensaje={item} esMio={esMio} onLongPress={() => onLongPressMessage?.(item)} />
           </View>
         );
       }}

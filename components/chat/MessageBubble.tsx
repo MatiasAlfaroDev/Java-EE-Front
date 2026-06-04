@@ -12,9 +12,10 @@ interface Props {
   mensaje: Mensaje;
   esMio: boolean;
   onLongPress?: () => void;
+  editing?: boolean;
 }
 
-export function MessageBubble({ mensaje, esMio, onLongPress }: Props) {
+export function MessageBubble({ mensaje, esMio, onLongPress, editing=false }: Props) {
  const estadoIcon = () => {
   if (!esMio) return null;
 
@@ -37,7 +38,7 @@ export function MessageBubble({ mensaje, esMio, onLongPress }: Props) {
 
   
   return (
-    <View style={[s.wrap, esMio ? s.wrapMio : s.wrapOtro]}>
+    <View style={[s.wrap, esMio ? s.wrapMio : s.wrapOtro, editing && s.bubbleEditing]}>
       {!esMio && <Avatar initials={mensaje.sender_initials} size={28} style={s.avatar} />}
       <View style={s.col}>
         {!esMio && <Text style={s.senderName}>{mensaje.sender_username}</Text>}
@@ -49,10 +50,10 @@ export function MessageBubble({ mensaje, esMio, onLongPress }: Props) {
         >
           {mensaje.deleted_at
             ? <Text style={[s.content, s.deletedTxt]}>Mensaje eliminado</Text>
-            : <Text style={s.content}>{mensaje.contenido ?? mensaje.contenido ?? ''}</Text>
+            : <Text style={s.content}>{mensaje.contenido ?? ''}</Text>
           }
           <View style={s.meta}>
-            {mensaje.edited_at && <Text style={s.editadoTxt}>editado</Text>}
+            {mensaje.editado && <Text style={s.editadoTxt}>editado</Text>}
             <Text style={s.hora}>{horaCorta(mensaje.sent_at)}</Text>
             {esMio && estadoIcon()}
           </View>
@@ -77,4 +78,5 @@ const s = StyleSheet.create({
   hora:       { ...typography.caption, color: theme.textMuted },
   editadoTxt:  { ...typography.caption, color: theme.textMuted, fontStyle: 'italic' },
   deletedTxt:  { ...typography.body, color: theme.textMuted, fontStyle: 'italic' },
+  bubbleEditing: { borderWidth: 1, borderColor: theme.accent },
 });

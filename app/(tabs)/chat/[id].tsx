@@ -58,6 +58,9 @@ export default function ChatScreen() {
 
   const [enviando, setEnviando] = useState(false);
 
+  const [editingMessage, setEditingMessage] = useState<Mensaje | null>(null);
+  const iniciarEdicion = (mensaje: Mensaje) => {setEditingMessage(mensaje);};
+
   // BACK ANDROID
   useEffect(() => {
     const sub = BackHandler.addEventListener(
@@ -290,12 +293,29 @@ const enviar = useCallback(
           usuarioId={usuario?.id ?? ''}
           onEndReached={() => {}}
           chatId={id}
+          onLongPressMessage={iniciarEdicion}
         />
 
         <InputComposer
           chatId={id}
-          onSend={enviar}
-          onChangeText={() => {}}
+          onSend={(texto) => {
+            if (editingMessage) {
+              mensajeService.editar(editingMessage.id, texto);
+
+              useChatStore.getState().editarMensaje({
+                id: editingMessage.id,
+                contenido: texto,
+                editado: true,
+              });
+
+              setEditingMessage(null);
+              return;
+            }
+
+            enviar(texto);
+          }}
+          editingMessage={editingMessage}
+          onCancelEdit={() => setEditingMessage(null)}
         />
       </KeyboardAvoidingView>
     </View>

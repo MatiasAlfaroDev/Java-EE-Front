@@ -51,4 +51,5 @@ export interface Mensaje {
   encuesta?: Encuesta;
   entregado?: boolean; 
   leido?: boolean;     
+  editado?: boolean;
 }
