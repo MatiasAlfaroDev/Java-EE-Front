@@ -95,19 +95,21 @@ export default function ChatScreen() {
 
   // WEBSOCKET
 
-useEffect(() => {
-  if (!id || !usuario) return;
+useFocusEffect(
+  useCallback(() => {
+    if (!id || !usuario) return;
 
-  const marcar = async () => {
-    try {
-      await mensajeService.marcarLeido(Number(id));
-    } catch (e) {
-      console.log('error marcando leido', e);
-    }
-  };
+    const marcar = async () => {
+      try {
+        await mensajeService.marcarLeido(Number(id));
+      } catch (e) {
+        console.log('error marcando leido', e);
+      }
+    };
 
-  marcar();
-}, [id]);
+    marcar();
+  }, [id, usuario])
+);
 
   useEffect(() => {
 
@@ -245,7 +247,7 @@ const enviar = useCallback(
           </Text>
 
           <Text style={s.headerEstado}>
-            {email ?? 'Desconectado'}
+            {chat?.online ? 'En línea' : 'Desconectado'}
           </Text>
         </View>
 
