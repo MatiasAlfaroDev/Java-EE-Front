@@ -48,7 +48,7 @@ export function MessageBubble({ mensaje, esMio, onLongPress, editing=false }: Pr
           activeOpacity={0.85}
           style={[s.bubble, esMio ? s.bubbleMio : s.bubbleOtro]}
         >
-          {mensaje.deleted_at
+          {mensaje.eliminado
             ? <Text style={[s.content, s.deletedTxt]}>Mensaje eliminado</Text>
             : <Text style={s.content}>{mensaje.contenido ?? ''}</Text>
           }

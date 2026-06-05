@@ -390,8 +390,18 @@ const enviar = useCallback(
               {String(selectedMessage.sender_id) === String(usuario?.id) && (
                 <TouchableOpacity
                   style={s.menuItem}
-                  onPress={() => {
-                    console.log('Eliminar para todos');
+                  onPress={async () => {
+                    try {
+                      await mensajeService.eliminarParaTodos(selectedMessage.id);
+
+                      useChatStore.getState().eliminarMensajeParaTodos(
+                        id,
+                        selectedMessage.id
+                      );
+                    } catch (e) {
+                      console.log('Error eliminando para todos', e);
+                    }
+
                     setSelectedMessage(null);
                     setMenuVisible(false);
                   }}

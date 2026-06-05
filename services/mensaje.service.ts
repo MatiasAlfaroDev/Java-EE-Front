@@ -89,4 +89,10 @@ export const mensajeService = {
       ENDPOINTS.MENSAJE_ELIMINAR_PARA_MI(mensajeId)
     );
   },
+
+  eliminarParaTodos: (mensajeId: string | number) => {
+    return api.put(
+      ENDPOINTS.MENSAJE_ELIMINAR_PARA_TODOS(mensajeId)
+    );
+  },
 };

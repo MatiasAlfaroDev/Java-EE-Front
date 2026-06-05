@@ -53,6 +53,7 @@ export default function RootLayout() {
   const editarMensaje       = useChatStore(s => s.editarMensaje);
   const marcarEliminado     = useChatStore(s => s.marcarEliminado);
   const actualizarReacciones = useChatStore(s => s.actualizarReacciones);
+  const eliminarMensajeParaTodos = useChatStore(s => s.eliminarMensajeParaTodos);
   const setTyping           = useChatStore(s => s.setTyping);
   const marcarMensajeEntregado =
     useChatStore(s => s.marcarMensajeEntregado);
@@ -97,6 +98,14 @@ export default function RootLayout() {
         contenido: String(data.contenido),
         editado: true,
       });
+      return;
+    }
+
+    if (data.type === 'message_deleted') {
+      eliminarMensajeParaTodos(
+        String(data.chatId),
+        String(data.messageId)
+      );
       return;
     }
 
