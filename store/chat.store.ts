@@ -57,6 +57,7 @@ interface ChatState {
   marcarMensajeEntregado: (mensajeId: string) => void;
 
   marcarMensajeLeido: (mensajeId: string) => void;
+  eliminarMensajeParaMi: (chatId: string, mensajeId: string | number) => void;
 }
 
 export const useChatStore = create<ChatState>()((set) => ({
@@ -310,4 +311,17 @@ export const useChatStore = create<ChatState>()((set) => ({
       mensajes: nuevosMensajes,
     };
   }),
+
+  eliminarMensajeParaMi: (
+    chatId: string,
+    mensajeId: string | number
+  ) =>
+    set(state => ({
+      mensajes: {
+        ...state.mensajes,
+        [chatId]:
+          (state.mensajes[chatId] ?? [])
+            .filter(m => String(m.id) !== String(mensajeId))
+      }
+    })),
 }));

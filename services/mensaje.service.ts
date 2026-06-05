@@ -82,5 +82,11 @@ export const mensajeService = {
     return api.put(ENDPOINTS.MENSAJE_EDITAR(mensajeId), {
       contenido: nuevoContenido,
     });
-  }
+  },
+
+  eliminarParaMi: (mensajeId: string | number) => {
+    return api.put(
+      ENDPOINTS.MENSAJE_ELIMINAR_PARA_MI(mensajeId)
+    );
+  },
 };

@@ -52,4 +52,5 @@ export interface Mensaje {
   entregado?: boolean; 
   leido?: boolean;     
   editado?: boolean;
+  eliminado?: boolean;
 }

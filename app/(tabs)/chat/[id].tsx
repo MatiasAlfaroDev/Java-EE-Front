@@ -362,8 +362,24 @@ const enviar = useCallback(
 
               <TouchableOpacity
                 style={s.menuItem}
-                onPress={() => {
-                  console.log('Eliminar para mí');
+                onPress={async () => {
+                  try {
+                    await mensajeService.eliminarParaMi(
+                      selectedMessage.id
+                    );
+                    useChatStore.getState().eliminarMensajeParaMi(
+                      id,
+                      selectedMessage.id
+                    );
+                  } catch (e) {
+
+                    console.log(
+                      'Error eliminando mensaje',
+                      e
+                    );
+
+                  }
+
                   setSelectedMessage(null);
                   setMenuVisible(false);
                 }}

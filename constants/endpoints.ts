@@ -29,4 +29,5 @@ export const ENDPOINTS = {
   MENSAJE_ENTREGADO: (mensajeId: number) => `/mensajes/${mensajeId}/entregado`,
   MENSAJE_LEIDO: (chatId: number) => `/mensajes/${chatId}/leido`,
   MENSAJE_EDITAR: (mensajeId: string) => `/mensajes/${mensajeId}`,
+  MENSAJE_ELIMINAR_PARA_MI: (id: string | number) => `/mensajes/${id}/eliminar-para-mi`,
 } as const;
