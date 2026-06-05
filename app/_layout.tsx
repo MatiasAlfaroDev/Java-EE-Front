@@ -91,6 +91,7 @@ export default function RootLayout() {
     }
 
     if (data.type === 'message_edited') {
+      console.log('WS EDITED', data);
       editarMensaje({
         id: String(data.messageId),
         contenido: String(data.contenido),

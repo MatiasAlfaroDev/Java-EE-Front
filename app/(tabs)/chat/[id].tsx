@@ -206,7 +206,9 @@ const enviar = useCallback(
     try {
       await mensajeService.enviar(id, texto.trim());
 
-      actualizarEstadoMensaje(id, tempId, 'ENVIADO');
+// Recargar mensajes desde backend
+      const lista = await mensajeService.listar(id);
+      setMensajes(id, lista);
 
     } catch (e) {
       actualizarEstadoMensaje(id, tempId, 'RECHAZADO'); 
@@ -298,17 +300,30 @@ const enviar = useCallback(
 
         <InputComposer
           chatId={id}
-          onSend={(texto) => {
+          onSend={async (texto) => {
             if (editingMessage) {
-              mensajeService.editar(editingMessage.id, texto);
 
-              useChatStore.getState().editarMensaje({
-                id: editingMessage.id,
-                contenido: texto,
-                editado: true,
-              });
+              if (String(editingMessage.id).startsWith('pending-')) {
+                console.log('No se puede editar un mensaje pendiente');
+                setEditingMessage(null);
+                return;
+              }
 
-              setEditingMessage(null);
+              try {
+                await mensajeService.editar(editingMessage.id, texto);
+
+                useChatStore.getState().editarMensaje({
+                  id: editingMessage.id,
+                  contenido: texto,
+                  editado: true,
+                });
+
+                setEditingMessage(null);
+
+              } catch (e) {
+                console.log('Error editando mensaje', e);
+              }
+
               return;
             }
 
