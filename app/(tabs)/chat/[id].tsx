@@ -59,7 +59,9 @@ export default function ChatScreen() {
   const [enviando, setEnviando] = useState(false);
 
   const [editingMessage, setEditingMessage] = useState<Mensaje | null>(null);
-  const iniciarEdicion = (mensaje: Mensaje) => {setEditingMessage(mensaje);};
+  const [selectedMessage, setSelectedMessage] = useState<Mensaje | null>(null);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const abrirMenuMensaje = (mensaje: Mensaje) => { setSelectedMessage(mensaje); setMenuVisible(true);};
 
   // BACK ANDROID
   useEffect(() => {
@@ -295,7 +297,7 @@ const enviar = useCallback(
           usuarioId={usuario?.id ?? ''}
           onEndReached={() => {}}
           chatId={id}
-          onLongPressMessage={iniciarEdicion}
+          onLongPressMessage={abrirMenuMensaje}
         />
 
         <InputComposer
@@ -333,6 +335,80 @@ const enviar = useCallback(
           onCancelEdit={() => setEditingMessage(null)}
         />
       </KeyboardAvoidingView>
+      {menuVisible && selectedMessage && (
+        <TouchableOpacity
+          activeOpacity={1}
+          style={s.menuOverlay}
+          onPress={() => {
+            setSelectedMessage(null);
+            setMenuVisible(false);
+          }}
+        >
+          <TouchableOpacity activeOpacity={1}>
+            <View style={s.menuBox}>
+
+              {String(selectedMessage.sender_id) === String(usuario?.id) && (
+                <TouchableOpacity
+                  style={s.menuItem}
+                  onPress={() => {
+                    setEditingMessage(selectedMessage);
+                    setSelectedMessage(null);
+                    setMenuVisible(false);
+                  }}
+                >
+                  <Text>Editar</Text>
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity
+                style={s.menuItem}
+                onPress={() => {
+                  console.log('Eliminar para mí');
+                  setSelectedMessage(null);
+                  setMenuVisible(false);
+                }}
+              >
+                <Text>Eliminar para mí</Text>
+              </TouchableOpacity>
+
+              {String(selectedMessage.sender_id) === String(usuario?.id) && (
+                <TouchableOpacity
+                  style={s.menuItem}
+                  onPress={() => {
+                    console.log('Eliminar para todos');
+                    setSelectedMessage(null);
+                    setMenuVisible(false);
+                  }}
+                >
+                  <Text>Eliminar para todos</Text>
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity
+                style={s.menuItem}
+                onPress={() => {
+                  console.log('Reenviar');
+                  setSelectedMessage(null);
+                  setMenuVisible(false);
+                }}
+              >
+                <Text>Reenviar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={s.menuItem}
+                onPress={() => {
+                  setSelectedMessage(null);
+                  setMenuVisible(false);
+                }}
+              >
+                <Text>Cancelar</Text>
+              </TouchableOpacity>
+
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -376,4 +452,27 @@ const s = StyleSheet.create({
   headerIcon: {
     padding: 4,
   },
+
+  menuOverlay: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(0,0,0,0.4)',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+
+menuBox: {
+  width: 260,
+  backgroundColor: "#2d24dd",
+  overflow: 'hidden',
+},
+
+menuItem: {
+  padding: 16,
+  borderBottomWidth: 1,
+  borderBottomColor: theme.border,
+},
 });
