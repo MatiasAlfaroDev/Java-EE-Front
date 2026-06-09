@@ -206,6 +206,7 @@ const enviar = useCallback(
       estado: 'PENDIENTE',
       iv: ' ',
       reacciones: [],
+      mensajeOrigenId: undefined,
     };
 
     agregarMensaje(optimista); 
@@ -417,8 +418,13 @@ const enviar = useCallback(
 
               <TouchableOpacity
                 style={s.menuItem}
-                onPress={() => {
-                  console.log('Reenviar');
+                onPress={async () => {
+                  router.push({
+                    pathname: '/(tabs)/seleccionar-chat',
+                    params: {
+                      mensajeId: String(selectedMessage.id),
+                    },
+                  });
                   setSelectedMessage(null);
                   setMenuVisible(false);
                 }}

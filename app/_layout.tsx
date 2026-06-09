@@ -35,6 +35,10 @@ function mapearMensajeWS(data: Record<string, unknown>): Mensaje {
     sent_at:         String(data.timestamp      ?? data.sent_at         ?? new Date().toISOString()),
     estado:          'ENVIADO',
     reacciones:      [],
+     mensajeOrigenId:
+      data.originalMessageId
+        ? Number(data.originalMessageId)
+        : 0,
   };
 }
 
@@ -139,7 +143,9 @@ export default function RootLayout() {
 
         return;
       }
-    
+    if (data.type === 'message_forwarded') {
+      console.log('WS FORWARDED', data);
+    }
     const userId = useAuthStore.getState().usuario?.id;
 
     const mensaje = mapearMensajeWS(data);

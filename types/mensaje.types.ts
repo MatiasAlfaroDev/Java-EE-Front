@@ -53,4 +53,5 @@ export interface Mensaje {
   leido?: boolean;     
   editado?: boolean;
   eliminado?: boolean;
+  mensajeOrigenId?: number;
 }

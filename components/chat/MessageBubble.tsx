@@ -48,6 +48,11 @@ export function MessageBubble({ mensaje, esMio, onLongPress, editing=false }: Pr
           activeOpacity={0.85}
           style={[s.bubble, esMio ? s.bubbleMio : s.bubbleOtro]}
         >
+           {(mensaje.mensajeOrigenId ?? 0) > 0 && (
+              <Text style={s.reenviadoTxt}>
+                ↪ Reenviado
+              </Text>
+            )}
           {mensaje.eliminado
             ? <Text style={[s.content, s.deletedTxt]}>Mensaje eliminado</Text>
             : <Text style={s.content}>{mensaje.contenido ?? ''}</Text>
@@ -57,6 +62,7 @@ export function MessageBubble({ mensaje, esMio, onLongPress, editing=false }: Pr
             <Text style={s.hora}>{horaCorta(mensaje.sent_at)}</Text>
             {esMio && estadoIcon()}
           </View>
+
         </TouchableOpacity>
       </View>
     </View>
@@ -78,5 +84,6 @@ const s = StyleSheet.create({
   hora:       { ...typography.caption, color: theme.textMuted },
   editadoTxt:  { ...typography.caption, color: theme.textMuted, fontStyle: 'italic' },
   deletedTxt:  { ...typography.body, color: theme.textMuted, fontStyle: 'italic' },
+  reenviadoTxt: { ...typography.caption, color: theme.accent, marginBottom: 4, fontStyle: 'italic' },
   bubbleEditing: { borderWidth: 1, borderColor: theme.accent },
 });
