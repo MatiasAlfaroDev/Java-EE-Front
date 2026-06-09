@@ -62,6 +62,28 @@ interface ChatState {
   eliminarMensajeParaTodos: (chatId: string, mensajeId: string) => void;
 }
 
+const recalcularUltimoMensaje = (
+  chats: Chat[],
+  mensajes: Record<string, Mensaje[]>,
+  chatId: string
+): Chat[] => {
+
+  const visibles = (mensajes[chatId] ?? [])
+    .filter(m => !m.eliminado);
+
+  const ultimo = visibles.at(-1);
+
+  return chats.map(c =>
+    String(c.id) === chatId
+      ? {
+          ...c,
+          lastMsg: ultimo?.contenido ?? '',
+          lastMsgTime: ultimo?.sent_at,
+        }
+      : c
+  );
+};
+
 export const useChatStore = create<ChatState>()((set) => ({
   chats: [],
   mensajes: {},
@@ -185,23 +207,48 @@ export const useChatStore = create<ChatState>()((set) => ({
       },
     })),
 
-  editarMensaje: (data) =>
-    set((s) => {
-      const nuevosMensajes = Object.fromEntries(
-        Object.entries(s.mensajes).map(([chatId, mensajes]) => [
-          chatId,
-          mensajes.map((m) =>
-            String(m.id) === data.id
-              ? { ...m, contenido: data.contenido, editado: true }
-              : m
-          ),
-        ])
-      );
+    editarMensaje: (data) =>
+      set((s) => {
 
-      return {
-        mensajes: nuevosMensajes,
-      };
-    }),
+        let chatIdEditado: string | null = null;
+
+        const nuevosMensajes = Object.fromEntries(
+          Object.entries(s.mensajes).map(([chatId, mensajes]) => {
+
+            const existe = mensajes.some(
+              m => String(m.id) === data.id
+            );
+
+            if (existe) {
+              chatIdEditado = chatId;
+            }
+
+            return [
+              chatId,
+              mensajes.map((m) =>
+                String(m.id) === data.id
+                  ? {
+                      ...m,
+                      contenido: data.contenido,
+                      editado: true
+                    }
+                  : m
+              ),
+            ];
+          })
+        );
+
+        return {
+          mensajes: nuevosMensajes,
+          chats: chatIdEditado
+            ? recalcularUltimoMensaje(
+                s.chats,
+                nuevosMensajes,
+                chatIdEditado
+              )
+            : s.chats,
+        };
+      }),
 
   marcarEliminado: (mensajeId, deletedAt) =>
     set((s) => {
@@ -321,18 +368,25 @@ export const useChatStore = create<ChatState>()((set) => ({
     };
   }),
 
-  eliminarMensajeParaMi: (
-    chatId: string,
-    mensajeId: string | number
-  ) =>
-    set(state => ({
-      mensajes: {
-        ...state.mensajes,
-        [chatId]:
-          (state.mensajes[chatId] ?? [])
-            .filter(m => String(m.id) !== String(mensajeId))
-      }
-    })),
+    eliminarMensajeParaMi: (chatId, mensajeId) =>
+      set(state => {
+
+        const nuevosMensajes = {
+          ...state.mensajes,
+          [chatId]:
+            (state.mensajes[chatId] ?? [])
+              .filter(m => String(m.id) !== String(mensajeId))
+        };
+
+        return {
+          mensajes: nuevosMensajes,
+          chats: recalcularUltimoMensaje(
+            state.chats,
+            nuevosMensajes,
+            chatId
+          )
+        };
+      }),
 
  /* eliminarMensajeParaTodos: (
     chatId: string,
