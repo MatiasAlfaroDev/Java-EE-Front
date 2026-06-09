@@ -26,6 +26,12 @@ export default function ChatsScreen() {
   const cargar = useCallback(async () => {
     try {
       const res = await chatService.listar();
+
+    console.log(
+  'CHATS BACK =>',
+  res.data
+);
+
       const mapeados: Chat[] = res.data.map(c => ({
         id:          String(c.id),
         nombre:      c.nombre,
@@ -33,6 +39,7 @@ export default function ChatsScreen() {
         initials:    c.nombre.slice(0, 2).toUpperCase(),
         lastMsg:     c.lastMsg     ?? undefined,
         lastMsgTime: c.lastMsgTime ?? undefined,
+        unread:      c.unread ?? 0,
       }));
       setchats(mapeados);
     } finally {

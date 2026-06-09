@@ -103,55 +103,6 @@ export default function TabsLayout() {
   const usuario =
     useAuthStore(s => s.usuario);
 
-  useEffect(() => {
-
-    if (!usuario) return;
-
-    conectarWebSocket(
-      
-      useAuthStore.getState().accessToken!,
-      
-      (data: any) => {
-
-      // ignorar mensajes propios
-    /*  if (
-        String(data.remitenteId) ===
-        String(usuario.id)
-      ) { 
-        return;
-      } */
-
-      agregarMensaje({
-        id: String(data.id),
-
-        chatId: String(data.chatId),
-
-        sender_id: String(data.remitenteId),
-
-        sender_username: data.remitente,
-
-        sender_initials:
-          data.remitente?.slice(0, 2)?.toUpperCase(),
-
-        contenido: data.contenido,
-
-        iv: '',
-
-        sent_at: new Date().toISOString(),
-
-        estado: 'ENVIADO',
-
-        reacciones: [],
-      });
-
-    });
-
-    return () => {
-      desconectarWebSocket();
-    };
-
-  }, [usuario?.id]);
-
   return (
     <Tabs
       tabBar={(props) => <FloatingTabBar {...(props as Parameters<typeof FloatingTabBar>[0])} />}

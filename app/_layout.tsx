@@ -79,6 +79,8 @@ export default function RootLayout() {
     (payload) => {
     const data = (payload ?? {}) as Record<string, unknown>;
 
+    console.log('WS EVENT', data);
+
     if (data.type === 'message_delivered') {
       console.log('WS DELIVERED', data);
       marcarMensajeEntregado(String(data.messageId));
@@ -108,12 +110,36 @@ export default function RootLayout() {
       );
       return;
     }
-
-    const mensaje = mapearMensajeWS(data);
-    agregarMensaje(mensaje);
-
+    
     const userId = useAuthStore.getState().usuario?.id;
 
+    const mensaje = mapearMensajeWS(data);
+
+    agregarMensaje(mensaje);
+
+    if (data.chatId) {
+
+    chatService.listar()
+      .then(res => {
+
+        const chats = res.data.map(c => ({
+          id: String(c.id),
+          nombre: c.nombre,
+          tipo: c.tipo,
+          initials: c.nombre.slice(0, 2).toUpperCase(),
+          lastMsg: c.lastMsg ?? undefined,
+          lastMsgTime: c.lastMsgTime ?? undefined,
+          unread: c.unread ?? 0,
+        }));
+
+        useChatStore
+          .getState()
+          .setchats(chats);
+
+      })
+      .catch(console.error);
+    }
+   
     // SOLO mensajes de otros
     if (String(data.remitenteId) !== String(userId) && data.id) {
       mensajeService.marcarEntregado(Number(data.id));

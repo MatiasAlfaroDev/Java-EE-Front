@@ -107,6 +107,11 @@ useFocusEffect(
     const marcar = async () => {
       try {
         await mensajeService.marcarLeido(Number(id));
+
+        useChatStore
+          .getState()
+          .marcarLeidos(id);
+          
       } catch (e) {
         console.log('error marcando leido', e);
       }

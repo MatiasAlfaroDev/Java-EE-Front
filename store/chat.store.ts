@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Chat } from '@/types/chat.types';
 import { Mensaje } from '@/types/mensaje.types';
+import { useAuthStore } from './auth.store';
 
 interface TypingState {
   [chatId: string]: string[];
@@ -124,6 +125,10 @@ export const useChatStore = create<ChatState>()((set) => ({
       (c) => String(c.id) === chatId
     );
 
+    const miId = String(useAuthStore.getState().usuario?.id);
+
+    const esMio = String(mensaje.sender_id) === miId;
+
     const chatsActualizados = existeChat
       ? s.chats.map((c) =>
           String(c.id) === chatId
@@ -131,6 +136,9 @@ export const useChatStore = create<ChatState>()((set) => ({
                 ...c,
                 lastMsg: mensaje.contenido,
                 lastMsgTime: mensaje.sent_at,
+                unread: esMio
+                  ? c.unread
+                  : (c.unread ?? 0) + 1,
               }
             : c
         )
