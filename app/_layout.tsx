@@ -103,13 +103,42 @@ export default function RootLayout() {
       return;
     }
 
-    if (data.type === 'message_deleted') {
+    /* if (data.type === 'message_deleted') {
       eliminarMensajeParaTodos(
         String(data.chatId),
         String(data.messageId)
       );
       return;
-    }
+    } */
+
+      if (data.type === 'message_deleted') {
+
+        eliminarMensajeParaTodos(
+          String(data.chatId),
+          String(data.messageId)
+        );
+
+        chatService.listar()
+          .then(res => {
+
+            const chats = res.data.map(c => ({
+              id: String(c.id),
+              nombre: c.nombre,
+              tipo: c.tipo,
+              initials: c.nombre.slice(0, 2).toUpperCase(),
+              lastMsg: c.lastMsg ?? undefined,
+              lastMsgTime: c.lastMsgTime ?? undefined,
+              unread: c.unread ?? 0,
+            }));
+
+            useChatStore
+              .getState()
+              .setchats(chats);
+
+          });
+
+        return;
+      }
     
     const userId = useAuthStore.getState().usuario?.id;
 

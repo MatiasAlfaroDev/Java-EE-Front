@@ -334,7 +334,7 @@ export const useChatStore = create<ChatState>()((set) => ({
       }
     })),
 
-  eliminarMensajeParaTodos: (
+ /* eliminarMensajeParaTodos: (
     chatId: string,
     mensajeId: string | number
   ) =>
@@ -348,5 +348,41 @@ export const useChatStore = create<ChatState>()((set) => ({
               : m
           )
       }
-    })),
+    })), */
+
+    eliminarMensajeParaTodos: (
+      chatId,
+      mensajeId
+    ) =>
+      set(state => {
+
+        const mensajesActualizados =
+          (state.mensajes[chatId] ?? []).map(m =>
+            String(m.id) === String(mensajeId)
+              ? { ...m, eliminado: true }
+              : m
+          );
+
+        const ultimoMensaje =
+          mensajesActualizados[mensajesActualizados.length - 1];
+
+        return {
+          mensajes: {
+            ...state.mensajes,
+            [chatId]: mensajesActualizados,
+          },
+
+          chats: state.chats.map(c =>
+            String(c.id) === String(chatId)
+              ? {
+                  ...c,
+                  lastMsg:
+                    ultimoMensaje?.eliminado
+                      ? 'Mensaje eliminado'
+                      : ultimoMensaje?.contenido,
+                }
+              : c
+          ),
+        };
+      }),
 }));

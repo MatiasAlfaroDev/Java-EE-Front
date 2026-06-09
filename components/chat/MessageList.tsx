@@ -25,7 +25,9 @@ export function MessageList({ mensajes, usuarioId, onEndReached, onLongPressMess
       keyExtractor={m => String(m.id)}
       //inverted
       renderItem={({ item, index }) => {
-        const prev     = mensajes[index + 1];
+        const prev     = index > 0
+          ? mensajes[index - 1]
+          : undefined;
         const esMio    = String(item.sender_id) === String(usuarioId);
         const showDate = shouldShowDate(item, prev);
 
