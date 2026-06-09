@@ -95,4 +95,13 @@ export const mensajeService = {
       ENDPOINTS.MENSAJE_ELIMINAR_PARA_TODOS(mensajeId)
     );
   },
+
+  reenviar: (mensajeId: string | number, chatId: string | number) => {
+    return api.post(
+      ENDPOINTS.MENSAJE_REENVIAR(mensajeId),
+      {
+        chatId,
+      }
+    );
+  },
 };

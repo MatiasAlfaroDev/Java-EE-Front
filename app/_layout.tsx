@@ -35,6 +35,10 @@ function mapearMensajeWS(data: Record<string, unknown>): Mensaje {
     sent_at:         String(data.timestamp      ?? data.sent_at         ?? new Date().toISOString()),
     estado:          'ENVIADO',
     reacciones:      [],
+     mensajeOrigenId:
+      data.originalMessageId
+        ? Number(data.originalMessageId)
+        : 0,
   };
 }
 

@@ -83,16 +83,15 @@ export function MessageBubble({
           activeOpacity={0.85}
           style={[s.bubble, esMio ? s.bubbleMio : s.bubbleOtro]}
         >
-          {mensaje.eliminado ? (
-            <Text style={[s.content, s.deletedTxt]}>
-              Mensaje eliminado
-            </Text>
-          ) : (
-            <Text style={s.content}>
-              {mensaje.contenido ?? ''}
-            </Text>
-          )}
-
+           {(mensaje.mensajeOrigenId ?? 0) > 0 && (
+              <Text style={s.reenviadoTxt}>
+                ↪ Reenviado
+              </Text>
+            )}
+          {mensaje.eliminado
+            ? <Text style={[s.content, s.deletedTxt]}>Mensaje eliminado</Text>
+            : <Text style={s.content}>{mensaje.contenido ?? ''}</Text>
+          }
           <View style={s.meta}>
             {mensaje.editado && (
               <Text style={s.editadoTxt}>editado</Text>
@@ -104,6 +103,7 @@ export function MessageBubble({
 
             {esMio && estadoIcon()}
           </View>
+
         </TouchableOpacity>
 
         {/* REACCIONES */}
