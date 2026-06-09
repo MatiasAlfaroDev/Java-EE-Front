@@ -5,8 +5,6 @@ import { typography } from '@/constants/typography';
 import { Mensaje } from '@/types/mensaje.types';
 import { Avatar } from '@/components/ui/Avatar';
 import { horaCorta } from '@/utils/fecha';
-import { useEffect, useState } from 'react';
-import { mensajeService } from '@/services/mensaje.service';
 
 interface Props {
   mensaje: Mensaje;
@@ -15,68 +13,178 @@ interface Props {
   editing?: boolean;
 }
 
-export function MessageBubble({ mensaje, esMio, onLongPress, editing=false }: Props) {
- const estadoIcon = () => {
-  if (!esMio) return null;
+export function MessageBubble({
+  mensaje,
+  esMio,
+  onLongPress,
+  editing = false,
+}: Props) {
+  const estadoIcon = () => {
+    if (!esMio) return null;
 
-  if (mensaje.estado === 'PENDIENTE')
-    return <Ionicons name="time-outline" size={12} color={theme.textMuted} />;
+    if (mensaje.estado === 'PENDIENTE')
+      return <Ionicons name="time-outline" size={12} color={theme.textMuted} />;
 
-  if (mensaje.estado === 'RECHAZADO')
-    return <Ionicons name="alert-circle-outline" size={12} color={theme.error} />;
+    if (mensaje.estado === 'RECHAZADO')
+      return <Ionicons name="alert-circle-outline" size={12} color={theme.error} />;
 
-  if (!mensaje.entregado)
-    return <Ionicons name="checkmark" size={12} color={theme.textMuted} />;
+    if (!mensaje.entregado)
+      return <Ionicons name="checkmark" size={12} color={theme.textMuted} />;
 
-  if (!mensaje.leido)
-    return <Ionicons name="checkmark-done-outline" size={12} color={theme.textMuted} />;
+    if (!mensaje.leido)
+      return <Ionicons name="checkmark-done-outline" size={12} color={theme.textMuted} />;
 
-  return <Ionicons name="checkmark-done" size={12} color={theme.accent} />;
-};
-  
-  
+    return <Ionicons name="checkmark-done" size={12} color={theme.accent} />;
+  };
 
-  
+  // ✅ SIEMPRE array seguro
+  const reacciones = Array.isArray(mensaje.reacciones)
+    ? mensaje.reacciones
+    : [];
+
+  // ✅ Agrupar por emoji
+  const agrupadas = Object.values(
+    reacciones.reduce((acc: Record<string, any>, r) => {
+      if (!r?.emoji) return acc;
+
+      if (!acc[r.emoji]) {
+        acc[r.emoji] = {
+          emoji: r.emoji,
+          usuarios: [],
+        };
+      }
+
+      acc[r.emoji].usuarios.push(r);
+
+      return acc;
+    }, {})
+  );
+
   return (
     <View style={[s.wrap, esMio ? s.wrapMio : s.wrapOtro, editing && s.bubbleEditing]}>
-      {!esMio && <Avatar initials={mensaje.sender_initials} size={28} style={s.avatar} />}
+      {!esMio && (
+        <Avatar
+          initials={mensaje.sender_initials}
+          size={28}
+          style={s.avatar}
+        />
+      )}
+
       <View style={s.col}>
-        {!esMio && <Text style={s.senderName}>{mensaje.sender_username}</Text>}
+        {!esMio && (
+          <Text style={s.senderName}>
+            {mensaje.sender_username}
+          </Text>
+        )}
+
         <TouchableOpacity
           onLongPress={onLongPress}
           delayLongPress={300}
           activeOpacity={0.85}
           style={[s.bubble, esMio ? s.bubbleMio : s.bubbleOtro]}
         >
-          {mensaje.eliminado
-            ? <Text style={[s.content, s.deletedTxt]}>Mensaje eliminado</Text>
-            : <Text style={s.content}>{mensaje.contenido ?? ''}</Text>
-          }
+          {mensaje.eliminado ? (
+            <Text style={[s.content, s.deletedTxt]}>
+              Mensaje eliminado
+            </Text>
+          ) : (
+            <Text style={s.content}>
+              {mensaje.contenido ?? ''}
+            </Text>
+          )}
+
           <View style={s.meta}>
-            {mensaje.editado && <Text style={s.editadoTxt}>editado</Text>}
-            <Text style={s.hora}>{horaCorta(mensaje.sent_at)}</Text>
+            {mensaje.editado && (
+              <Text style={s.editadoTxt}>editado</Text>
+            )}
+
+            <Text style={s.hora}>
+              {horaCorta(mensaje.sent_at)}
+            </Text>
+
             {esMio && estadoIcon()}
           </View>
         </TouchableOpacity>
+
+        {/* REACCIONES */}
+        {agrupadas.length > 0 && (
+          <View style={s.reaccionesContainer}>
+            {agrupadas.map((grupo: any) => (
+              <TouchableOpacity
+                key={grupo.emoji}
+                style={s.reaccion}
+                onPress={() => {
+                  console.log('Reacciones del emoji:', grupo.emoji);
+                  console.log('Usuarios:', grupo.usuarios);
+                }}
+              >
+                <Text>
+                  {grupo.emoji} {grupo.usuarios.length}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </View>
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  wrap:       { flexDirection: 'row', marginVertical: 4, paddingHorizontal: 12 },
-  wrapMio:    { justifyContent: 'flex-end' },
-  wrapOtro:   { justifyContent: 'flex-start', gap: 8 },
-  avatar:     { marginTop: 4 },
-  col:        { maxWidth: '75%' },
-  senderName: { ...typography.caption, color: theme.textMuted, marginBottom: 4, marginLeft: 4 },
-  bubble:     { padding: 10, gap: 4 },
-  bubbleMio:  { backgroundColor: theme.bubbleSent, borderRadius: 16, borderBottomRightRadius: 4 },
-  bubbleOtro: { backgroundColor: theme.bubbleRecv, borderRadius: 16, borderTopLeftRadius: 4 },
-  content:    { ...typography.body, color: theme.text },
-  meta:       { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-end' },
-  hora:       { ...typography.caption, color: theme.textMuted },
-  editadoTxt:  { ...typography.caption, color: theme.textMuted, fontStyle: 'italic' },
-  deletedTxt:  { ...typography.body, color: theme.textMuted, fontStyle: 'italic' },
-  bubbleEditing: { borderWidth: 1, borderColor: theme.accent },
+  wrap: { flexDirection: 'row', marginVertical: 4, paddingHorizontal: 12 },
+  wrapMio: { justifyContent: 'flex-end' },
+  wrapOtro: { justifyContent: 'flex-start', gap: 8 },
+  avatar: { marginTop: 4 },
+  col: { maxWidth: '75%' },
+
+  senderName: {
+    ...typography.caption,
+    color: theme.textMuted,
+    marginBottom: 4,
+    marginLeft: 4,
+  },
+
+  bubble: { padding: 10, gap: 4 },
+  bubbleMio: {
+    backgroundColor: theme.bubbleSent,
+    borderRadius: 16,
+    borderBottomRightRadius: 4,
+  },
+  bubbleOtro: {
+    backgroundColor: theme.bubbleRecv,
+    borderRadius: 16,
+    borderTopLeftRadius: 4,
+  },
+
+  content: { ...typography.body, color: theme.text },
+
+  meta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-end',
+  },
+
+  hora: { ...typography.caption, color: theme.textMuted },
+  editadoTxt: { ...typography.caption, color: theme.textMuted, fontStyle: 'italic' },
+  deletedTxt: { ...typography.body, color: theme.textMuted, fontStyle: 'italic' },
+
+  bubbleEditing: {
+    borderWidth: 1,
+    borderColor: theme.accent,
+  },
+
+  reaccionesContainer: {
+    flexDirection: 'row',
+    gap: 6,
+    marginTop: 4,
+    alignSelf: 'flex-end',
+  },
+
+  reaccion: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
 });

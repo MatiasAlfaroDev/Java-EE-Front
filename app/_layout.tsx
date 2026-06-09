@@ -140,6 +140,16 @@ export default function RootLayout() {
         return;
       }
     
+if (data.type === 'MESSAGE_REACTION') {
+ actualizarReacciones(
+  String(data.mensajeId),
+  String(data.usuarioId),
+  String(data.usuarioNombre),
+  data.emoji ? String(data.emoji) : null
+);
+  return;
+}
+
     const userId = useAuthStore.getState().usuario?.id;
 
     const mensaje = mapearMensajeWS(data);
