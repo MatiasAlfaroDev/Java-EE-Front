@@ -143,17 +143,9 @@ export default function RootLayout() {
 
         return;
       }
-    
-if (data.type === 'MESSAGE_REACTION') {
- actualizarReacciones(
-  String(data.mensajeId),
-  String(data.usuarioId),
-  String(data.usuarioNombre),
-  data.emoji ? String(data.emoji) : null
-);
-  return;
-}
-
+    if (data.type === 'message_forwarded') {
+      console.log('WS FORWARDED', data);
+    }
     const userId = useAuthStore.getState().usuario?.id;
 
     const mensaje = mapearMensajeWS(data);

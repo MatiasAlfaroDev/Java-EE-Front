@@ -19,10 +19,10 @@ interface ChatState {
   typing: TypingState;
   chatActivo: string | null;
   wsReconectado: number;
-
+  
   notificarReconnect: () => void;
 
-  setchats: (chats: Chat[]) => void;
+  setchats: (chats : Chat[]) => void;
   setchatActivo: (id: string | null) => void;
 
   setMensajes: (chatId: string, mensajes: Mensaje[]) => void;
@@ -52,23 +52,14 @@ interface ChatState {
 
   actualizarReacciones: (
     mensajeId: string,
-    usuarioId: string,
-    usuarioNombre: string,
-    emoji: string | null
+    reacciones: Mensaje['reacciones']
   ) => void;
 
   marcarMensajeEntregado: (mensajeId: string) => void;
+
   marcarMensajeLeido: (mensajeId: string) => void;
-
-  eliminarMensajeParaMi: (
-    chatId: string,
-    mensajeId: string | number
-  ) => void;
-
-  eliminarMensajeParaTodos: (
-    chatId: string,
-    mensajeId: string
-  ) => void;
+  eliminarMensajeParaMi: (chatId: string, mensajeId: string | number) => void;
+  eliminarMensajeParaTodos: (chatId: string, mensajeId: string) => void;
 }
 
 const recalcularUltimoMensaje = (
@@ -110,7 +101,7 @@ export const useChatStore = create<ChatState>()((set) => ({
   setMensajes: (chatId, mensajes) =>
     set((s) => {
       const ordenados = [...mensajes]
-        .filter((m) => m?.contenido?.trim())
+        .filter((m) => m?.contenido?.trim().length > 0) // 🔴 evita mensajes vacíos
         .sort(
           (a, b) =>
             new Date(a.sent_at).getTime() -
@@ -126,76 +117,91 @@ export const useChatStore = create<ChatState>()((set) => ({
     }),
 
   agregarMensaje: (mensaje) => {
-    const chatId = String(mensaje.chatId);
+  const chatId = String(mensaje.chatId);
+  if (!mensaje?.contenido || !mensaje.contenido.trim()) {
+    return;
+  }
 
-    if (!mensaje?.contenido?.trim()) return;
+  set((s) => {
+    const mensajesChat = s.mensajes[chatId] ?? [];
 
-    set((s) => {
-      const mensajesChat = s.mensajes[chatId] ?? [];
+    // 🔥 DEDUPE REAL (ID + fallback por contenido/tiempo)
+    const yaExiste = mensajesChat.some((m) => {
+      if (String(m.id) === String(mensaje.id)) return true;
 
-      const yaExiste = mensajesChat.some((m) => {
-        if (String(m.id) === String(mensaje.id)) return true;
-
-        return (
-          m.contenido === mensaje.contenido &&
-          m.sender_id === mensaje.sender_id &&
-          Math.abs(
-            new Date(m.sent_at).getTime() -
-              new Date(mensaje.sent_at).getTime()
-          ) < 1500
-        );
-      });
-
-      if (yaExiste) return s;
-
-      const miId = String(useAuthStore.getState().usuario?.id);
-      const esMio = String(mensaje.sender_id) === miId;
-
-      const chatsActualizados = s.chats.some(
-        (c) => String(c.id) === chatId
-      )
-        ? s.chats.map((c) =>
-            String(c.id) === chatId
-              ? {
-                  ...c,
-                  lastMsg: mensaje.contenido,
-                  lastMsgTime: mensaje.sent_at,
-                  unread: esMio
-                    ? c.unread
-                    : (c.unread ?? 0) + 1,
-                }
-              : c
-          )
-        : [
-            {
-              id: chatId,
-              nombre: mensaje.sender_username,
-              initials: mensaje.sender_initials,
-              lastMsg: mensaje.contenido,
-              lastMsgTime: mensaje.sent_at,
-              unread: 1,
-              tipo: 'INDIVIDUAL',
-            } as Chat,
-            ...s.chats,
-          ];
-
-      return {
-        mensajes: {
-          ...s.mensajes,
-          [chatId]: [...mensajesChat, mensaje],
-        },
-        chats: chatsActualizados,
-      };
+      return (
+        m.contenido === mensaje.contenido &&
+        m.sender_id === mensaje.sender_id &&
+        Math.abs(
+          new Date(m.sent_at).getTime() -
+          new Date(mensaje.sent_at).getTime()
+        ) < 1500
+      );
     });
-  },
 
-  actualizarEstadoMensaje: (chatId, mensajeId, estado) =>
+    if (yaExiste) {
+      return s;
+    }
+
+    const existeChat = s.chats.some(
+      (c) => String(c.id) === chatId
+    );
+
+    const miId = String(useAuthStore.getState().usuario?.id);
+
+    const esMio = String(mensaje.sender_id) === miId;
+
+    const chatsActualizados = existeChat
+      ? s.chats.map((c) =>
+          String(c.id) === chatId
+            ? {
+                ...c,
+                lastMsg: mensaje.contenido,
+                lastMsgTime: mensaje.sent_at,
+                unread: esMio
+                  ? c.unread
+                  : (c.unread ?? 0) + 1,
+              }
+            : c
+        )
+      : [
+          {
+            id: chatId,
+            nombre: mensaje.sender_username,
+            initials: mensaje.sender_initials,
+            lastMsg: mensaje.contenido,
+            lastMsgTime: mensaje.sent_at,
+            unread: 1,
+            tipo: 'INDIVIDUAL',
+          } as Chat,
+          ...s.chats,
+        ];
+
+    return {
+      mensajes: {
+        ...s.mensajes,
+        [chatId]: [...mensajesChat, mensaje],
+      },
+      chats: chatsActualizados,
+    };
+  });
+},
+
+    actualizarEstadoMensaje: (
+    chatId,
+    mensajeId,
+    estado
+  ) =>
     set((s) => ({
       mensajes: {
         ...s.mensajes,
+
         [chatId]: (s.mensajes[chatId] ?? []).map((m) =>
           String(m.id) === mensajeId
-            ? { ...m, estado }
+            ? {
+                ...m,
+                estado,
+              }
             : m
         ),
       },
@@ -245,10 +251,11 @@ export const useChatStore = create<ChatState>()((set) => ({
       }),
 
   marcarEliminado: (mensajeId, deletedAt) =>
-    set((s) => ({
-      mensajes: Object.fromEntries(
+    set((s) => {
+      const nuevosMensajes = Object.fromEntries(
         Object.entries(s.mensajes).map(([chatId, mensajes]) => [
           chatId,
+
           mensajes.map((m) =>
             String(m.id) === mensajeId
               ? {
@@ -259,65 +266,35 @@ export const useChatStore = create<ChatState>()((set) => ({
               : m
           ),
         ])
-      ),
-    })),
-actualizarReacciones: (
-  mensajeId: string,
-  usuarioId: string,
-  usuarioNombre: string,
-  emoji: string | null
-) =>
-  set((state) => {
-    const mensajes = state.mensajes ?? {};
+      );
 
-    const nuevosMensajes = Object.fromEntries(
-      Object.entries(mensajes).map(([chatId, lista]) => {
-        const safeLista = Array.isArray(lista) ? lista : [];
+      return {
+        mensajes: nuevosMensajes,
+      };
+    }),
 
-        return [
+  actualizarReacciones: (mensajeId, reacciones) =>
+    set((s) => {
+      const nuevosMensajes = Object.fromEntries(
+        Object.entries(s.mensajes).map(([chatId, mensajes]) => [
           chatId,
-          safeLista.map((m) => {
-            if (String(m.id) !== String(mensajeId)) return m;
 
-            const actuales = Array.isArray(m.reacciones)
-              ? m.reacciones
-              : [];
+          mensajes.map((m) =>
+            String(m.id) === mensajeId
+              ? {
+                  ...m,
+                  reacciones,
+                }
+              : m
+          ),
+        ])
+      );
 
-            // ❌ REMOVE reacción
-            if (!emoji) {
-              return {
-                ...m,
-                reacciones: actuales.filter(
-                  (r) => String(r.usuarioId) !== String(usuarioId)
-                ),
-              };
-            }
+      return {
+        mensajes: nuevosMensajes,
+      };
+    }),
 
-            // 🔁 REPLACE (1 reacción por usuario)
-            const filtradas = actuales.filter(
-              (r) => String(r.usuarioId) !== String(usuarioId)
-            );
-
-            return {
-              ...m,
-              reacciones: [
-                ...filtradas,
-                {
-                  emoji,
-                  usuarioId,
-                  usuarioNombre,
-                },
-              ],
-            };
-          }),
-        ];
-      })
-    );
-
-    return {
-      mensajes: nuevosMensajes,
-    };
-  }),
   setTyping: (chatId, username, activo) =>
     set((s) => {
       const actuales = s.typing[chatId] ?? [];
@@ -340,35 +317,23 @@ actualizarReacciones: (
     set((s) => ({
       chats: s.chats.map((c) =>
         String(c.id) === chatId
-          ? { ...c, unread: 0 }
+          ? {
+              ...c,
+              unread: 0,
+            }
           : c
       ),
     })),
 
-  marcarMensajeEntregado: (mensajeId) =>
-    set((s) => ({
-      mensajes: Object.fromEntries(
-        Object.entries(s.mensajes).map(([chatId, mensajes]) => [
-          chatId,
-          mensajes.map((m) =>
-            String(m.id) === mensajeId
-              ? { ...m, entregado: true }
-              : m
-          ),
-        ])
-      ),
-    })),
-
-  marcarMensajeLeido: (mensajeId) =>
-    set((s) => ({
-      mensajes: Object.fromEntries(
+    marcarMensajeEntregado: (mensajeId) =>
+    set((s) => {
+      const nuevosMensajes = Object.fromEntries(
         Object.entries(s.mensajes).map(([chatId, mensajes]) => [
           chatId,
           mensajes.map((m) =>
             String(m.id) === mensajeId
               ? {
                   ...m,
-                  leido: true,
                   entregado: true,
                 }
               : m
@@ -423,42 +388,55 @@ actualizarReacciones: (
         };
       }),
 
-  eliminarMensajeParaMi: (chatId, mensajeId) =>
-    set((s) => ({
+ /* eliminarMensajeParaTodos: (
+    chatId: string,
+    mensajeId: string | number
+  ) =>
+    set(state => ({
       mensajes: {
-        ...s.mensajes,
-        [chatId]: (s.mensajes[chatId] ?? []).filter(
-          (m) => String(m.id) !== String(mensajeId)
-        ),
-      },
-    })),
+        ...state.mensajes,
+        [chatId]:
+          (state.mensajes[chatId] ?? []).map(m =>
+            String(m.id) === String(mensajeId)
+              ? { ...m, eliminado: true }
+              : m
+          )
+      }
+    })), */
 
-  eliminarMensajeParaTodos: (chatId, mensajeId) =>
-    set((s) => {
-      const mensajesActualizados =
-        (s.mensajes[chatId] ?? []).map((m) =>
-          String(m.id) === String(mensajeId)
-            ? { ...m, eliminado: true }
-            : m
-        );
+    eliminarMensajeParaTodos: (
+      chatId,
+      mensajeId
+    ) =>
+      set(state => {
 
-      const ultimo = mensajesActualizados.at(-1);
+        const mensajesActualizados =
+          (state.mensajes[chatId] ?? []).map(m =>
+            String(m.id) === String(mensajeId)
+              ? { ...m, eliminado: true }
+              : m
+          );
 
-      return {
-        mensajes: {
-          ...s.mensajes,
-          [chatId]: mensajesActualizados,
-        },
-        chats: s.chats.map((c) =>
-          String(c.id) === String(chatId)
-            ? {
-                ...c,
-                lastMsg: ultimo?.eliminado
-                  ? 'Mensaje eliminado'
-                  : ultimo?.contenido,
-              }
-            : c
-        ),
-      };
-    }),
+        const ultimoMensaje =
+          mensajesActualizados[mensajesActualizados.length - 1];
+
+        return {
+          mensajes: {
+            ...state.mensajes,
+            [chatId]: mensajesActualizados,
+          },
+
+          chats: state.chats.map(c =>
+            String(c.id) === String(chatId)
+              ? {
+                  ...c,
+                  lastMsg:
+                    ultimoMensaje?.eliminado
+                      ? 'Mensaje eliminado'
+                      : ultimoMensaje?.contenido,
+                }
+              : c
+          ),
+        };
+      }),
 }));

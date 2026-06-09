@@ -28,8 +28,6 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Mensaje } from '@/types/mensaje.types';
 import NetInfo from '@react-native-community/netinfo';
 import { chatService } from '@/services/chat.service';
-import { QUICK_EMOJIS } from '@/constants/emojis';
-import { reaccionService } from '@/services/reaccion.service';
 
 export default function ChatScreen() {
   const {
@@ -64,29 +62,6 @@ export default function ChatScreen() {
   const [selectedMessage, setSelectedMessage] = useState<Mensaje | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
   const abrirMenuMensaje = (mensaje: Mensaje) => { setSelectedMessage(mensaje); setMenuVisible(true);};
-
-  const reaccionar = async (emoji: string) => {
-  if (!selectedMessage) return;
-
-  try {
-
-    await reaccionService.reaccionar(
-      selectedMessage.id,
-      emoji
-    );
-
-    setSelectedMessage(null);
-    setMenuVisible(false);
-
-  } catch (e) {
-
-    console.log(
-      'Error reaccionando',
-      e
-    );
-
-  }
-};
 
   // BACK ANDROID
   useEffect(() => {
@@ -374,25 +349,9 @@ const enviar = useCallback(
             setSelectedMessage(null);
             setMenuVisible(false);
           }}
-          
         >
           <TouchableOpacity activeOpacity={1}>
-
-        <View style={s.emojiBar}>
-          {QUICK_EMOJIS.map((emoji) => (
-       <TouchableOpacity
-          key={emoji}
-          style={s.emojiButton}
-          onPress={() => reaccionar(emoji)}
-        >
-        <Text style={s.emojiText}>
-          {emoji}
-        </Text>
-      </TouchableOpacity>
-        ))}
-      </View>
-
-      <View style={s.menuBox}>
+            <View style={s.menuBox}>
 
               {String(selectedMessage.sender_id) === String(usuario?.id) && (
                 <TouchableOpacity
@@ -552,24 +511,5 @@ menuItem: {
   padding: 16,
   borderBottomWidth: 1,
   borderBottomColor: theme.border,
-},
-
-emojiBar: {
-  flexDirection: 'row',
-  backgroundColor: '#fff',
-  borderRadius: 24,
-  paddingHorizontal: 8,
-  paddingVertical: 6,
-  marginBottom: 12,
-  alignSelf: 'center',
-},
-
-emojiButton: {
-  paddingHorizontal: 6,
-  paddingVertical: 4,
-},
-
-emojiText: {
-  fontSize: 28,
 },
 });

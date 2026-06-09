@@ -1,9 +1,9 @@
 export type EstadoMensaje = 'ENVIADO' | 'PENDIENTE' | 'RECHAZADO';
 
 export interface Reaccion {
-  usuarioId: string;
-  usuarioNombre: string;
   emoji: string;
+  count: number;
+  mine: boolean;
 }
 
 export interface ArchivoAdjunto {
