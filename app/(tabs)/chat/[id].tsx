@@ -62,6 +62,7 @@ export default function ChatScreen() {
   const [selectedMessage, setSelectedMessage] = useState<Mensaje | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
   const abrirMenuMensaje = (mensaje: Mensaje) => { setSelectedMessage(mensaje); setMenuVisible(true);};
+  const eliminado = selectedMessage?.eliminado;
 
   // BACK ANDROID
   useEffect(() => {
@@ -352,8 +353,8 @@ const enviar = useCallback(
         >
           <TouchableOpacity activeOpacity={1}>
             <View style={s.menuBox}>
-
-              {String(selectedMessage.sender_id) === String(usuario?.id) && (
+              
+              {String(selectedMessage.sender_id) === String(usuario?.id) && !selectedMessage.eliminado && (
                 <TouchableOpacity
                   style={s.menuItem}
                   onPress={() => {
@@ -416,21 +417,23 @@ const enviar = useCallback(
                 </TouchableOpacity>
               )}
 
-              <TouchableOpacity
-                style={s.menuItem}
-                onPress={async () => {
-                  router.push({
-                    pathname: '/(tabs)/seleccionar-chat',
-                    params: {
-                      mensajeId: String(selectedMessage.id),
-                    },
-                  });
-                  setSelectedMessage(null);
-                  setMenuVisible(false);
-                }}
-              >
-                <Text>Reenviar</Text>
-              </TouchableOpacity>
+              {String(selectedMessage.sender_id) === String(usuario?.id) && !selectedMessage.eliminado && (
+                 <TouchableOpacity
+                    style={s.menuItem}
+                    onPress={async () => {
+                      router.push({
+                        pathname: '/(tabs)/seleccionar-chat',
+                        params: {
+                          mensajeId: String(selectedMessage.id),
+                        },
+                      });
+                      setSelectedMessage(null);
+                      setMenuVisible(false);
+                    }}
+                  >
+                    <Text>Reenviar</Text>
+                  </TouchableOpacity>
+              )}
 
               <TouchableOpacity
                 style={s.menuItem}
