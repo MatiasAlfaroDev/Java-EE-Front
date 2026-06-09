@@ -31,5 +31,6 @@ export const ENDPOINTS = {
   MENSAJE_EDITAR: (mensajeId: string) => `/mensajes/${mensajeId}`,
   MENSAJE_ELIMINAR_PARA_MI: (id: string | number) => `/mensajes/${id}/eliminar-para-mi`,
   MENSAJE_ELIMINAR_PARA_TODOS: (id: string | number) => `/mensajes/${id}/eliminar-para-todos`,
+  REACCIONES: '/reacciones',
   MENSAJE_REENVIAR: (id: string | number) => `/mensajes/${id}/reenviar`,
 } as const;
