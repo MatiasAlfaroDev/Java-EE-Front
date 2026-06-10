@@ -20,6 +20,7 @@ export const ENDPOINTS = {
   // Chats
   CHATS:            '/chats',
   CHAT:              (id: string) => `/chats/${id}`,
+  MIEMBROS_CHAT:      (chatId: string) => `/chats/${chatId}/miembros`,
   AGREGAR_MIEMBRO:    '/chats/agregar-miembro',
   ELIMINAR_MIEMBRO:   '/chats/eliminar-miembro',
 

@@ -20,7 +20,7 @@ const TAB_CONFIG: Record<string, { icon: IoniconName; label: string }> = {
   'admin':      { icon: 'shield-outline',      label: 'Admin'   },
 };
 
-const HIDDEN_ROUTES = new Set(['chat/[id]']);
+const HIDDEN_ROUTES = new Set(['chat/[id]', 'grupo-info/[id]']);
 
 function FloatingTabBar({ state, navigation }: {
   state: { routes: { key: string; name: string }[]; index: number };
@@ -31,8 +31,9 @@ function FloatingTabBar({ state, navigation }: {
   const isAdmin   = usuario?.rol === 'ADMIN';
   const insets    = useSafeAreaInsets();
 
-  // Ocultar tab bar completamente dentro de un chat
-  if (state.routes[state.index].name === 'chat/[id]') return null;
+  // Ocultar tab bar completamente dentro de un chat o info de grupo
+  const currentName = state.routes[state.index].name;
+  if (currentName === 'chat/[id]' || currentName === 'grupo-info/[id]') return null;
 
   const visibleRoutes = state.routes.filter(route => {
     if (HIDDEN_ROUTES.has(route.name)) return false;
@@ -114,6 +115,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="perfil"    />
       <Tabs.Screen name="admin"     />
       <Tabs.Screen name="chat/[id]" />
+      <Tabs.Screen name="grupo-info/[id]" />
     </Tabs>
   );
 }

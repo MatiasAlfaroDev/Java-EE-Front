@@ -197,14 +197,11 @@ export default function NuevoGrupoScreen() {
       );
 
       router.push({
-        pathname:
-          '/(tabs)/chat/[id]',
+        pathname: '/(tabs)/chat/[id]',
         params: {
-          id: String(
-            chatCreado.id
-          ),
-          nombre:
-            nombreGrupo,
+          id:     String(chatCreado.id),
+          nombre: nombreGrupo,
+          tipo:   'GRUPO',
         },
       });
 
@@ -252,10 +249,9 @@ export default function NuevoGrupoScreen() {
       <TextInput
         style={s.inputGrupo}
         placeholder="Nombre del grupo"
+        placeholderTextColor={theme.textMuted}
         value={nombreGrupo}
-        onChangeText={
-          setNombreGrupo
-        }
+        onChangeText={setNombreGrupo}
       />
 
       <View style={s.searchWrap}>
@@ -271,6 +267,7 @@ export default function NuevoGrupoScreen() {
         <TextInput
           style={s.searchInput}
           placeholder="Buscar usuarios..."
+          placeholderTextColor={theme.textMuted}
           value={query}
           onChangeText={setQuery}
         />
@@ -450,13 +447,13 @@ const s = StyleSheet.create({
       theme.textMuted,
   },
 
-    boton: {
+  boton: {
     margin: 16,
-    backgroundColor: 'red',
+    backgroundColor: theme.accent,
     borderRadius: 10,
     padding: 14,
     alignItems: 'center',
-    },
+  },
 
   botonText: {
     color: '#fff',

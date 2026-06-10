@@ -24,6 +24,7 @@ interface ChatState {
 
   setchats: (chats : Chat[]) => void;
   setchatActivo: (id: string | null) => void;
+  renombrarChat: (chatId: string, nombre: string) => void;
 
   setMensajes: (chatId: string, mensajes: Mensaje[]) => void;
 
@@ -99,6 +100,15 @@ export const useChatStore = create<ChatState>()((set) => ({
   setchats: (chats) => set({ chats }),
 
   setchatActivo: (id) => set({ chatActivo: id }),
+
+  renombrarChat: (chatId, nombre) =>
+    set(s => ({
+      chats: s.chats.map(c =>
+        String(c.id) === chatId
+          ? { ...c, nombre, initials: nombre.slice(0, 2).toUpperCase() }
+          : c
+      ),
+    })),
 
   setMensajes: (chatId, mensajes) =>
     set((s) => {

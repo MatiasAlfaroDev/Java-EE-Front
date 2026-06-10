@@ -46,6 +46,14 @@ export default function ChatScreen() {
     s.chats.find(c => String(c.id) === id),
   );
 
+  const irAInfoGrupo = () => {
+    console.log('[GrupoInfo] navegando → id:', id);
+    router.push({
+      pathname: '/(tabs)/grupo-info/[id]' as any,
+      params: { id, nombre: nombre ?? chat?.nombre },
+    });
+  };
+
   const usuario = useAuthStore(s => s.usuario);
 
   const mensajes = useChatStore(s => s.mensajes[id] ?? []);
@@ -277,48 +285,34 @@ const enviar = useCallback(
           />
         </TouchableOpacity>
 
-        <Avatar
-          initials={
-            nombre
-              ? nombre.slice(0, 2).toUpperCase()
-              : chat?.initials ?? '??'
-          }
-          online={chat?.online}
-          size={32}
-        />
-
-        <View style={s.headerInfo}>
-          <Text style={s.headerNombre}>
-            {nombre ?? chat?.nombre ?? 'Chat'}
-          </Text>
-
-          <Text style={s.headerEstado}>
-            {chat?.online ? 'En línea' : 'Desconectado'}
-          </Text>
-        </View>
-
-        <TouchableOpacity style={s.headerIcon}>
-          <Ionicons
-            name="call-outline"
-            size={20}
-            color={theme.textMuted}
+        <TouchableOpacity
+          style={s.headerCenter}
+          onPress={irAInfoGrupo}
+          activeOpacity={0.65}
+        >
+          <Avatar
+            initials={nombre ? nombre.slice(0, 2).toUpperCase() : chat?.initials ?? '??'}
+            online={chat?.online}
+            size={32}
           />
+          <View style={s.headerInfo}>
+            <Text style={s.headerNombre}>{nombre ?? chat?.nombre ?? 'Chat'}</Text>
+            <Text style={s.headerEstado}>
+              {chat?.online ? 'En línea' : 'Desconectado'}
+            </Text>
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity style={s.headerIcon}>
-          <Ionicons
-            name="videocam-outline"
-            size={20}
-            color={theme.textMuted}
-          />
+          <Ionicons name="call-outline" size={20} color={theme.textMuted} />
         </TouchableOpacity>
 
         <TouchableOpacity style={s.headerIcon}>
-          <Ionicons
-            name="ellipsis-vertical-outline"
-            size={20}
-            color={theme.textMuted}
-          />
+          <Ionicons name="videocam-outline" size={20} color={theme.textMuted} />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={s.headerIcon} onPress={irAInfoGrupo}>
+          <Ionicons name="people-outline" size={20} color={theme.accent} />
         </TouchableOpacity>
       </View>
 
@@ -552,6 +546,13 @@ const s = StyleSheet.create({
 
   backBtn: {
     padding: 4,
+  },
+
+  headerCenter: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
 
   headerInfo: {

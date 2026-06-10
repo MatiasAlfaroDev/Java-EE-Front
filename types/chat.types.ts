@@ -20,3 +20,12 @@ export interface CrearchatRequest {
   tipo: TipoChat | string;
   miembros?: number[];
 }
+
+export interface MiembroChat {
+  id: number;
+  nombre: string;
+  email: string;
+  rol?: ChatRol;
+  estado?: 'ONLINE' | 'OFFLINE';
+  initials: string;
+}

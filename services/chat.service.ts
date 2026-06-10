@@ -1,6 +1,6 @@
 import { api } from './api';
 import { ENDPOINTS } from '@/constants/endpoints';
-import { CrearchatRequest } from '@/types/chat.types';
+import { CrearchatRequest, MiembroChat } from '@/types/chat.types';
 
 export interface chatBackend {
   id:          number;
@@ -40,4 +40,10 @@ export const chatService = {
           usuarioId: Number(usuarioId),
         }
       ),
+
+  obtenerMiembros: (chatId: string) =>
+    api.get<MiembroChat[]>(ENDPOINTS.MIEMBROS_CHAT(chatId)),
+
+  renombrar: (chatId: string, nombre: string) =>
+    api.patch(ENDPOINTS.CHAT(chatId), { nombre }),
 };

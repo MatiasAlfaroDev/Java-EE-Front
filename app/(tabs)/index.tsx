@@ -92,7 +92,15 @@ export default function ChatsScreen() {
           sections={secciones}
           keyExtractor={item => String(item.id)}
           renderItem={({ item }) => (
-            <ChatRow chat={item} onPress={() => router.push(`/(tabs)/chat/${item.id}`)} />
+            <ChatRow
+              chat={item}
+              onPress={() =>
+                router.push({
+                  pathname: '/(tabs)/chat/[id]',
+                  params: { id: item.id, nombre: item.nombre, tipo: item.tipo ?? '' },
+                })
+              }
+            />
           )}
           renderSectionHeader={({ section }) => (
             <Text style={s.sectionHeader}>{section.title}</Text>
