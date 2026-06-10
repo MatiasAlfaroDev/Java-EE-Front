@@ -52,7 +52,9 @@ interface ChatState {
 
   actualizarReacciones: (
     mensajeId: string,
-    reacciones: Mensaje['reacciones']
+    usuarioId: string,
+    usuarioNombre: string,
+    emoji: string | null
   ) => void;
 
   marcarMensajeEntregado: (mensajeId: string) => void;
@@ -273,27 +275,61 @@ export const useChatStore = create<ChatState>()((set) => ({
       };
     }),
 
-  actualizarReacciones: (mensajeId, reacciones) =>
-    set((s) => {
-      const nuevosMensajes = Object.fromEntries(
-        Object.entries(s.mensajes).map(([chatId, mensajes]) => [
+  actualizarReacciones: (
+  mensajeId: string,
+  usuarioId: string,
+  usuarioNombre: string,
+  emoji: string | null
+) =>
+  set((state) => {
+    const mensajes = state.mensajes ?? {};
+    const nuevosMensajes = Object.fromEntries(
+      Object.entries(mensajes).map(([chatId, lista]) => {
+        const safeLista = Array.isArray(lista) ? lista : [];
+        return [
           chatId,
+          safeLista.map((m) => {
+            if (String(m.id) !== String(mensajeId)) return m;
+            const actuales = Array.isArray(m.reacciones)
+              ? m.reacciones
+              : [];
+     // ❌ REMOVE reacción
+            if (!emoji) {
+              return {
+                ...m,
+                reacciones: actuales.filter(
+                  (r) => String(r.usuarioId) !== String(usuarioId)
+                ),
+              };
+            }
 
-          mensajes.map((m) =>
-            String(m.id) === mensajeId
-              ? {
-                  ...m,
-                  reacciones,
-                }
-              : m
-          ),
-        ])
-      );
+            // 🔁 REPLACE (1 reacción por usuario)
+            const filtradas = actuales.filter(
+              (r) => String(r.usuarioId) !== String(usuarioId)
+            );
 
-      return {
-        mensajes: nuevosMensajes,
-      };
-    }),
+            return {
+              ...m,
+              reacciones: [
+                ...filtradas,
+                {
+                  emoji,
+                  usuarioId,
+                  usuarioNombre,
+                },
+              ],
+            };
+          }),
+        ];
+      })
+    );
+
+    return {
+      mensajes: nuevosMensajes,
+    };
+  }),
+
+
 
   setTyping: (chatId, username, activo) =>
     set((s) => {

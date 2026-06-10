@@ -5,8 +5,7 @@ import { typography } from '@/constants/typography';
 import { Mensaje } from '@/types/mensaje.types';
 import { Avatar } from '@/components/ui/Avatar';
 import { horaCorta } from '@/utils/fecha';
-import { useEffect, useState } from 'react';
-import { mensajeService } from '@/services/mensaje.service';
+
 
 interface Props {
   mensaje: Mensaje;
@@ -34,7 +33,28 @@ export function MessageBubble({ mensaje, esMio, onLongPress, editing=false }: Pr
   return <Ionicons name="checkmark-done" size={12} color={theme.accent} />;
 };
   
-  
+   // ✅ SIEMPRE array seguro
+  const reacciones = Array.isArray(mensaje.reacciones)
+    ? mensaje.reacciones
+    : [];
+
+  // ✅ Agrupar por emoji
+  const agrupadas = Object.values(
+    reacciones.reduce((acc: Record<string, any>, r) => {
+      if (!r?.emoji) return acc;
+
+      if (!acc[r.emoji]) {
+        acc[r.emoji] = {
+          emoji: r.emoji,
+          usuarios: [],
+        };
+      }
+
+      acc[r.emoji].usuarios.push(r);
+
+      return acc;
+    }, {})
+  );
 
   
   return (
@@ -64,26 +84,90 @@ export function MessageBubble({ mensaje, esMio, onLongPress, editing=false }: Pr
           </View>
 
         </TouchableOpacity>
+
+            {/* REACCIONES */}
+        {agrupadas.length > 0 && (
+          <View style={s.reaccionesContainer}>
+            {agrupadas.map((grupo: any) => (
+              <TouchableOpacity
+                key={grupo.emoji}
+                style={s.reaccion}
+                onPress={() => {
+                  console.log('Reacciones del emoji:', grupo.emoji);
+                  console.log('Usuarios:', grupo.usuarios);
+                }}
+              >
+                <Text>
+                  {grupo.emoji} {grupo.usuarios.length}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
       </View>
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  wrap:       { flexDirection: 'row', marginVertical: 4, paddingHorizontal: 12 },
-  wrapMio:    { justifyContent: 'flex-end' },
-  wrapOtro:   { justifyContent: 'flex-start', gap: 8 },
-  avatar:     { marginTop: 4 },
-  col:        { maxWidth: '75%' },
-  senderName: { ...typography.caption, color: theme.textMuted, marginBottom: 4, marginLeft: 4 },
-  bubble:     { padding: 10, gap: 4 },
-  bubbleMio:  { backgroundColor: theme.bubbleSent, borderRadius: 16, borderBottomRightRadius: 4 },
-  bubbleOtro: { backgroundColor: theme.bubbleRecv, borderRadius: 16, borderTopLeftRadius: 4 },
-  content:    { ...typography.body, color: theme.text },
-  meta:       { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-end' },
-  hora:       { ...typography.caption, color: theme.textMuted },
-  editadoTxt:  { ...typography.caption, color: theme.textMuted, fontStyle: 'italic' },
-  deletedTxt:  { ...typography.body, color: theme.textMuted, fontStyle: 'italic' },
+  wrap: { flexDirection: 'row', marginVertical: 4, paddingHorizontal: 12 },
+  wrapMio: { justifyContent: 'flex-end' },
+  wrapOtro: { justifyContent: 'flex-start', gap: 8 },
+  avatar: { marginTop: 4 },
+  col: { maxWidth: '75%' },
+
+  senderName: {
+    ...typography.caption,
+    color: theme.textMuted,
+    marginBottom: 4,
+    marginLeft: 4,
+  },
+
+  bubble: { padding: 10, gap: 4 },
+  bubbleMio: {
+    backgroundColor: theme.bubbleSent,
+    borderRadius: 16,
+    borderBottomRightRadius: 4,
+  },
+  bubbleOtro: {
+    backgroundColor: theme.bubbleRecv,
+    borderRadius: 16,
+    borderTopLeftRadius: 4,
+  },
+
+  content: { ...typography.body, color: theme.text },
+
+  meta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-end',
+  },
+
+  hora: { ...typography.caption, color: theme.textMuted },
+  editadoTxt: { ...typography.caption, color: theme.textMuted, fontStyle: 'italic' },
+  deletedTxt: { ...typography.body, color: theme.textMuted, fontStyle: 'italic' },
+
   reenviadoTxt: { ...typography.caption, color: theme.accent, marginBottom: 4, fontStyle: 'italic' },
-  bubbleEditing: { borderWidth: 1, borderColor: theme.accent },
+
+
+  bubbleEditing: {
+    borderWidth: 1,
+    borderColor: theme.accent,
+  },
+
+  reaccionesContainer: {
+    flexDirection: 'row',
+    gap: 6,
+    marginTop: 4,
+    alignSelf: 'flex-end',
+  },
+
+  reaccion: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
 });
