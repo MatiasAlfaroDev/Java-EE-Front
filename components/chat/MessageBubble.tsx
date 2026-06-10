@@ -12,9 +12,14 @@ interface Props {
   esMio: boolean;
   onLongPress?: () => void;
   editing?: boolean;
+
+  onReactionPress?: (
+    emoji: string,
+    usuarios: any[]
+  ) => void;
 }
 
-export function MessageBubble({ mensaje, esMio, onLongPress, editing=false }: Props) {
+export function MessageBubble({ mensaje, esMio, onLongPress, editing=false, onReactionPress }: Props) {
  const estadoIcon = () => {
   if (!esMio) return null;
 
@@ -89,14 +94,16 @@ export function MessageBubble({ mensaje, esMio, onLongPress, editing=false }: Pr
         {agrupadas.length > 0 && (
           <View style={s.reaccionesContainer}>
             {agrupadas.map((grupo: any) => (
-              <TouchableOpacity
-                key={grupo.emoji}
-                style={s.reaccion}
-                onPress={() => {
-                  console.log('Reacciones del emoji:', grupo.emoji);
-                  console.log('Usuarios:', grupo.usuarios);
-                }}
-              >
+             <TouchableOpacity
+  key={grupo.emoji}
+  style={s.reaccion}
+  onPress={() =>
+    onReactionPress?.(
+      grupo.emoji,
+      grupo.usuarios
+    )
+  }
+>
                 <Text>
                   {grupo.emoji} {grupo.usuarios.length}
                 </Text>

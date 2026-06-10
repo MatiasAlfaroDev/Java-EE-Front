@@ -63,6 +63,11 @@ export default function ChatScreen() {
   const [editingMessage, setEditingMessage] = useState<Mensaje | null>(null);
   const [selectedMessage, setSelectedMessage] = useState<Mensaje | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
+const [reactionInfo, setReactionInfo] = useState<{
+  emoji: string;
+  usuarios: any[];
+} | null>(null);
+
   const abrirMenuMensaje = (mensaje: Mensaje) => { setSelectedMessage(mensaje); setMenuVisible(true);};
   const eliminado = selectedMessage?.eliminado;
 
@@ -327,12 +332,18 @@ const enviar = useCallback(
         }
       >
         <MessageList
-          mensajes={mensajes}
-          usuarioId={usuario?.id ?? ''}
-          onEndReached={() => {}}
-          chatId={id}
-          onLongPressMessage={abrirMenuMensaje}
-        />
+  mensajes={mensajes}
+  usuarioId={usuario?.id ?? ''}
+  onEndReached={() => {}}
+  chatId={id}
+  onLongPressMessage={abrirMenuMensaje}
+  onReactionPress={(emoji, usuarios) =>
+    setReactionInfo({
+      emoji,
+      usuarios,
+    })
+  }
+/>
 
         <InputComposer
           chatId={id}
@@ -489,6 +500,34 @@ const enviar = useCallback(
           </TouchableOpacity>
         </TouchableOpacity>
       )}
+      {reactionInfo && (
+  <TouchableOpacity
+    activeOpacity={1}
+    style={s.menuOverlay}
+    onPress={() => setReactionInfo(null)}
+  >
+    <TouchableOpacity
+      activeOpacity={1}
+      style={s.reactionModal}
+    >
+      <Text style={s.reactionTitle}>
+        {reactionInfo.emoji} {reactionInfo.usuarios.length}
+      </Text>
+
+      {reactionInfo.usuarios.map((u: any) => (
+        <View
+          key={u.usuarioId}
+          style={s.reactionUser}
+        >
+          <Text>
+            {u.usuarioNombre}
+          </Text>
+        </View>
+      ))}
+    </TouchableOpacity>
+  </TouchableOpacity>
+)}
+
     </View>
   );
 }
@@ -573,6 +612,25 @@ emojiButton: {
 
 emojiText: {
   fontSize: 28,
+},
+
+reactionModal: {
+  width: 280,
+  backgroundColor: '#fff',
+  borderRadius: 16,
+  padding: 16,
+},
+
+reactionTitle: {
+  fontSize: 18,
+  fontWeight: '600',
+  marginBottom: 12,
+},
+
+reactionUser: {
+  paddingVertical: 10,
+  borderBottomWidth: 1,
+  borderBottomColor: '#eee',
 },
 
 });

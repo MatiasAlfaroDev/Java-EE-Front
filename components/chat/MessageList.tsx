@@ -9,6 +9,10 @@ interface Props {
   onEndReached?: () => void;
   chatId?: string;
   onLongPressMessage?: (mensaje: Mensaje) => void;
+  onReactionPress?: (
+  emoji: string,
+  usuarios: any[]
+) => void;
 }
 
 const shouldShowDate = (cur: Mensaje, prev?: Mensaje): boolean => {
@@ -18,7 +22,7 @@ const shouldShowDate = (cur: Mensaje, prev?: Mensaje): boolean => {
   return a !== b;
 };
 
-export function MessageList({ mensajes, usuarioId, onEndReached, onLongPressMessage }: Props) {
+export function MessageList({ mensajes, usuarioId, onEndReached, onLongPressMessage, onReactionPress }: Props) {
   return (
     <FlatList
       data={mensajes}
@@ -40,7 +44,7 @@ export function MessageList({ mensajes, usuarioId, onEndReached, onLongPressMess
                 })}
               />
             )}
-            <MessageBubble mensaje={item} esMio={esMio} onLongPress={() => onLongPressMessage?.(item)} />
+            <MessageBubble mensaje={item} esMio={esMio} onLongPress={() => onLongPressMessage?.(item)} onReactionPress={onReactionPress} />
           </View>
         );
       }}
