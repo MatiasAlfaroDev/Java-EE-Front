@@ -10,7 +10,7 @@ export interface Chat {
   lastMsg?: string;
   lastMsgTime?: string;   // ISO string del último mensaje
   unread?: number;
-  online?: boolean;
+  estado?: 'ONLINE' | 'OFFLINE';
   tipo?: 'INDIVIDUAL' | 'GRUPO' | 'PRIVADO';
   miembros?: number;
 }

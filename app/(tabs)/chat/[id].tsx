@@ -20,6 +20,7 @@ import { useChatStore } from '@/store/chat.store';
 import { useAuthStore } from '@/store/auth.store';
 
 import { mensajeService } from '@/services/mensaje.service';
+import { usuarioService } from '@/services/usuario.service';
 
 import { MessageList } from '@/components/chat/MessageList';
 import { InputComposer } from '@/components/chat/InputComposer';
@@ -54,6 +55,8 @@ export default function ChatScreen() {
     });
   };
 
+  
+
   const usuario = useAuthStore(s => s.usuario);
 
   const mensajes = useChatStore(s => s.mensajes[id] ?? []);
@@ -67,14 +70,11 @@ export default function ChatScreen() {
   const setMensajes = useChatStore(s => s.setMensajes);
 
   const [enviando, setEnviando] = useState(false);
-
+  const [estadoUsuario, setEstadoUsuario] = useState<'ONLINE' | 'OFFLINE'>('OFFLINE');
   const [editingMessage, setEditingMessage] = useState<Mensaje | null>(null);
   const [selectedMessage, setSelectedMessage] = useState<Mensaje | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
-const [reactionInfo, setReactionInfo] = useState<{
-  emoji: string;
-  usuarios: any[];
-} | null>(null);
+  const [reactionInfo, setReactionInfo] = useState<{emoji: string; usuarios: any[];} | null>(null);
 
   const abrirMenuMensaje = (mensaje: Mensaje) => { setSelectedMessage(mensaje); setMenuVisible(true);};
   const eliminado = selectedMessage?.eliminado;
@@ -102,6 +102,59 @@ const [reactionInfo, setReactionInfo] = useState<{
   }
 };
 
+  useEffect(() => {
+
+    if (!email) return;
+
+    const cargarEstado = async () => {
+
+      try {
+
+        const res =
+          await usuarioService.listar();
+
+        const usuarioChat =
+          res.data.find(
+            u => u.email === email
+          );
+
+        if (usuarioChat) {
+
+          setEstadoUsuario(
+            usuarioChat.estado
+          );
+          
+          console.log(
+            'ESTADO USUARIO',
+            estadoUsuario
+          );
+
+
+        }
+
+      } catch (e) {
+
+        console.log(
+          'Error cargando estado',
+          e
+        );
+
+      }
+
+    };
+
+    cargarEstado();
+
+    const interval =
+      setInterval(
+        cargarEstado,
+        5000
+      );
+
+    return () =>
+      clearInterval(interval);
+
+  }, [email]);
 
 
   // BACK ANDROID
@@ -292,13 +345,17 @@ const enviar = useCallback(
         >
           <Avatar
             initials={nombre ? nombre.slice(0, 2).toUpperCase() : chat?.initials ?? '??'}
-            online={chat?.online}
+            online={chat?.estado === 'ONLINE'}
             size={32}
           />
           <View style={s.headerInfo}>
             <Text style={s.headerNombre}>{nombre ?? chat?.nombre ?? 'Chat'}</Text>
             <Text style={s.headerEstado}>
-              {chat?.online ? 'En línea' : 'Desconectado'}
+              {chat?.estado == null
+                ? 'Grupo'
+                : chat.estado === 'ONLINE'
+                  ? 'En línea'
+                  : 'Desconectado'}
             </Text>
           </View>
         </TouchableOpacity>

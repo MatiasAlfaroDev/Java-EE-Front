@@ -8,6 +8,7 @@ export interface chatBackend {
   tipo?:       'INDIVIDUAL' | 'GRUPO' | 'PRIVADO';
   lastMsg?:    string | null;
   lastMsgTime?: string | null;
+  estado?:     'ONLINE' | 'OFFLINE';
   unread?: number;
   miembros?:   number;
 }

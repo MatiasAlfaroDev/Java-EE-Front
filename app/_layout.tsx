@@ -132,6 +132,7 @@ export default function RootLayout() {
               initials: c.nombre.slice(0, 2).toUpperCase(),
               lastMsg: c.lastMsg ?? undefined,
               lastMsgTime: c.lastMsgTime ?? undefined,
+              estado: c.estado ?? undefined,
               unread: c.unread ?? 0,
             }));
 
@@ -171,6 +172,7 @@ export default function RootLayout() {
           initials: c.nombre.slice(0, 2).toUpperCase(),
           lastMsg: c.lastMsg ?? undefined,
           lastMsgTime: c.lastMsgTime ?? undefined,
+          estado: c.estado ?? undefined,
           unread: c.unread ?? 0,
         }));
 
@@ -195,10 +197,6 @@ export default function RootLayout() {
       }
 
     );
-
-   /* return () => {
-      desconectarWebSocket();
-    }; */
 
   }, [isAutenticado, accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
