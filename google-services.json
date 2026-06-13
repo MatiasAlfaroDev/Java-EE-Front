@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "173087386282",
+    "project_id": "chat-empresarial-4acc9",
+    "storage_bucket": "chat-empresarial-4acc9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:173087386282:android:5284f46a968650053dfed3",
+        "android_client_info": {
+          "package_name": "com.grupo5.chatee"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxkI3a_6pRcBqei0EX5A40IdRPaQ6Lzxs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

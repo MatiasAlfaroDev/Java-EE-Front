@@ -16,7 +16,8 @@ export const ENDPOINTS = {
   NOTIFS:             '/notificaciones',
   NOTIF_READ:         (id: string) => `/notificaciones/${id}/leer`,
   NOTIFS_READ_ALL:    '/notificaciones/leer-todas',
-
+  PUSH_TOKEN: '/usuarios/push-token',
+  
   // Chats
   CHATS:            '/chats',
   CHAT:              (id: string) => `/chats/${id}`,
@@ -34,4 +35,6 @@ export const ENDPOINTS = {
   MENSAJE_ELIMINAR_PARA_TODOS: (id: string | number) => `/mensajes/${id}/eliminar-para-todos`,
   MENSAJE_REENVIAR: (id: string | number) => `/mensajes/${id}/reenviar`,
   REACCIONES: '/reacciones',
+
+ 
 } as const;

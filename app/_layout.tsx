@@ -16,6 +16,9 @@ import { USE_MOCK_API } from '@/constants/dev';
 import { Mensaje, Reaccion } from '@/types/mensaje.types';
 import { mensajeService } from '@/services/mensaje.service';
 import { chatService } from '@/services/chat.service';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
+import { usuarioService } from '@/services/usuario.service';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -41,6 +44,15 @@ function mapearMensajeWS(data: Record<string, unknown>): Mensaje {
         : 0,
   };
 }
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -80,7 +92,7 @@ export default function RootLayout() {
 
     conectarWebSocket(
     accessToken,
-    (payload) => {
+    async (payload) => {
     const data = (payload ?? {}) as Record<string, unknown>;
 
     console.log('WS EVENT', data);
@@ -107,52 +119,44 @@ export default function RootLayout() {
       return;
     }
 
-    /* if (data.type === 'message_deleted') {
+    if (data.type === 'message_deleted') {
+
       eliminarMensajeParaTodos(
         String(data.chatId),
         String(data.messageId)
       );
+
+      chatService.listar()
+        .then(res => {
+
+          const chats = res.data.map(c => ({
+            id: String(c.id),
+            nombre: c.nombre,
+            tipo: c.tipo,
+            initials: c.nombre.slice(0, 2).toUpperCase(),
+            lastMsg: c.lastMsg ?? undefined,
+            lastMsgTime: c.lastMsgTime ?? undefined,
+            estado: c.estado ?? undefined,
+            unread: c.unread ?? 0,
+          }));
+
+          useChatStore
+            .getState()
+            .setchats(chats);
+
+        });
+
       return;
-    } */
-
-      if (data.type === 'message_deleted') {
-
-        eliminarMensajeParaTodos(
-          String(data.chatId),
-          String(data.messageId)
-        );
-
-        chatService.listar()
-          .then(res => {
-
-            const chats = res.data.map(c => ({
-              id: String(c.id),
-              nombre: c.nombre,
-              tipo: c.tipo,
-              initials: c.nombre.slice(0, 2).toUpperCase(),
-              lastMsg: c.lastMsg ?? undefined,
-              lastMsgTime: c.lastMsgTime ?? undefined,
-              estado: c.estado ?? undefined,
-              unread: c.unread ?? 0,
-            }));
-
-            useChatStore
-              .getState()
-              .setchats(chats);
-
-          });
-
+    }
+    if (data.type === 'MESSAGE_REACTION') {
+      actualizarReacciones(
+        String(data.mensajeId),
+        String(data.usuarioId),
+        String(data.usuarioNombre),
+        data.emoji ? String(data.emoji) : null
+      );
         return;
       }
-    if (data.type === 'MESSAGE_REACTION') {
- actualizarReacciones(
-  String(data.mensajeId),
-  String(data.usuarioId),
-  String(data.usuarioNombre),
-  data.emoji ? String(data.emoji) : null
-);
-  return;
-}
 
     const userId = useAuthStore.getState().usuario?.id;
 
@@ -160,7 +164,33 @@ export default function RootLayout() {
 
     agregarMensaje(mensaje);
 
-    if (data.chatId) {
+    if (
+      String(data.remitenteId) !==
+      String(userId)
+    ) {
+
+      console.log('ENTRO AL BLOQUE DE NOTIFICACION');
+
+      try {
+
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: String(data.remitente),
+            body: String(data.contenido),
+          },
+          trigger: null,
+        });
+
+        console.log('NOTIFICACION PROGRAMADA');
+
+      } catch (e) {
+
+        console.log('ERROR NOTIFICACION', e);
+
+      }
+    }
+
+  if (data.chatId) {
 
     chatService.listar()
       .then(res => {
@@ -199,6 +229,59 @@ export default function RootLayout() {
     );
 
   }, [isAutenticado, accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
+
+      useEffect(() => {
+
+      Notifications.requestPermissionsAsync()
+        .then(r => {
+          console.log('PERMISOS NOTIF', r);
+        })
+        .catch(console.error);
+
+    }, []);
+
+    useEffect(() => {
+
+      if (!isAutenticado || !accessToken) {
+        return;
+      }
+
+      async function registrarPush() {
+
+        const permisos =
+          await Notifications.requestPermissionsAsync();
+
+        if (permisos.status !== 'granted') {
+          return;
+        }
+
+        try {
+
+          const token =
+            await Notifications.getExpoPushTokenAsync({
+              projectId:
+                Constants.expoConfig?.extra?.eas?.projectId,
+            });
+
+          console.log('TOKEN', token.data);
+
+          await usuarioService.guardarPushToken(
+            token.data
+          );
+
+          console.log('TOKEN GUARDADO');
+
+        } catch (e) {
+
+          console.log('ERROR TOKEN', e);
+
+        }
+      }
+
+      registrarPush();
+
+    }, [isAutenticado, accessToken]);
+
 
   if (!fontsLoaded) return null;
 
