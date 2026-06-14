@@ -23,6 +23,7 @@
       },
       "package": "com.grupo5.chatee",
       "googleServicesFile": "./google-services.json",
+      "usesCleartextTraffic": true,
       "permissions": [
         "android.permission.RECORD_AUDIO"
       ]

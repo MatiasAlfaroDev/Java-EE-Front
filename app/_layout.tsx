@@ -89,7 +89,7 @@ export default function RootLayout() {
 
       return;
     }
-
+   
     conectarWebSocket(
     accessToken,
     async (payload) => {
@@ -164,55 +164,41 @@ export default function RootLayout() {
 
     agregarMensaje(mensaje);
 
-    if (
-      String(data.remitenteId) !==
-      String(userId)
-    ) {
+    if (data.chatId) {
 
-      console.log('ENTRO AL BLOQUE DE NOTIFICACION');
+      console.log(
+        'REFRESH CHATS',
+        data.chatId,
+        data.id
+      );
 
-      try {
+      chatService.listar()
+        .then(res => {
 
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: String(data.remitente),
-            body: String(data.contenido),
-          },
-          trigger: null,
-        });
+          console.log(
+            'CHATS RECIBIDOS',
+            JSON.stringify(res.data, null, 2)
+          );
 
-        console.log('NOTIFICACION PROGRAMADA');
+          const chats = res.data.map(c => ({
+            id: String(c.id),
+            nombre: c.nombre,
+            tipo: c.tipo,
+            initials: c.nombre.slice(0, 2).toUpperCase(),
+            lastMsg: c.lastMsg ?? undefined,
+            lastMsgTime: c.lastMsgTime ?? undefined,
+            estado: c.estado ?? undefined,
+            unread: c.unread ?? 0,
+          }));
 
-      } catch (e) {
+          useChatStore
+            .getState()
+            .setchats(chats);
 
-        console.log('ERROR NOTIFICACION', e);
-
+          console.log('CHATS ACTUALIZADOS');
+        })
+        .catch(console.error);
       }
-    }
-
-  if (data.chatId) {
-
-    chatService.listar()
-      .then(res => {
-
-        const chats = res.data.map(c => ({
-          id: String(c.id),
-          nombre: c.nombre,
-          tipo: c.tipo,
-          initials: c.nombre.slice(0, 2).toUpperCase(),
-          lastMsg: c.lastMsg ?? undefined,
-          lastMsgTime: c.lastMsgTime ?? undefined,
-          estado: c.estado ?? undefined,
-          unread: c.unread ?? 0,
-        }));
-
-        useChatStore
-          .getState()
-          .setchats(chats);
-
-      })
-      .catch(console.error);
-    }
    
     // SOLO mensajes de otros
     if (String(data.remitenteId) !== String(userId) && data.id) {
