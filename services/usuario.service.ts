@@ -12,4 +12,5 @@ estado: 'ONLINE' | 'OFFLINE';
 
 export const usuarioService = {
   listar: () => api.get<UsuarioBackend[]>(ENDPOINTS.USUARIOS),
+    guardarPushToken: (token: string) => api.post(ENDPOINTS.PUSH_TOKEN, { token }),
 };

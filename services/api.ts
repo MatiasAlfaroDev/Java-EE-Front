@@ -33,6 +33,8 @@ import axios from 'axios';
 import { API_BASE_URL } from '@/constants/endpoints';
 import { useAuthStore } from '@/store/auth.store';
 
+console.log('API_BASE_URL =', API_BASE_URL);
+
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
@@ -43,11 +45,8 @@ api.interceptors.request.use(config => {
   const token = useAuthStore.getState().accessToken;
 
   console.log(
-    'REQUEST:',
-    config.method,
-    config.url,
-    'TOKEN:',
-    token
+    'FULL URL:',
+    `${config.baseURL ?? ''}${config.url ?? ''}`
   );
 
   if (token) config.headers.Authorization = token;
@@ -60,10 +59,18 @@ api.interceptors.response.use(
   async error => {
 
     console.log(
-      'ERROR REQUEST:',
-      error.config?.url,
+      'FULL URL:',
+      error.config?.baseURL + error.config?.url
+    );
+
+    console.log(
       'STATUS:',
       error.response?.status
+    );
+
+    console.log(
+      'DATA:',
+      error.response?.data
     );
 
     return Promise.reject(error);

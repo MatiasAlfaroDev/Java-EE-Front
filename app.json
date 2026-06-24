@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "splash": {
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#091525"
     },
@@ -20,7 +21,12 @@
       "adaptiveIcon": {
         "backgroundColor": "#091525"
       },
-      "package": "com.grupo5.chatee"
+      "package": "com.grupo5.chatee",
+      "googleServicesFile": "./google-services.json",
+      "usesCleartextTraffic": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -59,6 +65,13 @@
     "experiments": {
       "typedRoutes": true
     },
-    "scheme": "chatee"
+    "scheme": "chatee",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "60259e58-1eec-487e-9a1d-d1940a8cdc3e"
+      }
+    },
+    "owner": "cecimenca"
   }
 }
