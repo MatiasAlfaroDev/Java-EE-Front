@@ -34,9 +34,17 @@ export function UserRow({ usuario, onToggleStatus }: Props) {
       </View>
       <TouchableOpacity style={s.actionBtn} onPress={onToggleStatus}>
         <Ionicons
-          name={usuario.estado === 'ONLINE' ? 'person-remove-outline' : 'person-add-outline'}
+          name={
+            usuario.bloqueado
+              ? 'lock-open-outline'
+              : 'lock-closed-outline'
+          }
           size={18}
-          color={usuario.estado === 'ONLINE' ? theme.error : theme.online}
+          color={
+            usuario.bloqueado
+              ? theme.online
+              : theme.error
+          }
         />
       </TouchableOpacity>
     </View>

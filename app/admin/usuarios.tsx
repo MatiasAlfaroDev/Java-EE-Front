@@ -15,29 +15,45 @@ export default function UsuariosAdminScreen() {
   const cargar = useCallback(async () => {
     try {
       const res = await usuarioService.listar();
-      setUsuarios(res.data);
+
+      setUsuarios(
+        res.data.filter(u => u.rol === 'USER')
+      );
     } finally {
-      setLoading(false); setRefreshing(false);
+      setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
   useEffect(() => { cargar(); }, [cargar]);
 
   const toggleStatus = (u: UsuarioAdmin) => {
-    const esOnline = u.estado === 'ONLINE';
-    const accion = esOnline ? 'desconectar' : 'reconectar';
-    Alert.alert(`¿${accion.charAt(0).toUpperCase() + accion.slice(1)} usuario?`, u.nombre, [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: accion.charAt(0).toUpperCase() + accion.slice(1),
-        style: esOnline ? 'destructive' : 'default',
-        onPress: async () => {
-          setUsuarios(prev => prev.map(x =>
-            x.id === u.id ? { ...x, estado: esOnline ? 'OFFLINE' : 'ONLINE' } : x
-          ));
+    const accion = u.bloqueado ? 'desbloquear' : 'bloquear';
+
+    Alert.alert(
+      `${accion.charAt(0).toUpperCase() + accion.slice(1)} usuario`,
+      `¿Deseás ${accion} a ${u.nombre}?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: accion.charAt(0).toUpperCase() + accion.slice(1),
+          style: u.bloqueado ? 'default' : 'destructive',
+          onPress: async () => {
+            try {
+              if (u.bloqueado) {
+                await usuarioService.desbloquear(u.id);
+              } else {
+                await usuarioService.bloquear(u.id);
+              }
+
+              await cargar();
+            } catch {
+              Alert.alert('Error', 'No se pudo actualizar el usuario.');
+            }
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
   return (

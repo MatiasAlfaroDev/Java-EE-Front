@@ -1,16 +1,20 @@
 export const API_BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ??
-  'http://192.168.1.162:8080/chat-empresarial/api';
+  'http://192.168.1.4:8080/chat-empresarial/api';
 
 export const WS_BASE_URL =
   process.env.EXPO_PUBLIC_WS_URL ??
-  'http://192.168.1.162:8080';
+  'http://192.168.1.4:8080';
 export const ENDPOINTS = {
   // Autenticación
   LOGIN:              '/usuarios/login',
   REGISTER:           '/usuarios/registro',
   LOGOUT:             '/usuarios/logout',
   USUARIOS:            '/usuarios/listar',
+
+  // Usuarios admin
+  BLOQUEAR_USUARIO: (id: string | number) => `/usuarios/bloquear/${id}`,
+  DESBLOQUEAR_USUARIO: (id: string | number) => `/usuarios/desbloquear/${id}`,
 
   // Notificaciones
   NOTIFS:             '/notificaciones',
