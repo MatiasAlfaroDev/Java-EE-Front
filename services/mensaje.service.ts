@@ -7,9 +7,12 @@ import { useAuthStore } from '@/store/auth.store';
 import { Mensaje } from '@/types/mensaje.types';
 
 export interface EnviarMensajeBackend {
-  chatId:    number;
+  chatId: number;
   contenido: string;
-  tipo:      'TEXTO' | 'IMAGEN' | 'VIDEO' | 'ARCHIVO';
+  tipo: 'TEXTO' | 'IMAGEN' | 'VIDEO' | 'ARCHIVO';
+
+  nombreArchivo?: string;
+  tamanoArchivo?: number;
 }
 
 const mockToMensaje = (m: MensajeMock): Mensaje => ({
@@ -23,7 +26,10 @@ const mockToMensaje = (m: MensajeMock): Mensaje => ({
   sent_at:         m.sent_at,
   estado:          m.estado,
   reacciones:      [],
-});
+  tipo: 'TEXTO',
+  adjunto: null,
+
+}); 
 
 export const mensajeService = {
   // listar solo existe en el mock — el backend real no tiene GET de mensajes por chat
@@ -43,9 +49,9 @@ export const mensajeService = {
 
     return response.data;
 
-  },
+  }, 
 
-  enviar: (chatId: string, contenido: string, tipo: EnviarMensajeBackend['tipo'] = 'TEXTO') => {
+  enviar: (chatId: string, contenido: string, tipo: EnviarMensajeBackend['tipo'] = 'TEXTO', nombreArchivo?: string, tamanoArchivo?: number, mimeType?: string) => {
     if (USE_MOCK_API) {
       const usuario = useAuthStore.getState().usuario;
       return mockMensajeService.enviar(
@@ -61,12 +67,18 @@ export const mensajeService = {
       chatIdConvertido: Number(chatId),
       contenido,
       tipo,
+      nombreArchivo,
+      tamanoArchivo,
+      mimeType,
     });
 
     return api.post(ENDPOINTS.MENSAJE_ENVIAR, {
-      chatId:    Number(chatId),
+      chatId: Number(chatId),
       contenido,
       tipo,
+      nombreArchivo,
+      tamanoArchivo,
+      mimeType,
     });
   },
 

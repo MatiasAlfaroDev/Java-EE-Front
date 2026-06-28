@@ -1,0 +1,51 @@
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system/legacy';
+
+import { archivoService } from './archivo.service';
+
+export interface ArchivoSubido {
+  urlArchivo: string;
+  nombreArchivo: string;
+  tamanoArchivo: number;
+  mimeType: string;
+}
+
+export const uploadService = {
+
+  async seleccionarYSubir(): Promise<ArchivoSubido | null> {
+
+    const resultado = await DocumentPicker.getDocumentAsync({
+      multiple: false,
+      copyToCacheDirectory: true,
+    });
+
+    if (resultado.canceled) {
+      return null;
+    }
+
+    const archivo = resultado.assets[0];
+
+    if (!archivo.uri) {
+      throw new Error('No se pudo obtener el archivo.');
+    }
+
+    const contenidoBase64 = await FileSystem.readAsStringAsync(
+      archivo.uri,
+      {
+        encoding: FileSystem.EncodingType.Base64,
+      }
+    );
+
+    const response = await archivoService.subir(
+      contenidoBase64,
+      archivo.mimeType ?? 'application/octet-stream',
+      archivo.name
+    );
+
+    return {
+    ...response.data,
+    mimeType: archivo.mimeType ?? 'application/octet-stream',
+    };
+  },
+
+};

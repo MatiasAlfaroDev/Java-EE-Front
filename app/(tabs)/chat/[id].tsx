@@ -282,9 +282,15 @@ useFocusEffect(
   // ENVIAR MENSAJE
 const enviar = useCallback(
   
-  async (texto: string) => {
-    if (!texto.trim() || !usuario) return;
-  console.log("ENVIAR CALL:", JSON.stringify(texto));
+  async (
+    contenido: string,
+    tipo: 'TEXTO' | 'ARCHIVO' | 'IMAGEN' | 'VIDEO' = 'TEXTO',
+    nombreArchivo?: string,
+    tamanoArchivo?: number,
+    mimeType?: string,
+  ) => {
+    if (!contenido.trim() || !usuario) return;
+  console.log("ENVIAR CALL:", JSON.stringify(contenido));
     setEnviando(true);
 
     const tempId = `pending-${Date.now()}`;
@@ -295,7 +301,8 @@ const enviar = useCallback(
       sender_id: usuario.id,
       sender_username: usuario.username,
       sender_initials: usuario.initials,
-      contenido: texto.trim(),
+      contenido: contenido.trim(),
+      tipo,
       sent_at: new Date().toISOString(),
       estado: 'PENDIENTE',
       iv: ' ',
@@ -306,7 +313,14 @@ const enviar = useCallback(
     agregarMensaje(optimista); 
 
     try {
-      await mensajeService.enviar(id, texto.trim());
+      await mensajeService.enviar(
+        id,
+        contenido.trim(),
+        tipo,
+        nombreArchivo,
+        tamanoArchivo,
+        mimeType
+      );
 
 // Recargar mensajes desde backend
       const lista = await mensajeService.listar(id);
@@ -426,6 +440,19 @@ const enviar = useCallback(
             }
 
             enviar(texto);
+          }}
+          onSendAdjunto={async (archivo) => {
+            try {
+              await enviar(
+                  archivo.urlArchivo,
+                  'ARCHIVO',
+                  archivo.nombreArchivo,
+                  archivo.tamanoArchivo,
+                  archivo.mimeType
+              );
+            } catch (e) {
+              console.log("Error enviando adjunto", e);
+            }
           }}
           editingMessage={editingMessage}
           onCancelEdit={() => setEditingMessage(null)}

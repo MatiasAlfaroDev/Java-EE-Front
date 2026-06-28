@@ -6,16 +6,19 @@ import { theme } from '@/constants/theme';
 import { typography } from '@/constants/typography';
 import { EmojiPicker } from './EmojiPicker';
 import { Mensaje } from '@/types/mensaje.types';
+import { uploadService, ArchivoSubido } from '@/services/upload.service';
+import { Alert } from 'react-native';
 
 interface Props {
   chatId: string;
   onSend: (texto: string) => void;
+  onSendAdjunto?: (archivo: ArchivoSubido) => void;
   onChangeText?: (text: string) => void;
   editingMessage?: Mensaje | null;  
   onCancelEdit?: () => void; 
 }
 
-export function InputComposer({ chatId, onSend, onChangeText, editingMessage, onCancelEdit, }: Props) {
+export function InputComposer({ chatId, onSend, onSendAdjunto, onChangeText, editingMessage, onCancelEdit, }: Props) {
   const [texto, setTexto] = useState('');
   const [emojiVisible, setEmojiVisible] = useState(false);
   const insets = useSafeAreaInsets();
@@ -37,6 +40,25 @@ export function InputComposer({ chatId, onSend, onChangeText, editingMessage, on
 
     onSend(texto.trim());
     setTexto('');
+  };
+
+  const handleAdjunto = async () => {
+    try {
+      const archivo = await uploadService.seleccionarYSubir();
+
+      if (!archivo) {
+        return;
+      }
+
+      onSendAdjunto?.(archivo);
+
+    } catch (error) {
+      console.error("Error al subir adjunto:", error);
+      Alert.alert(
+        "Error",
+        "No fue posible subir el archivo."
+      );
+    }
   };
 
   const tieneTexto = texto.trim().length > 0;
@@ -75,6 +97,17 @@ export function InputComposer({ chatId, onSend, onChangeText, editingMessage, on
             autoCorrect={false}
           />
         </View>
+
+        <TouchableOpacity
+          style={s.sideBtn}
+          onPress={handleAdjunto}
+        >
+          <Ionicons
+            name="attach-outline"
+            size={24}
+            color={theme.textMuted}
+          />
+        </TouchableOpacity>
 
         {/* Cámara (se oculta cuando hay texto) */}
         {!tieneTexto && (

@@ -7,11 +7,9 @@ export interface Reaccion {
 }
 
 export interface ArchivoAdjunto {
-  id: string;
-  file_name: string;
-  mime_type: string;
-  size_bytes: number;
-  scan_result: 'PENDING' | 'CLEAN' | 'INFECTED';
+  urlArchivo: string;
+  nombreArchivo: string;
+  tamanoArchivo: number;
 }
 
 export interface OpcionEncuesta {
@@ -38,6 +36,7 @@ export interface Mensaje {
   chatId: string;
   parent_id?: string;
   contenido: string;
+  tipo: 'TEXTO' | 'ARCHIVO' | 'IMAGEN' | 'VIDEO';
   iv: string;
   sent_at: string;
   delivered_at?: string;
@@ -47,7 +46,7 @@ export interface Mensaje {
   estado: EstadoMensaje;
   reacciones: Reaccion[];
   threads_count?: number;
-  archivo?: ArchivoAdjunto;
+  adjunto?: ArchivoAdjunto | null;
   encuesta?: Encuesta;
   entregado?: boolean; 
   leido?: boolean;     

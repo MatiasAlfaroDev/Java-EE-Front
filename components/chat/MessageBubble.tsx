@@ -5,6 +5,11 @@ import { typography } from '@/constants/typography';
 import { Mensaje } from '@/types/mensaje.types';
 import { Avatar } from '@/components/ui/Avatar';
 import { horaCorta } from '@/utils/fecha';
+import { archivoService } from '@/services/archivo.service';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import { API_BASE_URL, ENDPOINTS } from '@/constants/endpoints';
+import { useAuthStore } from '@/store/auth.store';
 
 
 interface Props {
@@ -61,6 +66,37 @@ export function MessageBubble({ mensaje, esMio, onLongPress, editing=false, onRe
     }, {})
   );
 
+  const token = useAuthStore(state => state.accessToken);
+
+  const abrirAdjunto = async () => {
+    if (!mensaje.adjunto) return;
+
+    try {
+      const url =
+        `${API_BASE_URL}${ENDPOINTS.ADJUNTO(mensaje.adjunto.urlArchivo)}`;
+
+      const archivo = await FileSystem.File.downloadFileAsync(
+        url,
+        new FileSystem.Directory(FileSystem.Paths.cache),
+        {
+          headers: {
+            Authorization: token ?? "",
+          },
+          idempotent: true,
+        }
+      );
+
+      if (!(await Sharing.isAvailableAsync())) {
+        alert("No se puede abrir el archivo.");
+        return;
+      }
+
+      await Sharing.shareAsync(archivo.uri);
+
+    } catch (e) {
+      console.log("Error abriendo adjunto", e);
+    }
+  };
   
   return (
     <View style={[s.wrap, esMio ? s.wrapMio : s.wrapOtro, editing && s.bubbleEditing]}>
@@ -78,10 +114,21 @@ export function MessageBubble({ mensaje, esMio, onLongPress, editing=false, onRe
                 ↪ Reenviado
               </Text>
             )}
-          {mensaje.eliminado
-            ? <Text style={[s.content, s.deletedTxt]}>Mensaje eliminado</Text>
-            : <Text style={s.content}>{mensaje.contenido ?? ''}</Text>
-          }
+          {mensaje.eliminado ? (
+            <Text style={[s.content, s.deletedTxt]}>
+              Mensaje eliminado
+            </Text>
+          ) : mensaje.tipo === 'ARCHIVO' ? (
+            <TouchableOpacity onPress={abrirAdjunto}>
+              <Text style={s.content}>
+                📎 {mensaje.adjunto?.nombreArchivo}
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <Text style={s.content}>
+              {mensaje.contenido ?? ''}
+            </Text>
+          )}
           <View style={s.meta}>
             {mensaje.editado && <Text style={s.editadoTxt}>editado</Text>}
             <Text style={s.hora}>{horaCorta(mensaje.sent_at)}</Text>
