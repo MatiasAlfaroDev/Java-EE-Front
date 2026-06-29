@@ -10,7 +10,9 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { API_BASE_URL, ENDPOINTS } from '@/constants/endpoints';
 import { useAuthStore } from '@/store/auth.store';
-
+import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Image } from 'expo-image';
 
 interface Props {
   mensaje: Mensaje;
@@ -68,6 +70,65 @@ export function MessageBubble({ mensaje, esMio, onLongPress, editing=false, onRe
 
   const token = useAuthStore(state => state.accessToken);
 
+  const [imagenLocal, setImagenLocal] = useState<string | null>(null);
+  
+  const nombreArchivo = mensaje.adjunto?.nombreArchivo?.toLowerCase() ?? "";
+
+  const esImagen =
+    mensaje.tipo === "ARCHIVO" &&
+    (
+      nombreArchivo.endsWith(".jpg") ||
+      nombreArchivo.endsWith(".jpeg") ||
+      nombreArchivo.endsWith(".png") ||
+      nombreArchivo.endsWith(".webp") ||
+      nombreArchivo.endsWith(".gif")
+    );
+
+  const esVideo =
+    mensaje.tipo === "ARCHIVO" &&
+    (
+      nombreArchivo.endsWith(".mp4") ||
+      nombreArchivo.endsWith(".mov") ||
+      nombreArchivo.endsWith(".avi") ||
+      nombreArchivo.endsWith(".mkv")
+    );
+
+    useEffect(() => {
+
+      if (!esImagen || !mensaje.adjunto) {
+        return;
+      }
+
+      const descargar = async () => {
+
+        try {
+
+          const url =
+            `${API_BASE_URL}${ENDPOINTS.ADJUNTO(mensaje.adjunto!.urlArchivo)}`;
+
+          const archivo = await FileSystem.File.downloadFileAsync(
+            url,
+            new FileSystem.Directory(FileSystem.Paths.cache),
+            {
+              headers: {
+                Authorization: token ?? "",
+              },
+              idempotent: true,
+            }
+          );
+
+          setImagenLocal(archivo.uri);
+
+        } catch (e) {
+          console.log("Error descargando miniatura", e);
+        }
+
+      };
+
+      descargar();
+
+    }, [mensaje.id]);
+    
   const abrirAdjunto = async () => {
     if (!mensaje.adjunto) return;
 
@@ -91,7 +152,15 @@ export function MessageBubble({ mensaje, esMio, onLongPress, editing=false, onRe
         return;
       }
 
-      await Sharing.shareAsync(archivo.uri);
+      router.push({
+        pathname: "/attachment-viewer",
+        params: {
+          uri: encodeURIComponent(archivo.uri),
+          nombreArchivo: encodeURIComponent(
+            mensaje.adjunto!.nombreArchivo
+          ),
+        },
+      });
 
     } catch (e) {
       console.log("Error abriendo adjunto", e);
@@ -118,12 +187,44 @@ export function MessageBubble({ mensaje, esMio, onLongPress, editing=false, onRe
             <Text style={[s.content, s.deletedTxt]}>
               Mensaje eliminado
             </Text>
-          ) : mensaje.tipo === 'ARCHIVO' ? (
-            <TouchableOpacity onPress={abrirAdjunto}>
-              <Text style={s.content}>
-                📎 {mensaje.adjunto?.nombreArchivo}
-              </Text>
-            </TouchableOpacity>
+          ) : esImagen ? (
+
+          <TouchableOpacity onPress={abrirAdjunto}>
+            <Image
+              source={{ uri: imagenLocal ?? "" }}
+              style={s.imagen}
+              contentFit="cover"
+            />
+          </TouchableOpacity>
+
+          ) : esVideo ? (
+
+          <TouchableOpacity
+            style={s.video}
+            onPress={abrirAdjunto}
+          >
+
+          <Ionicons
+            name="play-circle"
+            size={70}
+            color="white"
+          />
+
+          <Text style={s.videoNombre}>
+            {mensaje.adjunto?.nombreArchivo}
+          </Text>
+
+          </TouchableOpacity>
+
+          ) : mensaje.tipo === "ARCHIVO" ? (
+
+          <TouchableOpacity onPress={abrirAdjunto}>
+
+          <Text style={s.content}>
+          📎 {mensaje.adjunto?.nombreArchivo}
+          </Text>
+
+          </TouchableOpacity>
           ) : (
             <Text style={s.content}>
               {mensaje.contenido ?? ''}
@@ -209,6 +310,26 @@ const s = StyleSheet.create({
   bubbleEditing: {
     borderWidth: 1,
     borderColor: theme.accent,
+  },
+
+  imagen: {
+    width: 220,
+    height: 220,
+    borderRadius: 12,
+  },
+
+  video: {
+    width: 220,
+    height: 180,
+    borderRadius: 12,
+    backgroundColor: "#222",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  videoNombre: {
+    color: "white",
+    marginTop: 10,
   },
 
   reaccionesContainer: {

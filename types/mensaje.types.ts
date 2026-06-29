@@ -10,6 +10,7 @@ export interface ArchivoAdjunto {
   urlArchivo: string;
   nombreArchivo: string;
   tamanoArchivo: number;
+  mimeType: string;
 }
 
 export interface OpcionEncuesta {
