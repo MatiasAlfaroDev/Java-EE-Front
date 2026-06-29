@@ -9,10 +9,18 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://app-production-c142.up.railway.app/chat-empresarial/api",
+        "EXPO_PUBLIC_WS_URL": "https://app-production-c142.up.railway.app"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://app-production-c142.up.railway.app/chat-empresarial/api",
+        "EXPO_PUBLIC_WS_URL": "https://app-production-c142.up.railway.app"
+      }
     }
   },
   "submit": {
