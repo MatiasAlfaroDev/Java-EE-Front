@@ -217,7 +217,6 @@ const obtenerAudioLocal = async (): Promise<string> => {
   return descargado.uri;
 };
 
-
   return (
     <View style={[s.wrap, esMio ? s.wrapMio : s.wrapOtro, editing && s.bubbleEditing]}>
       {!esMio && <Avatar initials={mensaje.sender_initials} size={28} style={s.avatar} />}

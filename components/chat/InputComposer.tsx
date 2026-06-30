@@ -82,14 +82,6 @@ const handleAudio = async () => {
     );
 
     onSendAudio?.(audio);
-      mensajeService.enviar(
-      chatId,
-      audio.urlArchivo,
-      'AUDIO',
-      audio.nombreArchivo,
-      audio.tamanoArchivo,
-      audio.mimeType
-    );
 
   } catch (error) {
     console.error("Error grabando audio:", error);

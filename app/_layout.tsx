@@ -34,6 +34,7 @@ function mapearMensajeWS(data: Record<string, unknown>): Mensaje {
     sender_initials: String(data.remitente      ?? '').slice(0, 2).toUpperCase(),
     chatId:      String(data.chatId         ?? data.channel_id      ?? ''),
     contenido:         String(data.contenido      ?? data.content         ?? ''),
+    tipo: String(data.tipo ?? "TEXTO") as Mensaje["tipo"],
     iv:              '',
     sent_at:         String(data.timestamp      ?? data.sent_at         ?? new Date().toISOString()),
     estado:          'ENVIADO',
@@ -42,6 +43,7 @@ function mapearMensajeWS(data: Record<string, unknown>): Mensaje {
       data.originalMessageId
         ? Number(data.originalMessageId)
         : 0,
+    
   };
 }
 

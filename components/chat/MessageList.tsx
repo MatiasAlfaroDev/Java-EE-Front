@@ -2,6 +2,8 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import { Mensaje } from '@/types/mensaje.types';
 import { MessageBubble } from './MessageBubble';
 import { Separator } from '@/components/ui/Separator';
+import { useEffect, useRef } from 'react';
+
 
 interface Props {
   mensajes: Mensaje[];
@@ -23,8 +25,23 @@ const shouldShowDate = (cur: Mensaje, prev?: Mensaje): boolean => {
 };
 
 export function MessageList({ mensajes, usuarioId, onEndReached, onLongPressMessage, onReactionPress }: Props) {
+  
+  const listRef = useRef<FlatList<Mensaje>>(null);
+
+  useEffect(() => {
+    if (mensajes.length > 0) {
+      setTimeout(() => {
+        listRef.current?.scrollToEnd({
+          animated: false,
+        });
+      }, 50);
+    }
+  }, [mensajes.length]);
+
+  
   return (
     <FlatList
+      ref={listRef}
       data={mensajes}
       keyExtractor={m => String(m.id)}
       //inverted
@@ -51,6 +68,11 @@ export function MessageList({ mensajes, usuarioId, onEndReached, onLongPressMess
       onEndReached={onEndReached}
       onEndReachedThreshold={0.3}
       contentContainerStyle={s.list}
+      onContentSizeChange={() =>
+        listRef.current?.scrollToEnd({
+          animated: false,
+        })
+      }
     />
   );
 }

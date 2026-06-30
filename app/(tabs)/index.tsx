@@ -28,9 +28,9 @@ export default function ChatsScreen() {
       const res = await chatService.listar();
 
     console.log(
-  'CHATS BACK =>',
-  res.data
-);
+        'CHATS BACK =>',
+        res.data
+      );
 
       const mapeados: Chat[] = res.data.map(c => ({
         id:          String(c.id),

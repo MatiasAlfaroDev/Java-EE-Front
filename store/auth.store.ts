@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Usuario } from '@/types/auth.types';
+import { desconectarWebSocket } from '@/services/websocket.service';
 
 interface AuthState {
   usuario:       Usuario | null;
@@ -34,7 +35,7 @@ export const useAuthStore = create<AuthState>()(
       setUsuario: (usuario) => set({ usuario }),
 
       // 🚪 logout limpio
-      logout: async () => {
+     logout: async () => {
         const token = get().accessToken;
 
         // opcional: avisar backend
@@ -47,13 +48,16 @@ export const useAuthStore = create<AuthState>()(
           }
         }
 
+        desconectarWebSocket();
+        
         // 🔥 limpiar SOLO auth
         set({
           usuario: null,
           accessToken: null,
           isAutenticado: false,
         });
-      },
+      }, 
+
     }),
     {
       name: 'terotalk-auth',
