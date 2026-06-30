@@ -5,6 +5,7 @@ export interface UsuarioAdmin {
   email: string;
   rol: string;
   estado: 'ONLINE' | 'OFFLINE';
+  bloqueado?: boolean;
   initials: string;
 }
 
