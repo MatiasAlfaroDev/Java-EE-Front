@@ -12,6 +12,31 @@ export interface ArchivoSubido {
 
 export const uploadService = {
 
+  async subirArchivo(
+    uri: string,
+    nombreArchivo: string,
+    mimeType: string
+  ): Promise<ArchivoSubido> {
+
+    const contenidoBase64 = await FileSystem.readAsStringAsync(
+      uri,
+      {
+        encoding: FileSystem.EncodingType.Base64,
+      }
+    );
+
+    const response = await archivoService.subir(
+      contenidoBase64,
+      mimeType,
+      nombreArchivo
+    );
+
+    return {
+      ...response.data,
+      mimeType,
+    };
+  },
+
   async seleccionarYSubir(): Promise<ArchivoSubido | null> {
 
     const resultado = await DocumentPicker.getDocumentAsync({
@@ -29,23 +54,11 @@ export const uploadService = {
       throw new Error('No se pudo obtener el archivo.');
     }
 
-    const contenidoBase64 = await FileSystem.readAsStringAsync(
+    return this.subirArchivo(
       archivo.uri,
-      {
-        encoding: FileSystem.EncodingType.Base64,
-      }
+      archivo.name,
+      archivo.mimeType ?? 'application/octet-stream'
     );
-
-    const response = await archivoService.subir(
-      contenidoBase64,
-      archivo.mimeType ?? 'application/octet-stream',
-      archivo.name
-    );
-
-    return {
-    ...response.data,
-    mimeType: archivo.mimeType ?? 'application/octet-stream',
-    };
   },
 
 };

@@ -9,7 +9,7 @@ import { Mensaje } from '@/types/mensaje.types';
 export interface EnviarMensajeBackend {
   chatId: number;
   contenido: string;
-  tipo: 'TEXTO' | 'IMAGEN' | 'VIDEO' | 'ARCHIVO';
+  tipo: 'TEXTO' | 'IMAGEN' | 'VIDEO' | 'ARCHIVO' |'AUDIO';
 
   nombreArchivo?: string;
   tamanoArchivo?: number;

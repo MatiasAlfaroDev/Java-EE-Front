@@ -197,6 +197,7 @@ export const useChatStore = create<ChatState>()((set) => ({
       chats: chatsActualizados,
     };
   });
+  
 },
 
     actualizarEstadoMensaje: (

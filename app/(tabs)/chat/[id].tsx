@@ -284,7 +284,7 @@ const enviar = useCallback(
   
   async (
     contenido: string,
-    tipo: 'TEXTO' | 'ARCHIVO' | 'IMAGEN' | 'VIDEO' = 'TEXTO',
+    tipo: 'TEXTO' | 'ARCHIVO' |'AUDIO' | 'IMAGEN' | 'VIDEO' = 'TEXTO',
     nombreArchivo?: string,
     tamanoArchivo?: number,
     mimeType?: string,
@@ -442,18 +442,23 @@ const enviar = useCallback(
             enviar(texto);
           }}
           onSendAdjunto={async (archivo) => {
-            try {
-              await enviar(
-                  archivo.urlArchivo,
-                  'ARCHIVO',
-                  archivo.nombreArchivo,
-                  archivo.tamanoArchivo,
-                  archivo.mimeType
-              );
-            } catch (e) {
-              console.log("Error enviando adjunto", e);
-            }
-          }}
+  try {
+    const tipo =
+      archivo.mimeType.startsWith('audio')
+        ? 'AUDIO'
+        : 'ARCHIVO';
+
+    await enviar(
+      archivo.urlArchivo,
+      tipo,
+      archivo.nombreArchivo,
+      archivo.tamanoArchivo,
+      archivo.mimeType
+    );
+  } catch (e) {
+    console.log("Error enviando adjunto", e);
+  }
+}}
           editingMessage={editingMessage}
           onCancelEdit={() => setEditingMessage(null)}
         />

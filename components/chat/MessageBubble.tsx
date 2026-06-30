@@ -13,6 +13,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Image } from 'expo-image';
+import AudioMessage from "@/components/chat/AudioMessage";
 
 interface Props {
   mensaje: Mensaje;
@@ -167,6 +168,48 @@ export function MessageBubble({ mensaje, esMio, onLongPress, editing=false, onRe
     }
   };
   
+
+const obtenerAudioLocal = async (): Promise<string> => {
+  if (!mensaje.adjunto) {
+    throw new Error("No hay adjunto");
+  }
+
+  const directory = new FileSystem.Directory(FileSystem.Paths.cache);
+  const file = new FileSystem.File(
+    directory,
+    mensaje.adjunto.urlArchivo
+  );
+
+  // Si ya existe, reutilizarlo
+  if (file.exists) {
+    console.log("Audio en cache:", file.uri);
+    return file.uri;
+  }
+
+  console.log("Descargando audio...");
+
+  const url =
+    `${API_BASE_URL}${ENDPOINTS.ADJUNTO(
+      mensaje.adjunto.urlArchivo
+    )}`;
+
+  const descargado =
+    await FileSystem.File.downloadFileAsync(
+      url,
+      directory,
+      {
+        headers: {
+          Authorization: token ?? "",
+        },
+      }
+    );
+
+  console.log("Audio descargado:", descargado.uri);
+
+  return descargado.uri;
+};
+
+
   return (
     <View style={[s.wrap, esMio ? s.wrapMio : s.wrapOtro, editing && s.bubbleEditing]}>
       {!esMio && <Avatar initials={mensaje.sender_initials} size={28} style={s.avatar} />}
@@ -216,7 +259,15 @@ export function MessageBubble({ mensaje, esMio, onLongPress, editing=false, onRe
 
           </TouchableOpacity>
 
-          ) : mensaje.tipo === "ARCHIVO" ? (
+          )  : mensaje.tipo === "AUDIO" && mensaje.adjunto ? (
+
+            <AudioMessage
+              adjunto={mensaje.adjunto}
+              esMio={esMio}
+            />
+
+
+            ) : mensaje.tipo === "ARCHIVO" ? (
 
           <TouchableOpacity onPress={abrirAdjunto}>
 
@@ -243,15 +294,15 @@ export function MessageBubble({ mensaje, esMio, onLongPress, editing=false, onRe
           <View style={s.reaccionesContainer}>
             {agrupadas.map((grupo: any) => (
              <TouchableOpacity
-  key={grupo.emoji}
-  style={s.reaccion}
-  onPress={() =>
-    onReactionPress?.(
-      grupo.emoji,
-      grupo.usuarios
-    )
-  }
->
+                  key={grupo.emoji}
+                  style={s.reaccion}
+                  onPress={() =>
+                    onReactionPress?.(
+                      grupo.emoji,
+                      grupo.usuarios
+                    )
+                  }
+                >
                 <Text>
                   {grupo.emoji} {grupo.usuarios.length}
                 </Text>
@@ -345,4 +396,16 @@ const s = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
   },
+  audioContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 8,
+  paddingVertical: 6,
+  paddingHorizontal: 4,
+},
+
+audioText: {
+  ...typography.body,
+  color: theme.text,
+},
 });

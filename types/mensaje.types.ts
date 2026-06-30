@@ -37,7 +37,7 @@ export interface Mensaje {
   chatId: string;
   parent_id?: string;
   contenido: string;
-  tipo: 'TEXTO' | 'ARCHIVO' | 'IMAGEN' | 'VIDEO';
+  tipo: 'TEXTO' | 'ARCHIVO' | 'IMAGEN' | 'VIDEO' |'AUDIO';
   iv: string;
   sent_at: string;
   delivered_at?: string;
