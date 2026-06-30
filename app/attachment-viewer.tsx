@@ -1,6 +1,7 @@
 import { StyleSheet, TouchableOpacity, View, Image, Text } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
+import { Video, ResizeMode } from "expo-av";
 
 export default function AttachmentViewer() {
   const { uri, nombreArchivo } = useLocalSearchParams<{
@@ -54,27 +55,31 @@ export default function AttachmentViewer() {
           style={styles.image}
           resizeMode="contain"
         />
+
+      ) : esVideo ? (
+
+        <View style={styles.videoContainer}>
+          <Video
+            source={{ uri: decodedUri }}
+            style={styles.video}
+            useNativeControls
+            resizeMode={ResizeMode.CONTAIN}
+            shouldPlay={false}
+          />
+        </View>
+
       ) : (
+
         <View style={styles.center}>
           <Text style={styles.title}>
             {decodedNombre}
           </Text>
 
           <Text style={styles.subtitle}>
-            {esImagen
-              ? "Imagen"
-              : esVideo
-                ? "Video"
-                : esPdf
-                  ? "Documento PDF"
-                  : "Archivo"}
+            {esPdf
+              ? "Documento PDF"
+              : "Archivo"}
           </Text>
-
-          {esVideo && (
-            <Text style={styles.info}>
-              🎥 Video
-            </Text>
-          )}
 
           {esPdf && (
             <Text style={styles.info}>
@@ -82,7 +87,7 @@ export default function AttachmentViewer() {
             </Text>
           )}
 
-          {!esImagen && !esVideo && !esPdf && (
+          {!esPdf && (
             <Text style={styles.info}>
               📎 Archivo adjunto
             </Text>
@@ -96,7 +101,9 @@ export default function AttachmentViewer() {
               Abrir / Compartir
             </Text>
           </TouchableOpacity>
+
         </View>
+
       )}
 
     </View>
@@ -163,5 +170,16 @@ const styles = StyleSheet.create({
   closeText: {
     color: "#fff",
     fontSize: 28,
+  },
+
+  video: {
+    width: "95%",
+    aspectRatio: 16 / 9,
+  },
+
+  videoContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

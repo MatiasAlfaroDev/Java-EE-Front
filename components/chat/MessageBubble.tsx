@@ -75,30 +75,17 @@ export function MessageBubble({ mensaje, esMio, onLongPress, editing=false, onRe
   
   const nombreArchivo = mensaje.adjunto?.nombreArchivo?.toLowerCase() ?? "";
 
-  const esImagen =
-    mensaje.tipo === "ARCHIVO" &&
-    (
-      nombreArchivo.endsWith(".jpg") ||
-      nombreArchivo.endsWith(".jpeg") ||
-      nombreArchivo.endsWith(".png") ||
-      nombreArchivo.endsWith(".webp") ||
-      nombreArchivo.endsWith(".gif")
-    );
+  const esImagen = mensaje.tipo === "IMAGEN";
 
-  const esVideo =
-    mensaje.tipo === "ARCHIVO" &&
-    (
-      nombreArchivo.endsWith(".mp4") ||
-      nombreArchivo.endsWith(".mov") ||
-      nombreArchivo.endsWith(".avi") ||
-      nombreArchivo.endsWith(".mkv")
-    );
+  const esVideo = mensaje.tipo === "VIDEO";
 
     useEffect(() => {
 
       if (!esImagen || !mensaje.adjunto) {
         return;
       }
+
+      const adjunto = mensaje.adjunto;
 
       const descargar = async () => {
 
@@ -107,18 +94,30 @@ export function MessageBubble({ mensaje, esMio, onLongPress, editing=false, onRe
           const url =
             `${API_BASE_URL}${ENDPOINTS.ADJUNTO(mensaje.adjunto!.urlArchivo)}`;
 
-          const archivo = await FileSystem.File.downloadFileAsync(
-            url,
-            new FileSystem.Directory(FileSystem.Paths.cache),
-            {
-              headers: {
-                Authorization: token ?? "",
-              },
-              idempotent: true,
-            }
+          const directorio = new FileSystem.Directory(
+              FileSystem.Paths.cache
           );
 
-          setImagenLocal(archivo.uri);
+          const destino = new FileSystem.File(
+              directorio,
+              adjunto.urlArchivo
+          );
+
+          if (!destino.exists) {
+
+              await FileSystem.File.downloadFileAsync(
+                  url,
+                  destino,
+                  {
+                      headers: {
+                          Authorization: token ?? "",
+                      },
+                  }
+              );
+
+          }
+
+          setImagenLocal(destino.uri);
 
         } catch (e) {
           console.log("Error descargando miniatura", e);
@@ -131,42 +130,51 @@ export function MessageBubble({ mensaje, esMio, onLongPress, editing=false, onRe
     }, [mensaje.id]);
     
   const abrirAdjunto = async () => {
-    if (!mensaje.adjunto) return;
+  if (!mensaje.adjunto) return;
 
-    try {
-      const url =
-        `${API_BASE_URL}${ENDPOINTS.ADJUNTO(mensaje.adjunto.urlArchivo)}`;
+  try {
+    const url =
+      `${API_BASE_URL}${ENDPOINTS.ADJUNTO(mensaje.adjunto.urlArchivo)}`;
 
-      const archivo = await FileSystem.File.downloadFileAsync(
+    const directorio = new FileSystem.Directory(FileSystem.Paths.cache);
+
+    const destino = new FileSystem.File(
+      directorio,
+      mensaje.adjunto.urlArchivo
+    );
+
+    // Si no existe, lo descarga
+    if (!destino.exists) {
+      await FileSystem.File.downloadFileAsync(
         url,
-        new FileSystem.Directory(FileSystem.Paths.cache),
+        destino,
         {
           headers: {
             Authorization: token ?? "",
           },
-          idempotent: true,
         }
       );
-
-      if (!(await Sharing.isAvailableAsync())) {
-        alert("No se puede abrir el archivo.");
-        return;
-      }
-
-      router.push({
-        pathname: "/attachment-viewer",
-        params: {
-          uri: encodeURIComponent(archivo.uri),
-          nombreArchivo: encodeURIComponent(
-            mensaje.adjunto!.nombreArchivo
-          ),
-        },
-      });
-
-    } catch (e) {
-      console.log("Error abriendo adjunto", e);
     }
-  };
+
+    if (!(await Sharing.isAvailableAsync())) {
+      alert("No se puede abrir el archivo.");
+      return;
+    }
+
+    router.push({
+      pathname: "/attachment-viewer",
+      params: {
+        uri: encodeURIComponent(destino.uri),
+        nombreArchivo: encodeURIComponent(
+          mensaje.adjunto.nombreArchivo
+        ),
+      },
+    });
+
+  } catch (e) {
+    console.log("Error abriendo adjunto", e);
+  }
+};
   
 
 const obtenerAudioLocal = async (): Promise<string> => {
