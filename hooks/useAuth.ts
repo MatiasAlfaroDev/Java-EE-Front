@@ -3,7 +3,7 @@ import { authService } from '@/services/auth.service';
 import { LoginRequest, RegisterRequest, Usuario } from '@/types/auth.types';
 import { router } from 'expo-router';
 
-const mapearUsuario = (u: { id: number; nombre: string; email: string; rol: string; estado?: string }): Usuario => ({
+const mapearUsuario = (u: { id: number; nombre: string; email: string; rol: string; estado?: string; bloqueado?: boolean }): Usuario => ({
   id:         String(u.id),
   username:   u.nombre,
   email:      u.email,
@@ -12,6 +12,7 @@ const mapearUsuario = (u: { id: number; nombre: string; email: string; rol: stri
   public_key: '',
   initials:   u.nombre.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase(),
   created_at: new Date().toISOString(),
+  bloqueado: u.bloqueado ?? false,
 });
 
 export const useAuth = () => {

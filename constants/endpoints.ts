@@ -12,6 +12,10 @@ export const ENDPOINTS = {
   LOGOUT:             '/usuarios/logout',
   USUARIOS:            '/usuarios/listar',
 
+  // Usuarios admin
+  BLOQUEAR_USUARIO: (id: string | number) => `/usuarios/bloquear/${id}`,
+  DESBLOQUEAR_USUARIO: (id: string | number) => `/usuarios/desbloquear/${id}`,
+
   // Notificaciones
   NOTIFS:             '/notificaciones',
   NOTIF_READ:         (id: string) => `/notificaciones/${id}/leer`,

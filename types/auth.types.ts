@@ -2,9 +2,10 @@ export interface Usuario {
   id: string;
   username: string;
   email: string;
-  rol: 'USER' | 'MANAGER' | 'ADMIN';
+  rol: 'USER' | 'ADMIN';
   status: 'PENDING_MFA' | 'ACTIVE' | 'SUSPENDED' | 'OFFLINE';
   public_key: string;
+  bloqueado?: boolean;
   initials: string;
   created_at: string;
 }
@@ -36,5 +37,6 @@ export interface BackendLoginResponse {
     email: string;
     rol: string;
     estado?: string;
+    bloqueado?: boolean;
   };
 }

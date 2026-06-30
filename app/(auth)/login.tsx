@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/Button';
 type Tab = 'login' | 'register';
 
 const mapearUsuario = (u: {
-  id: number; nombre: string; email: string; rol: string; estado?: string;
+  id: number; nombre: string; email: string; rol: string; estado?: string; bloqueado?: boolean;
 }): Usuario => ({
   id:         String(u.id),
   username:   u.nombre,
@@ -25,6 +25,7 @@ const mapearUsuario = (u: {
   public_key: '',
   initials:   u.nombre.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase(),
   created_at: new Date().toISOString(),
+  bloqueado: u.bloqueado?? false,
 });
 
 function LoginForm({ onError }: { onError: (msg: string | null) => void }) {
@@ -43,13 +44,16 @@ function LoginForm({ onError }: { onError: (msg: string | null) => void }) {
         usuario: { id: number; nombre: string; email: string; rol: string; estado?: string };
       };
       useAuthStore.getState().setSession(mapearUsuario(u), token);
-      router.replace('/(tabs)');
-    } catch (e: unknown) {
-      onError(
-        (e as { response?: { data?: { message?: string } } })?.response?.data?.message
-        ?? 'Credenciales incorrectas',
-      );
-    } finally {
+      if (u.rol === 'ADMIN') {
+        router.replace('/admin');
+      } else {
+        router.replace('/(tabs)');
+      }
+    } catch (e: any) {
+        onError(
+          e?.response?.data ?? 'Credenciales incorrectas'
+        );
+      } finally {
       setLoading(false);
     }
   });
