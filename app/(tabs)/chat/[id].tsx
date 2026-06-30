@@ -487,18 +487,19 @@ const enviar = useCallback(
         ))}
       </View>
             <View style={s.menuBox}>
-              
-              {String(selectedMessage.sender_id) === String(usuario?.id) && !selectedMessage.eliminado && (
-                <TouchableOpacity
-                  style={s.menuItem}
-                  onPress={() => {
-                    setEditingMessage(selectedMessage);
-                    setSelectedMessage(null);
-                    setMenuVisible(false);
-                  }}
-                >
-                  <Text>Editar</Text>
-                </TouchableOpacity>
+          {String(selectedMessage.sender_id) === String(usuario?.id) &&
+            !selectedMessage.eliminado &&
+            selectedMessage.tipo === "TEXTO" && (
+              <TouchableOpacity
+                style={s.menuItem}
+                onPress={() => {
+                  setEditingMessage(selectedMessage);
+                  setSelectedMessage(null);
+                  setMenuVisible(false);
+                }}
+              >
+                <Text>Editar</Text>
+              </TouchableOpacity>
               )}
 
               <TouchableOpacity
