@@ -10,9 +10,10 @@ interface Props {
   chat: Chat;
   onPress: () => void;
   activo?: boolean;
+  onLongPress?: () => void;
 }
 
-export function ChatRow({ chat, onPress, activo }: Props) {
+export function ChatRow({ chat, onPress, activo, onLongPress }: Props) {
 
   // 🧠 nombre seguro (fallback incluido)
   const nombreMostrado =
@@ -34,6 +35,8 @@ export function ChatRow({ chat, onPress, activo }: Props) {
         pressed && s.rowPressed
       ]}
       onPress={onPress}
+      onLongPress={onLongPress}   
+
     >
       {/* Avatar */}
       <Avatar

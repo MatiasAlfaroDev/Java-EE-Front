@@ -1,10 +1,10 @@
 export const API_BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ??
-  'http://192.168.1.8:8080/chat-empresarial/api';
+  'http://192.168.1.5:8080/chat-empresarial/api';
 
 export const WS_BASE_URL =
   process.env.EXPO_PUBLIC_WS_URL ??
-  'http://192.168.1.8:8080';
+  'http://192.168.1.5:8080';
 export const ENDPOINTS = {
   // Autenticación
   LOGIN:              '/usuarios/login',
@@ -25,6 +25,7 @@ export const ENDPOINTS = {
   // Chats
   CHATS:            '/chats',
   CHAT:              (id: string) => `/chats/${id}`,
+  CHAT_ELIMINAR_PARA_MI: (id: string | number) => `/chats/${id}/para-mi`,
   MIEMBROS_CHAT:      (chatId: string) => `/chats/${chatId}/miembros`,
   AGREGAR_MIEMBRO:    '/chats/agregar-miembro',
   ELIMINAR_MIEMBRO:   '/chats/eliminar-miembro',

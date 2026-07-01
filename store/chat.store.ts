@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Chat } from '@/types/chat.types';
 import { Mensaje } from '@/types/mensaje.types';
 import { useAuthStore } from './auth.store';
+import { chatService } from '@/services/chat.service';
 
 interface TypingState {
   [chatId: string]: string[];
@@ -63,6 +64,9 @@ interface ChatState {
   marcarMensajeLeido: (mensajeId: string) => void;
   eliminarMensajeParaMi: (chatId: string, mensajeId: string | number) => void;
   eliminarMensajeParaTodos: (chatId: string, mensajeId: string) => void;
+  eliminarChatParaMi: (chatId: string) => void;
+  eliminarChatParaMiApi: (chatId: string) => Promise<void>; 
+
 }
 
 const recalcularUltimoMensaje = (
@@ -486,4 +490,21 @@ export const useChatStore = create<ChatState>()((set) => ({
           ),
         };
       }),
+
+      eliminarChatParaMi: (chatId) =>
+  set((state) => ({
+    chats: state.chats.filter(
+      (c) => String(c.id) !== String(chatId)
+    ),
+  })),
+
+  eliminarChatParaMiApi: async (chatId) => {
+  await chatService.eliminarParaMi(chatId);
+
+  set((state) => ({
+    chats: state.chats.filter(
+      (c) => String(c.id) !== String(chatId)
+    ),
+  }));
+},
 }));

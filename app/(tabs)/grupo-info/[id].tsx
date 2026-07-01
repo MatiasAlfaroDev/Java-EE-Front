@@ -172,8 +172,12 @@ export default function GrupoInfoScreen() {
 
   const initials = nombreActual.slice(0, 2).toUpperCase();
 
+  const esGrupo = id === 'GRUPO';
+
   // ─────────────────────────────────────────────────────────────────────────
   return (
+
+    
     <View style={s.root}>
 
       {/* ── HEADER ── */}

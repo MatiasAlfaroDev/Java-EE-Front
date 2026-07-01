@@ -19,6 +19,9 @@ export const chatService = {
 
   eliminar: (chatId: string) =>
     api.delete(`${ENDPOINTS.CHATS}/${chatId}`),
+  
+   eliminarParaMi: (chatId: string) =>
+    api.delete(ENDPOINTS.CHAT_ELIMINAR_PARA_MI(chatId)),
 
   crear: (data: CrearchatRequest) => 
     api.post<chatBackend>(ENDPOINTS.CHATS, {
