@@ -10,6 +10,7 @@ import { uploadService, ArchivoSubido } from '@/services/upload.service';
 import { Alert } from 'react-native';
 import { useRecorder } from "@/hooks/useAudioRecorder";
 import { mensajeService } from '@/services/mensaje.service';
+import * as ImagePicker from "expo-image-picker";
 
 interface Props {
   chatId: string;
@@ -88,6 +89,45 @@ const handleAudio = async () => {
     Alert.alert("Error", "No fue posible grabar el audio.");
   }
 };
+
+  const handleCamara = async () => {
+    try {
+      const permiso =
+        await ImagePicker.requestCameraPermissionsAsync();
+
+      if (!permiso.granted) {
+        Alert.alert(
+          "Permiso requerido",
+          "Debes permitir el acceso a la cámara."
+        );
+        return;
+      }
+
+      const resultado =
+        await ImagePicker.launchCameraAsync({
+          mediaTypes: ["images", "videos"],
+          quality: 0.8,
+        });
+
+      if (resultado.canceled) return;
+
+      const asset = resultado.assets[0];
+
+      const archivo = await uploadService.subirArchivo(
+        asset.uri,
+        asset.fileName ??
+          `captura-${Date.now()}`,
+        asset.mimeType ??
+          "image/jpeg"
+      );
+
+      onSendAdjunto?.(archivo);
+
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const tieneTexto = texto.trim().length > 0;
 
   return (
@@ -139,7 +179,7 @@ const handleAudio = async () => {
         {/* Cámara (se oculta cuando hay texto) */}
        {!tieneTexto && (
 <>
-    <TouchableOpacity style={s.sideBtn}>
+    <TouchableOpacity style={s.sideBtn} onPress={handleCamara}>
         <Ionicons
             name="camera-outline"
             size={28}
